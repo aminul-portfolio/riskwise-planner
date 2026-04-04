@@ -1,0 +1,104 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Strategy Exposure Review{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PLANNING TOOL</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Strategy Exposure Review</h1>
+        <p class="rw-page-subtitle mb-0">
+          Review strategy-level risk assumptions using win rate, risk-reward ratio, and volatility-aware sizing logic.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'lot_size' %}" class="btn rw-btn-outline">
+          <i class="bi bi-bullseye me-2"></i>Position Sizing
+        </a>
+        <a href="{% url 'sltp' %}" class="btn rw-btn-primary">
+          <i class="bi bi-sliders me-2"></i>SL / TP Planner
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Strategy Review Inputs</h2>
+      <p class="rw-section-subtitle">
+        Enter the core strategy assumptions to calculate an adjusted lot-size signal for exposure planning.
+      </p>
+    </div>
+
+    <form method="post" class="row g-4">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="col-md-6">
+        <label class="form-label rw-form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <small class="rw-form-help">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="text-warning small mt-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="col-12 d-grid">
+        <button type="submit" class="btn rw-btn-primary">
+          <i class="bi bi-calculator me-2"></i>Calculate Strategy Review
+        </button>
+      </div>
+    </form>
+  </section>
+
+  {% if result %}
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Strategy Review Result</h2>
+      <p class="rw-section-subtitle">
+        Use the adjusted sizing output as a planning signal when reviewing exposure under different strategy assumptions.
+      </p>
+    </div>
+
+    <div class="rw-result-card">
+      <div class="rw-result-icon">
+        <i class="bi bi-bar-chart-steps"></i>
+      </div>
+      <div>
+        <div class="rw-result-label">Adjusted Lot Size</div>
+        <div class="rw-result-value">{{ result|floatformat:2 }}</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this calculates:</strong> An adjusted lot size that scales a base position according to win rate, risk-reward ratio, and reference volatility. This is a planning signal, not a recommendation.
+      </p>
+      <p>
+        <strong>Formula (heuristic):</strong> <code>Adjusted Lot = Base Lot × (Win Rate / 50) × (RR / 2) × (200 / Volatility)</code>
+      </p>
+      <p>
+        <strong>Note — this is a heuristic formula.</strong> It provides a directional sizing signal based on simplified assumptions and should not be treated as a statistically validated model. The scaling factors (50, 2, 200) are reference anchors, not calibrated constants.
+      </p>
+      <p class="mb-0">
+        <strong>Limitations:</strong> Does not account for correlation between strategy assumptions, non-normal return distributions, or regime changes in volatility. Use alongside other planning tools for a fuller risk picture.
+      </p>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

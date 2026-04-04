@@ -1,0 +1,144 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Trade Risk Controls{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <!-- Page Header -->
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PLANNING TOOL</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Trade Risk Controls</h1>
+        <p class="rw-page-subtitle mb-0">
+          Calculate the monetary risk and account-risk percentage for a planned trade before capital is committed.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'lot_size' %}" class="btn rw-btn-outline">
+          <i class="bi bi-bullseye me-2"></i>Position Sizing
+        </a>
+        <a href="{% url 'strategy_risk' %}" class="btn rw-btn-primary">
+          <i class="bi bi-bar-chart me-2"></i>Strategy Review
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Card -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Trade Risk Inputs</h2>
+      <p class="rw-section-subtitle">
+        Enter account balance, position size, pip value, and stop-loss distance to quantify trade-level downside exposure.
+      </p>
+    </div>
+
+    <form method="post" class="row g-4">
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="col-md-6">
+        <label class="form-label rw-form-label">{{ field.label }}</label>
+        {{ field }}
+
+        {% if field.help_text %}
+          <small class="rw-form-help">{{ field.help_text }}</small>
+        {% endif %}
+
+        {% for error in field.errors %}
+          <div class="text-warning small mt-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="col-12 d-grid">
+        <button type="submit" class="btn rw-btn-primary">
+          <i class="bi bi-calculator me-2"></i>Calculate Trade Risk
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Results -->
+  {% if result %}
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Trade Risk Result</h2>
+      <p class="rw-section-subtitle">
+        Use these outputs to judge whether the planned trade fits within your capital preservation and risk-per-trade rules.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="rw-result-card h-100">
+          <div class="rw-result-icon">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div>
+            <div class="rw-result-label">Risk Amount</div>
+            <div class="rw-result-value">${{ result.risk_amount|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="rw-result-card h-100">
+          <div class="rw-result-icon">
+            <i class="bi bi-pie-chart"></i>
+          </div>
+          <div>
+            <div class="rw-result-label">Percent of Account at Risk</div>
+            <div class="rw-result-value">{{ result.risk_percent|floatformat:2 }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Risk Warning -->
+  {% if risk_warning %}
+  <section class="rw-feature-card mb-4" style="border-left: 3px solid {% if risk_warning.level == 'high' %}var(--rw-red, #ef4444){% elif risk_warning.level == 'elevated' %}var(--rw-amber, #f59e0b){% else %}var(--rw-cyan, #22d3ee){% endif %};">
+    <div class="d-flex align-items-start gap-3">
+      <i class="bi {% if risk_warning.level == 'high' %}bi-exclamation-octagon{% elif risk_warning.level == 'elevated' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %}"
+         style="font-size: 1.3rem; color: {% if risk_warning.level == 'high' %}var(--rw-red, #ef4444){% elif risk_warning.level == 'elevated' %}var(--rw-amber, #f59e0b){% else %}var(--rw-cyan, #22d3ee){% endif %};"></i>
+      <div>
+        <strong style="color: {% if risk_warning.level == 'high' %}var(--rw-red, #ef4444){% elif risk_warning.level == 'elevated' %}var(--rw-amber, #f59e0b){% else %}var(--rw-cyan, #22d3ee){% endif %};">
+          {% if risk_warning.level == 'high' %}High Risk — Review Before Use
+          {% elif risk_warning.level == 'elevated' %}Elevated Risk
+          {% else %}Caution
+          {% endif %}
+        </strong>
+        <p class="mb-0 mt-1" style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem;">
+          {{ risk_warning.message }}
+        </p>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this calculates:</strong> The monetary amount at risk for a single trade, based on the distance from entry to stop-loss, lot size, and pip value. The result is also expressed as a percentage of total account balance.
+      </p>
+      <p>
+        <strong>Assumptions:</strong> This calculation assumes a fixed pip value per lot and does not account for slippage, spread widening, or gap risk. Actual risk in volatile market conditions may exceed the calculated value.
+      </p>
+      <p class="mb-0">
+        <strong>Common guideline:</strong> Many capital preservation approaches recommend limiting risk per trade to 1–2% of account balance. Values above 5% are typically considered aggressive and may warrant review.
+      </p>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

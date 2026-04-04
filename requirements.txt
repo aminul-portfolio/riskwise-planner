@@ -1,0 +1,7 @@
+Django>=5.2,<6.0
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
+openpyxl>=3.1
+django-widget-tweaks>=1.5
+Pillow>=10.0

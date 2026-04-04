@@ -1,0 +1,44 @@
+{% extends 'riskwise/base.html' %}
+
+{% block title %}Delete Simulation{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">SIMULATION MANAGEMENT</div>
+    <h1 class="rw-page-title mb-3">Delete Simulation</h1>
+    <p class="rw-page-subtitle mb-0">
+      Confirm whether you want to permanently remove this saved simulation from your history.
+    </p>
+  </section>
+
+  <section class="rw-feature-card">
+    <div class="rw-empty-state text-start">
+      <div class="rw-empty-icon text-warning mb-3">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <h2 class="rw-section-title mb-2">Are you sure you want to delete this simulation?</h2>
+      <p class="rw-section-subtitle mb-3">
+        This action will remove the saved result and its associated chart from your simulation history.
+      </p>
+
+      <div class="rw-detail-list mb-4">
+        <div class="rw-detail-item"><strong>Label:</strong> {{ sim.label }}</div>
+        <div class="rw-detail-item"><strong>Created:</strong> {{ sim.created_at|date:"Y-m-d H:i" }}</div>
+      </div>
+
+      <form method="post" class="d-flex flex-column flex-sm-row gap-2">
+        {% csrf_token %}
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+          <i class="bi bi-x-circle me-2"></i>Cancel
+        </a>
+        <button type="submit" class="btn btn-danger" style="background: var(--rw-red, #ef4444); border-color: var(--rw-red, #ef4444);">
+          <i class="bi bi-trash me-2"></i>Yes, Permanently Delete
+        </button>
+      </form>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Logged Out{% endblock %}
+
+{% block content %}
+<div class="alert alert-info mt-4 text-center">
+  <i class="bi bi-box-arrow-right"></i> You have been logged out.
+</div>
+<div class="text-center">
+  <a href="{% url 'login' %}" class="btn btn-primary">
+    <i class="bi bi-box-arrow-in-right"></i> Login Again
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends 'riskwise/base.html' %}
+{% load dict_extras %}
+
+{% block title %}Scenario Comparison{% endblock %}
+
+{% block content %}
+<div class="rw-simulation-page">
+
+  <!-- Page Header -->
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">FLAGSHIP COMPARISON SURFACE</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Scenario Comparison</h1>
+        <p class="rw-page-subtitle mb-0">
+          Compare multiple planning assumptions to evaluate downside exposure, drawdown tolerance, and decision quality before taking risk.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'upload' %}" class="btn rw-btn-outline">
+          <i class="bi bi-upload me-2"></i>Upload Dataset
+        </a>
+        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-primary">
+          <i class="bi bi-shuffle me-2"></i>Monte Carlo Simulation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upload Panel -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Load Planning Dataset</h2>
+      <p class="rw-section-subtitle">
+        Upload CSV or Excel data with a <code>profit</code> column so multiple planning assumptions can be tested side by side.
+      </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-9">
+          <label class="form-label rw-form-label">Select Risk Dataset</label>
+          <input type="file" name="file" class="form-control rw-form-control">
+          <small class="rw-form-help">
+            Use realistic historical outcomes so scenario comparisons reflect downside-aware planning and capital preservation review.
+          </small>
+        </div>
+        <div class="col-lg-3 d-grid">
+          <button type="submit" class="btn rw-btn-primary">
+            <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
+          </button>
+        </div>
+      </div>
+    </form>
+
+    {% if instruction %}
+      <div class="alert rw-alert-info mt-4 mb-0">
+        <i class="bi bi-info-circle me-2"></i>{{ instruction }}
+      </div>
+    {% endif %}
+
+    {% if trade_count %}
+      <div class="alert rw-alert-info mt-4 mb-0">
+        <i class="bi bi-database me-2"></i><strong>{{ trade_count }}</strong> records loaded.
+      </div>
+    {% endif %}
+  </section>
+
+  {% if trade_count %}
+  <!-- Scenario Controls -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Scenario Inputs</h2>
+      <p class="rw-section-subtitle">
+        Configure up to three scenario sets and compare how different assumptions change the expected risk profile.
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="scenario_count" value="3">
+
+      <div class="row g-4">
+        {% for i in "123" %}
+        <div class="col-lg-4">
+          <div class="rw-scenario-input-card h-100">
+            <h3 class="rw-scenario-title mb-3">Scenario {{ i }}</h3>
+
+            <label class="form-label rw-form-label"># Simulations</label>
+            <input type="number" name="num_simulations_{{ i }}" class="form-control rw-form-control mb-3" placeholder="e.g., 1000"
+                   value="{{ form_data|get:i|get:'num_simulations'|default:'' }}">
+
+            <label class="form-label rw-form-label"># Trades per Simulation</label>
+            <input type="number" name="num_trades_{{ i }}" class="form-control rw-form-control mb-3" placeholder="e.g., 50"
+                   value="{{ form_data|get:i|get:'num_trades'|default:'' }}">
+
+            <label class="form-label rw-form-label">Range Start</label>
+            <input type="number" name="range_start_{{ i }}" class="form-control rw-form-control mb-3"
+                   value="{{ form_data|get:i|get:'range_start'|default:'' }}">
+
+            <label class="form-label rw-form-label">Range End</label>
+            <input type="number" name="range_end_{{ i }}" class="form-control rw-form-control mb-3"
+                   value="{{ form_data|get:i|get:'range_end'|default:'' }}">
+
+            <label class="form-label rw-form-label">Start Date</label>
+            <input type="date" name="start_date_{{ i }}" class="form-control rw-form-control mb-3"
+                   value="{{ form_data|get:i|get:'start_date'|default:'' }}">
+
+            <label class="form-label rw-form-label">End Date</label>
+            <input type="date" name="end_date_{{ i }}" class="form-control rw-form-control"
+                   value="{{ form_data|get:i|get:'end_date'|default:'' }}">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="row mt-4 g-3">
+        <div class="col-md-6 d-grid">
+          <button type="submit" class="btn rw-btn-primary">
+            <i class="bi bi-play-circle me-2"></i>Compare Scenarios
+          </button>
+        </div>
+        <div class="col-md-6 d-grid">
+          <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
+            <i class="bi bi-x-circle me-2"></i>Reset
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+
+  {% if scenarios %}
+  <!-- Scenario Results -->
+  <section class="mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Scenario Results</h2>
+      <p class="rw-section-subtitle">
+        Compare scenarios by downside profile, expected stability, and capital preservation impact to decide which setup is acceptable.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for scenario in scenarios %}
+      <div class="col-lg-4">
+        <div class="rw-scenario-result-card h-100">
+          <h3 class="rw-scenario-title mb-3">{{ scenario.label }}</h3>
+
+          {% if scenario.error %}
+            <div class="alert alert-warning mb-0">{{ scenario.error }}</div>
+          {% else %}
+            <ul class="rw-scenario-metrics list-unstyled mb-4">
+              <li><i class="bi bi-currency-dollar me-2"></i><strong>Min:</strong> ${{ scenario.min|floatformat:2 }}</li>
+              <li><i class="bi bi-currency-dollar me-2"></i><strong>Max:</strong> ${{ scenario.max|floatformat:2 }}</li>
+              <li><i class="bi bi-currency-dollar me-2"></i><strong>Median:</strong> ${{ scenario.median|floatformat:2 }}</li>
+              <li><i class="bi bi-emoji-smile me-2"></i><strong>Profit Chance:</strong> {{ scenario.prob_positive|floatformat:2 }}%</li>
+            </ul>
+
+            <div class="d-flex justify-content-end mb-3">
+              <a download="{{ scenario.label|slugify }}_chart.png"
+                 href="data:image/png;base64,{{ scenario.chart }}"
+                 class="btn rw-btn-outline btn-sm">
+                <i class="bi bi-download me-1"></i>Download Chart
+              </a>
+            </div>
+
+            <div class="text-center">
+              <img src="data:image/png;base64,{{ scenario.chart }}"
+                   class="img-fluid rw-scenario-chart-thumb"
+                   alt="{{ scenario.label }} chart"
+                   data-bs-toggle="modal"
+                   data-bs-target="#scenarioModal{{ forloop.counter }}">
+            </div>
+
+            <div class="modal fade" id="scenarioModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content rw-modal-content">
+                  <div class="modal-header rw-modal-header">
+                    <h5 class="modal-title">
+                      <i class="bi bi-bar-chart-line me-2"></i>{{ scenario.label }} — Full Size
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body text-center">
+                    <img src="data:image/png;base64,{{ scenario.chart }}" class="img-fluid rounded" alt="{{ scenario.label }} full chart">
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card mt-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this compares:</strong> Up to three independent Monte Carlo simulations run with different parameter assumptions. Each scenario samples from the uploaded dataset and produces aggregate distribution statistics (min, max, median, probability of profit).
+      </p>
+      <p>
+        <strong>Assumptions:</strong> Each scenario uses the same underlying dataset but may apply different trade counts, ranges, or date filters. Outcomes are sampled independently within each scenario.
+      </p>
+      <p class="mb-0">
+        <strong>Use with caution if:</strong> Scenarios use very different sample sizes — comparing a 10-trade scenario with a 500-trade scenario produces uneven confidence levels. Results are planning signals, not forecasts.
+      </p>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

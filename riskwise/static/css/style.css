@@ -1,0 +1,744 @@
+/* =========================================================
+   RiskWise Planner — SaaS Standard UI System
+   ========================================================= */
+
+:root {
+  --rw-bg: #0b1220;
+  --rw-panel: #111827;
+  --rw-panel-2: #0f172a;
+  --rw-panel-3: #162033;
+  --rw-border: #243244;
+  --rw-border-strong: #334155;
+
+  --rw-text: #e5e7eb;
+  --rw-text-strong: #ffffff;
+  --rw-muted: #94a3b8;
+
+  --rw-primary: #3b82f6;
+  --rw-primary-hover: #2563eb;
+  --rw-cyan: #22d3ee;
+  --rw-teal: #14b8a6;
+  --rw-amber: #f59e0b;
+  --rw-red: #ef4444;
+  --rw-purple: #a78bfa;
+
+  --rw-radius-sm: 12px;
+  --rw-radius-md: 16px;
+  --rw-radius-lg: 20px;
+
+  --rw-shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --rw-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.18);
+  --rw-shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.22);
+
+  --rw-transition: 0.2s ease;
+  --rw-max-width: 1400px;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.rw-body {
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  transition: color var(--rw-transition), background-color var(--rw-transition), border-color var(--rw-transition), transform var(--rw-transition);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* =========================================================
+   Layout Shell
+   ========================================================= */
+
+.rw-sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  border-right: 1px solid var(--rw-border);
+  position: sticky;
+  top: 0;
+}
+
+.rw-main {
+  min-height: 100vh;
+  background: var(--rw-bg);
+}
+
+.rw-content {
+  padding: 1.5rem;
+}
+
+.rw-page-shell {
+  min-height: calc(100vh - 90px);
+  background: transparent;
+}
+
+/* Shared page widths */
+.rw-home-page,
+.rw-dashboard-page,
+.rw-simulation-page,
+.rw-tool-page {
+  max-width: var(--rw-max-width);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   Brand / Sidebar
+   ========================================================= */
+
+.rw-brand {
+  color: var(--rw-text-strong);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rw-brand:hover {
+  color: var(--rw-text-strong);
+}
+
+.rw-brand-subtitle {
+  color: var(--rw-muted);
+  font-size: 0.9rem;
+}
+
+.rw-sidebar-section {
+  color: var(--rw-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 1.25rem 0 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.rw-nav-link {
+  color: #cbd5e1;
+  border-radius: var(--rw-radius-sm);
+  padding: 0.8rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+  transition: all var(--rw-transition);
+  border: 1px solid transparent;
+}
+
+.rw-nav-link:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--rw-text-strong);
+}
+
+.rw-nav-link.active {
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--rw-text-strong);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+/* =========================================================
+   Topbar
+   ========================================================= */
+
+.rw-topbar {
+  background: rgba(15, 23, 42, 0.92);
+  border-bottom: 1px solid var(--rw-border);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.rw-topbar-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.rw-topbar-label {
+  color: var(--rw-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.rw-mobile-toggle {
+  color: var(--rw-text-strong);
+  border: 1px solid var(--rw-border);
+  background: transparent;
+  border-radius: 10px;
+}
+
+.rw-mobile-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--rw-text-strong);
+}
+
+/* =========================================================
+   Offcanvas
+   ========================================================= */
+
+.rw-offcanvas {
+  background: #0f172a;
+  color: var(--rw-text);
+}
+
+.rw-offcanvas .offcanvas-header {
+  border-bottom: 1px solid var(--rw-border);
+}
+
+.rw-offcanvas .btn-close {
+  filter: invert(1);
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+.rw-btn-primary,
+.rw-btn-outline {
+  border-radius: var(--rw-radius-sm);
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  transition: all var(--rw-transition);
+}
+
+.rw-btn-primary {
+  background: var(--rw-primary);
+  border: 1px solid var(--rw-primary);
+  color: #fff;
+}
+
+.rw-btn-primary:hover,
+.rw-btn-primary:focus {
+  background: var(--rw-primary-hover);
+  border-color: var(--rw-primary-hover);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.rw-btn-outline {
+  background: transparent;
+  color: var(--rw-text);
+  border: 1px solid var(--rw-border);
+}
+
+.rw-btn-outline:hover,
+.rw-btn-outline:focus {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--rw-text-strong);
+  border-color: var(--rw-border-strong);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   Shared Surface System
+   ========================================================= */
+
+.rw-surface {
+  background: var(--rw-panel);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-lg);
+  color: var(--rw-text);
+  box-shadow: var(--rw-shadow-md);
+}
+
+.rw-surface-soft {
+  background: var(--rw-panel-2);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-md);
+  color: var(--rw-text);
+  box-shadow: var(--rw-shadow-sm);
+}
+
+.rw-hero-card,
+.rw-feature-card,
+.rw-screenshot-card,
+.rw-empty-state,
+.rw-kpi-card,
+.rw-history-card {
+  background: var(--rw-panel);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+  box-shadow: var(--rw-shadow-md);
+}
+
+.rw-hero-card,
+.rw-feature-card,
+.rw-screenshot-card,
+.rw-empty-state,
+.rw-history-card {
+  border-radius: var(--rw-radius-lg);
+  padding: 1.5rem;
+}
+
+.rw-kpi-card {
+  border-radius: var(--rw-radius-lg);
+  padding: 1.25rem;
+  transition: transform var(--rw-transition), border-color var(--rw-transition), box-shadow var(--rw-transition);
+}
+
+.rw-kpi-card:hover,
+.rw-feature-card:hover,
+.rw-history-card:hover,
+.rw-screenshot-card:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   Page Typography
+   ========================================================= */
+
+.rw-eyebrow {
+  color: var(--rw-cyan);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.85rem;
+}
+
+.rw-page-title {
+  font-size: clamp(1.9rem, 2vw + 1rem, 2.5rem);
+  font-weight: 800;
+  color: var(--rw-text-strong);
+  line-height: 1.15;
+}
+
+.rw-page-subtitle,
+.rw-section-subtitle,
+.rw-feature-text,
+.rw-empty-text,
+.rw-meta-text,
+.rw-form-help,
+.rw-brand-subtitle {
+  color: var(--rw-muted);
+}
+
+.rw-section-title,
+.rw-feature-title,
+.rw-empty-title,
+.rw-history-title,
+.rw-scenario-title {
+  color: var(--rw-text-strong);
+  font-weight: 700;
+}
+
+.rw-section-title {
+  font-size: 1.25rem;
+}
+
+.rw-feature-title,
+.rw-empty-title,
+.rw-history-title,
+.rw-scenario-title {
+  font-size: 1.1rem;
+}
+
+.rw-feature-icon,
+.rw-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.rw-empty-state {
+  text-align: center;
+}
+
+.rw-empty-icon {
+  color: var(--rw-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* =========================================================
+   Badges
+   ========================================================= */
+
+.rw-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.18);
+  color: var(--rw-text-strong);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rw-badge-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--rw-border);
+  color: var(--rw-text);
+}
+
+/* =========================================================
+   Forms
+   ========================================================= */
+
+.rw-form-label {
+  color: var(--rw-text-strong);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.rw-form-control {
+  background: var(--rw-panel-2);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+}
+
+.rw-form-control:focus {
+  background: var(--rw-panel-2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: var(--rw-text);
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
+.rw-form-control::placeholder {
+  color: #7c8ba1;
+}
+
+.rw-form-control:disabled,
+.rw-form-control[readonly] {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--rw-muted);
+}
+
+.rw-form-help {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}
+
+/* Bootstrap inputs with custom class consistency */
+.form-control.rw-form-control,
+.form-select.rw-form-control {
+  min-height: 48px;
+}
+
+/* =========================================================
+   Alerts
+   ========================================================= */
+
+.rw-alert-info {
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  color: var(--rw-text);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}
+
+/* =========================================================
+   KPI Cards
+   ========================================================= */
+
+.rw-kpi-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.85rem;
+}
+
+.rw-kpi-label {
+  color: var(--rw-muted);
+  font-size: 0.92rem;
+  margin-bottom: 0.45rem;
+}
+
+.rw-kpi-value {
+  color: var(--rw-text-strong);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.rw-kpi-card-primary .rw-kpi-icon { color: var(--rw-primary); }
+.rw-kpi-card-success .rw-kpi-icon { color: var(--rw-teal); }
+.rw-kpi-card-danger .rw-kpi-icon { color: var(--rw-red); }
+.rw-kpi-card-warning .rw-kpi-icon { color: var(--rw-amber); }
+.rw-kpi-card-info .rw-kpi-icon { color: var(--rw-cyan); }
+.rw-kpi-card-secondary .rw-kpi-icon { color: var(--rw-purple); }
+
+/* =========================================================
+   Results / Details / Insights
+   ========================================================= */
+
+.rw-result-card,
+.rw-detail-item,
+.rw-scenario-input-card,
+.rw-scenario-result-card,
+.rw-chart-wrap,
+.rw-code-block {
+  background: var(--rw-panel-2);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+  border-radius: var(--rw-radius-md);
+  box-shadow: var(--rw-shadow-sm);
+}
+
+.rw-result-card,
+.rw-scenario-input-card,
+.rw-scenario-result-card,
+.rw-chart-wrap,
+.rw-code-block {
+  padding: 1.25rem;
+}
+
+.rw-result-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rw-result-icon {
+  font-size: 2rem;
+  color: var(--rw-teal);
+  flex-shrink: 0;
+}
+
+.rw-result-label {
+  color: var(--rw-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.rw-result-value {
+  color: var(--rw-text-strong);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.rw-result-icon.text-danger { color: var(--rw-red) !important; }
+.rw-result-icon.text-success { color: var(--rw-teal) !important; }
+.rw-result-icon.text-primary { color: var(--rw-primary) !important; }
+
+.rw-detail-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.rw-detail-item {
+  padding: 0.9rem 1rem;
+}
+
+.rw-insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rw-insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  color: var(--rw-text);
+}
+
+.rw-insight-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+.rw-dot-danger { background: var(--rw-red); }
+.rw-dot-info { background: var(--rw-cyan); }
+.rw-dot-success { background: var(--rw-teal); }
+
+/* =========================================================
+   Charts / Screenshots / Modals
+   ========================================================= */
+
+.rw-screenshot-link {
+  display: block;
+}
+
+.rw-screenshot-image,
+.rw-scenario-chart-thumb,
+.rw-chart-image {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--rw-border);
+}
+
+.rw-screenshot-body {
+  padding-top: 1rem;
+}
+
+.rw-scenario-chart-thumb {
+  cursor: pointer;
+  background: var(--rw-panel);
+}
+
+.rw-chart-image {
+  background: #ffffff;
+}
+
+.rw-modal-content {
+  background: var(--rw-panel);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+}
+
+.rw-modal-header {
+  border-bottom: 1px solid var(--rw-border);
+}
+
+/* =========================================================
+   Tables / Code / History
+   ========================================================= */
+
+.rw-table-wrap {
+  border: 1px solid var(--rw-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.rw-dark-table {
+  --bs-table-bg: var(--rw-panel);
+  --bs-table-color: var(--rw-text);
+  --bs-table-border-color: var(--rw-border);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+  --bs-table-striped-color: var(--rw-text);
+  margin-bottom: 0;
+}
+
+.rw-dark-table thead th {
+  background: var(--rw-panel-2);
+  color: var(--rw-text-strong);
+  border-bottom: 1px solid var(--rw-border);
+}
+
+.rw-code-block {
+  overflow-x: auto;
+}
+
+.rw-code-block pre {
+  color: var(--rw-text);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rw-history-metrics li,
+.rw-scenario-metrics li {
+  color: var(--rw-text);
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rw-scenario-metrics li {
+  padding: 0.55rem 0;
+}
+
+.rw-history-metrics li:last-child,
+.rw-scenario-metrics li:last-child {
+  border-bottom: 0;
+}
+
+/* =========================================================
+   Pagination
+   ========================================================= */
+
+.rw-pagination .page-link {
+  background: var(--rw-panel);
+  border-color: var(--rw-border);
+  color: var(--rw-text);
+}
+
+.rw-pagination .page-item.disabled .page-link {
+  background: var(--rw-panel-2);
+  color: var(--rw-muted);
+  border-color: var(--rw-border);
+}
+
+.rw-pagination .page-link:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--rw-text-strong);
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+
+.rw-footer {
+  border-top: 1px solid var(--rw-border);
+  padding-top: 1.25rem;
+  text-align: center;
+  color: var(--rw-muted);
+}
+
+.rw-footer-link {
+  color: var(--rw-text);
+  text-decoration: none;
+}
+
+.rw-footer-link:hover {
+  color: var(--rw-text-strong);
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .rw-content {
+    padding: 1rem;
+  }
+
+  .rw-page-title {
+    font-size: 1.8rem;
+  }
+
+  .rw-kpi-value,
+  .rw-result-value {
+    font-size: 1.4rem;
+  }
+}
+
+/* =========================================================
+   Login / Auth Form Inputs
+   ========================================================= */
+
+.rw-form-input {
+  background: var(--rw-panel-2) !important;
+  border: 1px solid var(--rw-border) !important;
+  color: var(--rw-text) !important;
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+  min-height: 48px;
+  transition: border-color var(--rw-transition), box-shadow var(--rw-transition);
+}
+
+.rw-form-input:focus {
+  background: var(--rw-panel-2) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  color: var(--rw-text) !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15) !important;
+}
+
+.rw-form-input::placeholder {
+  color: #7c8ba1;
+}

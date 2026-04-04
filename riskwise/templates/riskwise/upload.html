@@ -1,0 +1,46 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Upload Dataset{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PRIMARY PLANNING FLOW</div>
+    <h1 class="rw-page-title mb-3">Upload Dataset</h1>
+    <p class="rw-page-subtitle mb-0">
+      Upload a CSV or Excel dataset so RiskWise can prepare downside-aware review, simulation, and planning surfaces.
+    </p>
+  </section>
+
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Load Planning Dataset</h2>
+      <p class="rw-section-subtitle">
+        Use a realistic file with outcome data so the downstream planning workflow reflects meaningful capital preservation analysis.
+      </p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger mb-4">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+      {% csrf_token %}
+      <div class="col-12">
+        <label class="form-label rw-form-label">Select File</label>
+        <input type="file" name="file" class="form-control rw-form-control" required>
+        <small class="rw-form-help">Upload CSV or Excel file. Use a file that includes outcome data such as profit.</small>
+      </div>
+
+      <div class="col-12 d-grid">
+        <button type="submit" class="btn rw-btn-primary">
+          <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
+        </button>
+      </div>
+    </form>
+  </section>
+
+</div>
+{% endblock %}

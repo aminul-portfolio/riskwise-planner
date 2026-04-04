@@ -1,0 +1,107 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Position Sizing{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <!-- Page Header -->
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PLANNING TOOL</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Position Sizing</h1>
+        <p class="rw-page-subtitle mb-0">
+          Estimate the monetary size of a planned position using lot size, pip distance, and contract assumptions before committing capital.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
+          <i class="bi bi-percent me-2"></i>Trade Risk Controls
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
+          <i class="bi bi-speedometer2 me-2"></i>Risk Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Card -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Position Sizing Inputs</h2>
+      <p class="rw-section-subtitle">
+        Enter the core trade parameters to estimate the dollar value of the position and support pre-trade allocation decisions.
+      </p>
+    </div>
+
+    <form method="post" class="row g-4">
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="col-md-6">
+        <label class="form-label rw-form-label">{{ field.label }}</label>
+        {{ field }}
+
+        {% if field.help_text %}
+          <small class="rw-form-help">{{ field.help_text }}</small>
+        {% endif %}
+
+        {% for error in field.errors %}
+          <div class="text-warning small mt-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="col-12 d-grid">
+        <button type="submit" class="btn rw-btn-primary">
+          <i class="bi bi-check-circle me-2"></i>Calculate Position Size
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Result Card -->
+  {% if result %}
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Position Sizing Result</h2>
+      <p class="rw-section-subtitle">
+        Use this output to judge whether the planned position size is appropriate for your account and capital preservation rules.
+      </p>
+    </div>
+
+    <div class="rw-result-card">
+      <div class="rw-result-icon">
+        <i class="bi bi-currency-dollar"></i>
+      </div>
+      <div>
+        <div class="rw-result-label">Dollar Value of Position</div>
+        <div class="rw-result-value">${{ result|floatformat:2 }}</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this calculates:</strong> The estimated dollar value of a planned position based on lot size, pip distance, and pip value per lot. This helps assess whether the total position exposure is appropriate before committing capital.
+      </p>
+      <p>
+        <strong>Formula:</strong> <code>Position Value = Pip Distance × Lot Size × Pip Value</code>
+      </p>
+      <p class="mb-0">
+        <strong>Limitations:</strong> This estimate uses a fixed pip value and does not account for variable contract sizes, leverage adjustments, or currency conversion between account and instrument denomination.
+      </p>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

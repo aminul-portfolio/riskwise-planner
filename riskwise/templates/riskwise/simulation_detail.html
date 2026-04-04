@@ -1,0 +1,158 @@
+{% extends 'riskwise/base.html' %}
+
+{% block title %}Simulation Detail — {{ sim.label }}{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">SIMULATION REVIEW</div>
+    <h1 class="rw-page-title mb-3">{{ sim.label }}</h1>
+    <p class="rw-page-subtitle mb-0">
+      Review saved simulation inputs, outputs, and the generated chart for follow-up analysis and comparison.
+    </p>
+  </section>
+
+  <!-- Metadata -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Simulation Metadata</h2>
+      <p class="rw-section-subtitle">
+        Basic information about when this simulation was created.
+      </p>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <div class="rw-kpi-card rw-kpi-card-primary h-100">
+          <div class="rw-kpi-label">Label</div>
+          <div class="rw-kpi-value" style="font-size: 1rem;">{{ sim.label }}</div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="rw-kpi-card rw-kpi-card-secondary h-100">
+          <div class="rw-kpi-label">Created</div>
+          <div class="rw-kpi-value" style="font-size: 1rem;">{{ sim.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+      </div>
+      {% if sim.tags %}
+      <div class="col-12">
+        <div class="d-flex flex-wrap gap-2 mt-1">
+          {% for tag in sim.tags.split %}
+            <span class="rw-badge rw-badge-secondary">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Parameters — Structured -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Parameters</h2>
+      <p class="rw-section-subtitle">
+        The simulation inputs used for this saved run.
+      </p>
+    </div>
+
+    {% if params_items %}
+      <div class="row g-3">
+        {% for key, value in params_items %}
+        <div class="col-sm-6 col-lg-4">
+          <div class="rw-kpi-card rw-kpi-card-info h-100">
+            <div class="rw-kpi-label">{{ key }}</div>
+            <div class="rw-kpi-value" style="font-size: 1rem;">{{ value }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="rw-code-block">
+        <pre class="mb-0">{{ sim.parameters }}</pre>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Results — Structured -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Results</h2>
+      <p class="rw-section-subtitle">
+        The saved summary outputs produced by the simulation.
+      </p>
+    </div>
+
+    {% if results_items %}
+      <div class="row g-3">
+        {% for key, value in results_items %}
+        <div class="col-sm-6 col-lg-4">
+          <div class="rw-kpi-card rw-kpi-card-success h-100">
+            <div class="rw-kpi-label">{{ key }}</div>
+            <div class="rw-kpi-value" style="font-size: 1rem;">{{ value }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="rw-code-block">
+        <pre class="mb-0">{{ sim.results }}</pre>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Chart -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Chart</h2>
+      <p class="rw-section-subtitle">
+        Review or download the saved chart generated for this simulation.
+      </p>
+    </div>
+
+    <div class="text-center mb-3">
+      <img
+        src="data:image/png;base64,{{ sim.chart_base64 }}"
+        class="img-fluid rw-scenario-chart-thumb"
+        alt="{{ sim.label }} chart"
+        data-bs-toggle="modal"
+        data-bs-target="#chartModal"
+        style="cursor: pointer;"
+      >
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+      <a
+        download="{{ sim.label|slugify }}_chart.png"
+        href="data:image/png;base64,{{ sim.chart_base64 }}"
+        class="btn rw-btn-outline"
+      >
+        <i class="bi bi-download me-2"></i>Download Chart
+      </a>
+      <a href="{% url 'simulation_download_json' sim.pk %}" class="btn rw-btn-outline">
+        <i class="bi bi-filetype-json me-2"></i>Download JSON
+      </a>
+      <a href="{% url 'simulation_history' %}" class="btn rw-btn-primary">
+        <i class="bi bi-clock-history me-2"></i>Back to History
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content rw-modal-content">
+      <div class="modal-header rw-modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-bar-chart-line me-2"></i>Full Size Chart
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="data:image/png;base64,{{ sim.chart_base64 }}" class="img-fluid rounded" alt="{{ sim.label }} full chart">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}SL / TP Planner{% endblock %}
+
+{% block content %}
+<div class="rw-tool-page">
+
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PLANNING TOOL</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">SL / TP Planner</h1>
+        <p class="rw-page-subtitle mb-0">
+          Calculate risk, reward, and risk-reward ratio using planned entry, stop-loss, and take-profit levels before taking a position.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
+          <i class="bi bi-percent me-2"></i>Trade Risk Controls
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
+          <i class="bi bi-speedometer2 me-2"></i>Risk Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">SL / TP Inputs</h2>
+      <p class="rw-section-subtitle">
+        Enter entry price, stop-loss, take-profit, and position assumptions to quantify downside and reward potential.
+      </p>
+    </div>
+
+    <form method="post" class="row g-4">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="col-md-6">
+        <label class="form-label rw-form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <small class="rw-form-help">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="text-warning small mt-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="col-12 d-grid">
+        <button type="submit" class="btn rw-btn-primary">
+          <i class="bi bi-check-circle me-2"></i>Calculate SL / TP
+        </button>
+      </div>
+    </form>
+  </section>
+
+  {% if result %}
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">SL / TP Result</h2>
+      <p class="rw-section-subtitle">
+        Use these outputs to judge whether the potential downside and reward profile fits your planning rules.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="rw-result-card h-100">
+          <div class="rw-result-icon text-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <div>
+            <div class="rw-result-label">Risk</div>
+            <div class="rw-result-value">${{ result.risk|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="rw-result-card h-100">
+          <div class="rw-result-icon text-success">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div>
+            <div class="rw-result-label">Reward</div>
+            <div class="rw-result-value">${{ result.reward|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="rw-result-card h-100">
+          <div class="rw-result-icon text-primary">
+            <i class="bi bi-diagram-3"></i>
+          </div>
+          <div>
+            <div class="rw-result-label">R:R Ratio</div>
+            <div class="rw-result-value">{{ result.rr|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this calculates:</strong> The dollar risk (entry to stop-loss), dollar reward (entry to take-profit), and their ratio for a planned trade.
+      </p>
+      <p>
+        <strong>Formulas:</strong> <code>Risk = |Entry − SL| × Lot × Pip Value</code> &nbsp;|&nbsp; <code>Reward = |TP − Entry| × Lot × Pip Value</code> &nbsp;|&nbsp; <code>R:R = Reward / Risk</code>
+      </p>
+      <p class="mb-0">
+        <strong>Limitations:</strong> Assumes a fixed pip value and does not account for spread, slippage, or partial fills. A R:R ratio above 1.0 means reward exceeds risk; most capital preservation approaches target at least 1.5:1 or 2:1 before entry.
+      </p>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'riskwise/base.html' %}
+
+{% block title %}RiskWise Planner — Risk Planning Overview{% endblock %}
+
+{% block content %}
+<div class="rw-home-page">
+
+  <!-- Hero -->
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">PRIMARY PLANNING FLOW</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Risk Planning Overview</h1>
+        <p class="rw-page-subtitle mb-4">
+          RiskWise Planner is a pre-trade risk planning and scenario modelling platform for position sizing, downside control, and simulation-backed decision support.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2">
+          <span class="rw-badge">Version 1.0</span>
+          <span class="rw-badge rw-badge-secondary">Capital Preservation</span>
+          <span class="rw-badge rw-badge-secondary">Scenario Modelling</span>
+        </div>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'upload' %}" class="btn rw-btn-primary">
+          <i class="bi bi-upload me-2"></i>Upload Dataset
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
+          <i class="bi bi-speedometer2 me-2"></i>Open Risk Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Primary Feature Cards -->
+  <section class="mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Core Workflow</h2>
+      <p class="rw-section-subtitle">
+        Move from dataset upload to downside-aware review, then into simulation and scenario comparison.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="rw-feature-card h-100">
+          <div class="rw-feature-icon text-primary">
+            <i class="bi bi-upload"></i>
+          </div>
+          <h3 class="rw-feature-title">Upload Risk Dataset</h3>
+          <p class="rw-feature-text">
+            Import CSV or Excel data to prepare position sizing, downside review, and simulation-backed planning surfaces.
+          </p>
+          <a href="{% url 'upload' %}" class="btn rw-btn-primary w-100 mt-3">
+            Upload Dataset
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="rw-feature-card h-100">
+          <div class="rw-feature-icon text-success">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h3 class="rw-feature-title">Capital Preservation Dashboard</h3>
+          <p class="rw-feature-text">
+            Review downside-aware planning metrics, drawdown context, and risk signals in one place.
+          </p>
+          <a href="{% url 'dashboard' %}" class="btn rw-btn-outline w-100 mt-3">
+            Open Risk Dashboard
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="rw-feature-card h-100">
+          <div class="rw-feature-icon text-info">
+            <i class="bi bi-shuffle"></i>
+          </div>
+          <h3 class="rw-feature-title">Simulation &amp; Scenario Modelling</h3>
+          <p class="rw-feature-text">
+            Stress-test risk assumptions with Monte Carlo simulation and scenario comparison before committing capital.
+          </p>
+          <div class="d-grid gap-2 mt-3">
+            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+              Run Simulation
+            </a>
+            <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
+              Monte Carlo Tool
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Grid -->
+  <section class="mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Explore Risk Planning Tools</h2>
+      <p class="rw-section-subtitle">
+        Review the full product surface across planning tools, calculators, and simulation workflows.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for feature in features %}
+      <div class="col-md-6 col-xl-4">
+        <div class="rw-feature-card h-100">
+          <div class="rw-feature-icon text-{{ feature.color }}">
+            <i class="{{ feature.icon }}"></i>
+          </div>
+          <h3 class="rw-feature-title">{{ feature.title }}</h3>
+          <p class="rw-feature-text">{{ feature.description }}</p>
+          <a href="{{ feature.url }}" class="btn rw-btn-outline w-100 mt-3">
+            {{ feature.button_text }}
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="rw-footer mt-4">
+    <p class="mb-1">Developed by <strong>Aminul Islam</strong></p>
+    <p class="mb-0">
+      <a href="mailto:aminulislamkhan.tech@gmail.com" class="rw-footer-link">
+        <i class="bi bi-envelope me-1"></i>aminulislamkhan.tech@gmail.com
+      </a>
+      <span class="mx-2">|</span>
+      <a href="https://www.linkedin.com/in/aminul-islam-a71a871a2" target="_blank" class="rw-footer-link">
+        <i class="bi bi-linkedin me-1"></i>LinkedIn
+      </a>
+    </p>
+  </footer>
+
+</div>
+{% endblock %}

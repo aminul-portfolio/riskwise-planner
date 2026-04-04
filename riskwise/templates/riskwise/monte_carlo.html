@@ -1,0 +1,274 @@
+{% extends 'riskwise/base.html' %}
+{% block title %}Monte Carlo Risk Simulation{% endblock %}
+
+{% block content %}
+<div class="rw-simulation-page">
+
+  <!-- Page Header -->
+  <section class="rw-hero-card mb-4">
+    <div class="rw-eyebrow">FLAGSHIP SIMULATION SURFACE</div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Monte Carlo Risk Simulation</h1>
+        <p class="rw-page-subtitle mb-0">
+          Run simulation-backed risk analysis to explore possible outcome distributions, downside ranges, and drawdown-aware planning scenarios before capital is committed.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'upload' %}" class="btn rw-btn-outline">
+          <i class="bi bi-upload me-2"></i>Upload Dataset
+        </a>
+        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
+          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upload Panel -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Load Planning Dataset</h2>
+      <p class="rw-section-subtitle">
+        Upload CSV or Excel data with a <code>profit</code> column to prepare the simulation workflow.
+      </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-9">
+          <label class="form-label rw-form-label">Select Risk Dataset</label>
+          <input type="file" name="file" class="form-control rw-form-control">
+          <small class="rw-form-help">
+            Use realistic trade outcomes so the simulation reflects downside-aware planning and capital preservation review.
+          </small>
+        </div>
+        <div class="col-lg-3 d-grid">
+          <button type="submit" class="btn rw-btn-primary">
+            <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
+          </button>
+        </div>
+      </div>
+    </form>
+
+    {% if instruction %}
+      <div class="alert rw-alert-info mt-4 mb-0">
+        <i class="bi bi-lightbulb me-2"></i>{{ instruction }}
+      </div>
+    {% endif %}
+
+    {% if trade_count %}
+      <div class="alert rw-alert-info mt-4 mb-0">
+        <i class="bi bi-database me-2"></i>
+        <strong>{{ trade_count }}</strong> records loaded
+        {% if summary.date_start and summary.date_end %}
+          ({{ summary.date_start }} to {{ summary.date_end }})
+        {% endif %}.
+      </div>
+    {% endif %}
+  </section>
+
+  {% if trade_count %}
+  <!-- Simulation Controls -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Simulation Controls</h2>
+      <p class="rw-section-subtitle">
+        Configure the simulation range, trade volume, and session filters before generating distribution outcomes.
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Number of Simulations</label>
+          <input type="number" name="num_simulations" class="form-control rw-form-control" placeholder="e.g., 1000"
+                 value="{{ form_data.num_simulations }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Number of Trades per Simulation</label>
+          <input type="number" name="num_trades" class="form-control rw-form-control" placeholder="e.g., 50"
+                 value="{{ form_data.num_trades }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Range Start</label>
+          <input type="number" name="range_start" class="form-control rw-form-control" value="{{ form_data.range_start }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Range End</label>
+          <input type="number" name="range_end" class="form-control rw-form-control" value="{{ form_data.range_end }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Session</label>
+          <select name="session" class="form-select rw-form-control" id="sessionSelect">
+            <option value="All" {% if form_data.session == 'All' %}selected{% endif %}>All Sessions</option>
+            <option value="UK" {% if form_data.session == 'UK' %}selected{% endif %}>UK Session</option>
+            <option value="US" {% if form_data.session == 'US' %}selected{% endif %}>US Session</option>
+            <option value="Asia" {% if form_data.session == 'Asia' %}selected{% endif %}>Asia Session</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 uk-time-range {% if form_data.session != 'UK' %}d-none{% endif %}">
+          <label class="form-label rw-form-label">UK Start Hour</label>
+          <input type="number" name="uk_start" class="form-control rw-form-control" value="{{ form_data.uk_start }}">
+        </div>
+
+        <div class="col-md-3 uk-time-range {% if form_data.session != 'UK' %}d-none{% endif %}">
+          <label class="form-label rw-form-label">UK End Hour</label>
+          <input type="number" name="uk_end" class="form-control rw-form-control" value="{{ form_data.uk_end }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">Start Date</label>
+          <input type="date" name="start_date" class="form-control rw-form-control" value="{{ form_data.start_date }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label rw-form-label">End Date</label>
+          <input type="date" name="end_date" class="form-control rw-form-control" value="{{ form_data.end_date }}">
+        </div>
+
+        <div class="col-md-6 d-grid">
+          <button type="submit" class="btn rw-btn-primary">
+            <i class="bi bi-play-circle me-2"></i>Run Simulation
+          </button>
+        </div>
+
+        <div class="col-md-6 d-grid">
+          <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
+            <i class="bi bi-x-circle me-2"></i>Reset Form
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+
+  {% if summary %}
+  <!-- Simulation Details -->
+  <section class="rw-feature-card mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Simulation Details</h2>
+      <p class="rw-section-subtitle">
+        Current simulation inputs and dataset filters used to generate the analysis.
+      </p>
+    </div>
+
+    <div class="rw-detail-list">
+      <div class="rw-detail-item"><strong>Range:</strong> {{ summary.range_start }} to {{ summary.range_end }}</div>
+      <div class="rw-detail-item"><strong>Session:</strong> {{ summary.session }}</div>
+      <div class="rw-detail-item"><strong>Trades Selected:</strong> {{ summary.trade_count }}</div>
+      {% if summary.date_start and summary.date_end %}
+        <div class="rw-detail-item"><strong>Date Range:</strong> {{ summary.date_start }} – {{ summary.date_end }}</div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if result_list %}
+  <!-- Results -->
+  <section class="mb-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Simulation Results</h2>
+      <p class="rw-section-subtitle">
+        Use the distribution, drawdown range, and scenario spread to judge whether the current risk plan aligns with your capital preservation rules.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for item in result_list %}
+      <div class="col-sm-6 col-xl-3">
+        <div class="rw-kpi-card h-100">
+          <div class="rw-kpi-icon">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <div class="rw-kpi-label">{{ item.label }}</div>
+          <div class="rw-kpi-value">
+            {% if item.is_percent %}
+              {{ item.value|floatformat:2 }}%
+            {% else %}
+              ${{ item.value|floatformat:2 }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if results and results.trades_used %}
+  <!-- Records Used -->
+  <section class="rw-feature-card">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Records Used in Simulation</h2>
+      <p class="rw-section-subtitle">
+        The sampled outcome values used to generate the current Monte Carlo run.
+      </p>
+    </div>
+
+    <div class="rw-table-wrap">
+      <table class="table rw-dark-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Profit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profit in results.trades_used %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>${{ profit|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Methodology -->
+  <section class="rw-feature-card mt-4">
+    <div class="rw-section-heading mb-3">
+      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+    </div>
+    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+      <p>
+        <strong>What this simulates:</strong> Multiple random sequences of trade outcomes are generated by sampling (with replacement) from the uploaded dataset. Each sequence produces a cumulative profit curve, and aggregate statistics are calculated across all simulations.
+      </p>
+      <p>
+        <strong>Assumptions:</strong> Trade outcomes are treated as independent and identically distributed. The simulation does not model serial correlation, position sizing changes, or regime shifts. Filtered subsets may reduce sample size and increase variance in results.
+      </p>
+      <p class="mb-0">
+        <strong>Use with caution if:</strong> The filtered dataset contains fewer than 30 records — small samples produce unstable distribution estimates. Results should be treated as planning signals, not predictions.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sessionSelect = document.getElementById('sessionSelect');
+  const ukTimeFields = document.querySelectorAll('.uk-time-range');
+
+  if (sessionSelect) {
+    sessionSelect.addEventListener('change', function() {
+      if (sessionSelect.value === 'UK') {
+        ukTimeFields.forEach(el => el.classList.remove('d-none'));
+      } else {
+        ukTimeFields.forEach(el => el.classList.add('d-none'));
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
