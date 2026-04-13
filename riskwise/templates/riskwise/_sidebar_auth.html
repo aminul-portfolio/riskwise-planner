@@ -1,0 +1,46 @@
+<div class="rw-user-panel rw-glass">
+  {% if request.user.is_authenticated %}
+    <div class="rw-user-header">
+      <div class="rw-user-avatar">
+        {{ request.user.username|make_list|first|upper }}
+      </div>
+      <div class="rw-user-info">
+        <div class="rw-user-panel-name">{{ request.user.username }}</div>
+        <div class="rw-user-role">Authenticated</div>
+      </div>
+    </div>
+
+    {% if dataset_meta %}
+      <div class="rw-user-session-bar">
+        <span class="rw-live-dot"></span>
+        <span>Session active</span>
+      </div>
+    {% endif %}
+
+    <div class="d-grid gap-2 mt-3">
+      <form method="post" action="{% url 'logout' %}" class="m-0">
+        {% csrf_token %}
+        <button type="submit" class="btn rw-btn-outline btn-sm w-100">
+          <i class="bi bi-box-arrow-right me-2"></i>Log Out
+        </button>
+      </form>
+    </div>
+
+  {% else %}
+    <div class="rw-user-header">
+      <div class="rw-user-avatar rw-user-avatar--guest">
+        <i class="bi bi-person"></i>
+      </div>
+      <div class="rw-user-info">
+        <div class="rw-user-panel-name">Guest Session</div>
+        <div class="rw-user-role">Not authenticated</div>
+      </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-3">
+      <a href="{% url 'login' %}" class="btn rw-btn-primary btn-sm">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+      </a>
+    </div>
+  {% endif %}
+</div>

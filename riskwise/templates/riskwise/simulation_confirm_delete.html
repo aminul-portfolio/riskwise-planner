@@ -1,40 +1,101 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Delete Simulation{% endblock %}
+{% block title %}Delete Saved Planning Run — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_history' %}">Saved Runs</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_detail' sim.pk %}">Run Detail</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Delete Run</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="rw-tool-page">
+<div class="rw-delete-page">
 
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">SIMULATION MANAGEMENT</div>
-    <h1 class="rw-page-title mb-3">Delete Simulation</h1>
-    <p class="rw-page-subtitle mb-0">
-      Confirm whether you want to permanently remove this saved simulation from your history.
-    </p>
+  <section class="rw-hero-card rw-detail-hero mb-4">
+    <div class="rw-eyebrow">SAVED RUN MANAGEMENT</div>
+
+    <div class="rw-detail-hero__grid">
+      <div class="rw-detail-hero__content">
+        <h1 class="rw-page-title">Delete Saved Planning Run</h1>
+        <p class="rw-page-subtitle mb-0">
+          Confirm whether you want to permanently remove this saved planning run from your review history.
+        </p>
+
+        <div class="rw-detail-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Archive Management</span>
+          <span class="rw-badge rw-badge--neutral">Permanent Action</span>
+          <span class="rw-badge rw-badge--neutral">Confirmation Required</span>
+        </div>
+      </div>
+
+      <div class="rw-detail-hero__actions">
+        <a href="{% url 'simulation_detail' sim.pk %}" class="btn rw-btn-outline">
+          <i class="bi bi-eye me-2"></i>Back to Detail
+        </a>
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-primary">
+          <i class="bi bi-clock-history me-2"></i>Saved Runs
+        </a>
+      </div>
+    </div>
   </section>
 
-  <section class="rw-feature-card">
+  <section class="rw-panel-card">
+    <div class="rw-panel-card__header">
+      <h3>Delete Confirmation</h3>
+      <span class="rw-badge rw-badge--neutral">Review Before Delete</span>
+    </div>
+
     <div class="rw-empty-state text-start">
       <div class="rw-empty-icon text-warning mb-3">
         <i class="bi bi-exclamation-triangle"></i>
       </div>
-      <h2 class="rw-section-title mb-2">Are you sure you want to delete this simulation?</h2>
+
+      <h2 class="rw-section-title mb-2">Are you sure you want to delete this saved run?</h2>
       <p class="rw-section-subtitle mb-3">
-        This action will remove the saved result and its associated chart from your simulation history.
+        This action will remove the saved result, associated chart, and review record from your planning history.
       </p>
 
+      <div class="rw-warning-banner rw-warning-banner--high mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div>
+          <strong class="d-block mb-1">Permanent action</strong>
+          <span>This deletion cannot be undone once confirmed.</span>
+        </div>
+      </div>
+
       <div class="rw-detail-list mb-4">
-        <div class="rw-detail-item"><strong>Label:</strong> {{ sim.label }}</div>
-        <div class="rw-detail-item"><strong>Created:</strong> {{ sim.created_at|date:"Y-m-d H:i" }}</div>
+        <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+          <span class="rw-meta-text">Run Label</span>
+          <strong>{{ sim.label|default:"Saved Planning Run" }}</strong>
+        </div>
+        <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+          <span class="rw-meta-text">Created</span>
+          <strong>{{ sim.created_at|date:"d M Y, H:i" }}</strong>
+        </div>
+        <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+          <span class="rw-meta-text">Record Type</span>
+          <strong>Saved Planning Run</strong>
+        </div>
       </div>
 
       <form method="post" class="d-flex flex-column flex-sm-row gap-2">
         {% csrf_token %}
+
         <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
           <i class="bi bi-x-circle me-2"></i>Cancel
         </a>
-        <button type="submit" class="btn btn-danger" style="background: var(--rw-red, #ef4444); border-color: var(--rw-red, #ef4444);">
-          <i class="bi bi-trash me-2"></i>Yes, Permanently Delete
+
+        <button
+          type="submit"
+          class="btn btn-danger"
+          style="background: var(--rw-red, #ef4444); border-color: var(--rw-red, #ef4444);"
+        >
+          <i class="bi bi-trash me-2"></i>Yes, Delete Saved Run
         </button>
       </form>
     </div>

@@ -1,216 +1,752 @@
 {% extends 'riskwise/base.html' %}
 {% load dict_extras %}
 
-{% block title %}Scenario Comparison{% endblock %}
+{% block title %}Scenario Comparison — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Results</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Scenario Comparison</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="rw-simulation-page">
+<div class="rw-scenario-page">
 
-  <!-- Page Header -->
-  <section class="rw-hero-card mb-4">
+  <section class="rw-hero-card rw-scenario-hero mb-4">
     <div class="rw-eyebrow">FLAGSHIP COMPARISON SURFACE</div>
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-      <div class="flex-grow-1">
-        <h1 class="rw-page-title mb-3">Scenario Comparison</h1>
+
+    <div class="rw-scenario-hero__grid">
+      <div class="rw-scenario-hero__content">
+        <h1 class="rw-page-title">Scenario Comparison</h1>
         <p class="rw-page-subtitle mb-0">
-          Compare multiple planning assumptions to evaluate downside exposure, drawdown tolerance, and decision quality before taking risk.
+          Compare multiple planning assumptions side by side to judge downside pressure, distribution stability,
+          and whether a setup still deserves capital under less favourable conditions.
         </p>
+
+        <div class="rw-scenario-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Scenario Review</span>
+          <span class="rw-badge rw-badge--neutral">Capital Planning</span>
+          <span class="rw-badge rw-badge--neutral">Decision Support</span>
+        </div>
       </div>
 
-      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
-        <a href="{% url 'upload' %}" class="btn rw-btn-outline">
-          <i class="bi bi-upload me-2"></i>Upload Dataset
+      <div class="rw-scenario-hero__actions">
+        <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
+          <i class="bi bi-speedometer2 me-2"></i>Planning Baseline
         </a>
-        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-primary">
-          <i class="bi bi-shuffle me-2"></i>Monte Carlo Simulation
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+          <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+        </a>
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+          <i class="bi bi-clock-history me-2"></i>Saved Runs
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Upload Panel -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Load Planning Dataset</h2>
-      <p class="rw-section-subtitle">
-        Upload CSV or Excel data with a <code>profit</code> column so multiple planning assumptions can be tested side by side.
+  {% if dataset_meta %}
+    <section class="rw-provenance mb-4">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-database" style="color: var(--rw-primary);"></i>
+          <span style="color: var(--rw-muted);">Active dataset</span>
+        </div>
+
+        {% firstof dataset_meta.source_file dataset_meta.filename as active_file %}
+        {% if active_file %}
+          <span class="rw-badge rw-badge--neutral">{{ active_file }}</span>
+        {% endif %}
+
+        {% if dataset_meta.records_loaded %}
+          <span class="rw-badge rw-badge--neutral">{{ dataset_meta.records_loaded }} records</span>
+        {% elif dataset_meta.trade_count %}
+          <span class="rw-badge rw-badge--neutral">{{ dataset_meta.trade_count }} records</span>
+        {% elif trade_count %}
+          <span class="rw-badge rw-badge--neutral">{{ trade_count }} records</span>
+        {% endif %}
+
+        {% if dataset_meta.date_start and dataset_meta.date_end %}
+          <span class="rw-badge rw-badge--neutral">{{ dataset_meta.date_start }} to {{ dataset_meta.date_end }}</span>
+        {% elif date_start and date_end %}
+          <span class="rw-badge rw-badge--neutral">{{ date_start }} to {{ date_end }}</span>
+        {% endif %}
+
+        {% if dataset_meta.uploaded_at_display %}
+          <span class="rw-badge rw-badge--neutral">Loaded {{ dataset_meta.uploaded_at_display }}</span>
+        {% endif %}
+
+        <span class="rw-badge rw-badge--neutral">Planning Use Only</span>
+      </div>
+
+      <p class="rw-methodology mb-0 mt-3">
+        Scenario comparison reuses the active planning dataset across multiple parameter sets so you can evaluate
+        how different assumptions change downside exposure before capital is committed.
       </p>
-    </div>
-
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="row g-3 align-items-end">
-        <div class="col-lg-9">
-          <label class="form-label rw-form-label">Select Risk Dataset</label>
-          <input type="file" name="file" class="form-control rw-form-control">
-          <small class="rw-form-help">
-            Use realistic historical outcomes so scenario comparisons reflect downside-aware planning and capital preservation review.
-          </small>
-        </div>
-        <div class="col-lg-3 d-grid">
-          <button type="submit" class="btn rw-btn-primary">
-            <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
-          </button>
-        </div>
-      </div>
-    </form>
-
-    {% if instruction %}
-      <div class="alert rw-alert-info mt-4 mb-0">
-        <i class="bi bi-info-circle me-2"></i>{{ instruction }}
-      </div>
-    {% endif %}
-
-    {% if trade_count %}
-      <div class="alert rw-alert-info mt-4 mb-0">
-        <i class="bi bi-database me-2"></i><strong>{{ trade_count }}</strong> records loaded.
-      </div>
-    {% endif %}
-  </section>
-
-  {% if trade_count %}
-  <!-- Scenario Controls -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Scenario Inputs</h2>
-      <p class="rw-section-subtitle">
-        Configure up to three scenario sets and compare how different assumptions change the expected risk profile.
-      </p>
-    </div>
-
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="scenario_count" value="3">
-
-      <div class="row g-4">
-        {% for i in "123" %}
-        <div class="col-lg-4">
-          <div class="rw-scenario-input-card h-100">
-            <h3 class="rw-scenario-title mb-3">Scenario {{ i }}</h3>
-
-            <label class="form-label rw-form-label"># Simulations</label>
-            <input type="number" name="num_simulations_{{ i }}" class="form-control rw-form-control mb-3" placeholder="e.g., 1000"
-                   value="{{ form_data|get:i|get:'num_simulations'|default:'' }}">
-
-            <label class="form-label rw-form-label"># Trades per Simulation</label>
-            <input type="number" name="num_trades_{{ i }}" class="form-control rw-form-control mb-3" placeholder="e.g., 50"
-                   value="{{ form_data|get:i|get:'num_trades'|default:'' }}">
-
-            <label class="form-label rw-form-label">Range Start</label>
-            <input type="number" name="range_start_{{ i }}" class="form-control rw-form-control mb-3"
-                   value="{{ form_data|get:i|get:'range_start'|default:'' }}">
-
-            <label class="form-label rw-form-label">Range End</label>
-            <input type="number" name="range_end_{{ i }}" class="form-control rw-form-control mb-3"
-                   value="{{ form_data|get:i|get:'range_end'|default:'' }}">
-
-            <label class="form-label rw-form-label">Start Date</label>
-            <input type="date" name="start_date_{{ i }}" class="form-control rw-form-control mb-3"
-                   value="{{ form_data|get:i|get:'start_date'|default:'' }}">
-
-            <label class="form-label rw-form-label">End Date</label>
-            <input type="date" name="end_date_{{ i }}" class="form-control rw-form-control"
-                   value="{{ form_data|get:i|get:'end_date'|default:'' }}">
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-
-      <div class="row mt-4 g-3">
-        <div class="col-md-6 d-grid">
-          <button type="submit" class="btn rw-btn-primary">
-            <i class="bi bi-play-circle me-2"></i>Compare Scenarios
-          </button>
-        </div>
-        <div class="col-md-6 d-grid">
-          <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
-            <i class="bi bi-x-circle me-2"></i>Reset
-          </button>
-        </div>
-      </div>
-    </form>
-  </section>
+    </section>
   {% endif %}
 
-  {% if scenarios %}
-  <!-- Scenario Results -->
-  <section class="mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Scenario Results</h2>
-      <p class="rw-section-subtitle">
-        Compare scenarios by downside profile, expected stability, and capital preservation impact to decide which setup is acceptable.
-      </p>
+  {% if instruction %}
+    <div class="alert alert-info mb-4">
+      {{ instruction }}
+    </div>
+  {% endif %}
+
+  {% if scenario_persistence_note %}
+    <div class="alert alert-warning mb-4">
+      {{ scenario_persistence_note }}
+    </div>
+  {% endif %}
+
+  <div class="row g-4 align-items-stretch">
+
+    <div class="col-xl-5">
+      <section class="rw-panel-card h-100">
+        <div class="rw-panel-card__header">
+          <h3>Compare Scenarios</h3>
+          <span class="rw-badge rw-badge--neutral">Setup</span>
+        </div>
+
+        <p class="rw-sim-panel-note mb-3">
+          Load a planning dataset, define up to three scenario sets, and compare how changes in sampling depth
+          and horizon affect downside results.
+        </p>
+
+        <form method="post" enctype="multipart/form-data" class="row g-3 mb-4">
+          {% csrf_token %}
+
+          <div class="col-12">
+            <label class="form-label rw-form-label">Planning Dataset</label>
+            <input type="file" name="file" class="form-control rw-form-control">
+            <small class="rw-form-help">
+              Upload a CSV or Excel file with a <strong>profit</strong> column. Uploading a file refreshes the active
+              planning dataset for all scenarios.
+            </small>
+          </div>
+
+          {% if dataset_meta %}
+            {% firstof dataset_meta.source_file dataset_meta.filename as current_file %}
+            {% if current_file %}
+              <div class="col-12">
+                <div class="rw-detail-item">
+                  <span class="rw-meta-text d-block mb-1">Current file</span>
+                  <strong>{{ current_file }}</strong>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+
+          <div class="col-12 d-grid d-sm-flex gap-2">
+            <button type="submit" class="btn rw-btn-primary">
+              <i class="bi bi-cloud-arrow-up me-2"></i>Load Dataset
+            </button>
+          </div>
+        </form>
+
+        {% if trade_count %}
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="accordion" id="scenarioAccordion">
+              {% for scenario_id in "123" %}
+                {% with current_form=form_data|get:scenario_id %}
+                  <div class="accordion-item mb-3" style="background: var(--rw-panel-2); border: 1px solid var(--rw-border); border-radius: var(--rw-radius-md); overflow: hidden;">
+                    <h3 class="accordion-header" id="scenarioHeading{{ scenario_id }}">
+                      <button
+                        class="accordion-button {% if scenario_id != '1' %}collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#scenarioCollapse{{ scenario_id }}"
+                        aria-expanded="{% if scenario_id == '1' %}true{% else %}false{% endif %}"
+                        aria-controls="scenarioCollapse{{ scenario_id }}"
+                        style="background: transparent; color: var(--rw-text-strong); box-shadow: none;"
+                      >
+                        Scenario {{ scenario_id }}
+                      </button>
+                    </h3>
+
+                    <div
+                      id="scenarioCollapse{{ scenario_id }}"
+                      class="accordion-collapse collapse {% if scenario_id == '1' %}show{% endif %}"
+                      aria-labelledby="scenarioHeading{{ scenario_id }}"
+                      data-bs-parent="#scenarioAccordion"
+                    >
+                      <div class="accordion-body">
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label"># Simulations</label>
+                            <input
+                              type="number"
+                              name="num_simulations_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              min="1"
+                              value="{{ current_form|get:'num_simulations'|default:'' }}"
+                              placeholder="e.g. 1000"
+                            >
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label"># Trades per Simulation</label>
+                            <input
+                              type="number"
+                              name="num_trades_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              min="1"
+                              value="{{ current_form|get:'num_trades'|default:'' }}"
+                              placeholder="e.g. 50"
+                            >
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label">Range Start</label>
+                            <input
+                              type="number"
+                              name="range_start_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              min="0"
+                              value="{{ current_form|get:'range_start'|default:'' }}"
+                              placeholder="0"
+                            >
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label">Range End</label>
+                            <input
+                              type="number"
+                              name="range_end_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              min="1"
+                              value="{{ current_form|get:'range_end'|default:'' }}"
+                              placeholder="{{ trade_count|default:'End' }}"
+                            >
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label">Filter Start Date</label>
+                            <input
+                              type="date"
+                              name="start_date_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              value="{{ current_form|get:'start_date'|default:'' }}"
+                            >
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label rw-form-label">Filter End Date</label>
+                            <input
+                              type="date"
+                              name="end_date_{{ scenario_id }}"
+                              class="form-control rw-form-control"
+                              value="{{ current_form|get:'end_date'|default:'' }}"
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            </div>
+
+            <div class="d-grid gap-2 d-sm-flex mt-4">
+              <button type="submit" class="btn rw-btn-primary">
+                <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+              </button>
+              <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
+                <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Dataset
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <div class="rw-empty-state rw-empty-state--compact mt-3">
+            <div class="rw-empty-icon">
+              <i class="bi bi-database-exclamation"></i>
+            </div>
+            <h3 class="rw-empty-title">No active dataset</h3>
+            <p class="rw-empty-text">
+              Load a planning dataset first to unlock the comparison workflow.
+            </p>
+          </div>
+        {% endif %}
+      </section>
     </div>
 
-    <div class="row g-4">
-      {% for scenario in scenarios %}
-      <div class="col-lg-4">
-        <div class="rw-scenario-result-card h-100">
-          <h3 class="rw-scenario-title mb-3">{{ scenario.label }}</h3>
+    <div class="col-xl-7">
+      <div class="d-flex flex-column gap-4 h-100">
 
-          {% if scenario.error %}
-            <div class="alert alert-warning mb-0">{{ scenario.error }}</div>
-          {% else %}
-            <ul class="rw-scenario-metrics list-unstyled mb-4">
-              <li><i class="bi bi-currency-dollar me-2"></i><strong>Min:</strong> ${{ scenario.min|floatformat:2 }}</li>
-              <li><i class="bi bi-currency-dollar me-2"></i><strong>Max:</strong> ${{ scenario.max|floatformat:2 }}</li>
-              <li><i class="bi bi-currency-dollar me-2"></i><strong>Median:</strong> ${{ scenario.median|floatformat:2 }}</li>
-              <li><i class="bi bi-emoji-smile me-2"></i><strong>Profit Chance:</strong> {{ scenario.prob_positive|floatformat:2 }}%</li>
-            </ul>
+        {% if scenarios %}
+          <section class="mb-0">
+            <div class="rw-scenario-decision-strip">
+              <div class="rw-scenario-decision-tile">
+                <div class="rw-scenario-decision-tile__label">Comparison Goal</div>
+                <div class="rw-scenario-decision-tile__value">Defensible downside</div>
+                <div class="rw-scenario-decision-tile__detail">
+                  Prefer the scenario that stays acceptable under stricter assumptions, not the one with the best upside only.
+                </div>
+              </div>
 
-            <div class="d-flex justify-content-end mb-3">
-              <a download="{{ scenario.label|slugify }}_chart.png"
-                 href="data:image/png;base64,{{ scenario.chart }}"
-                 class="btn rw-btn-outline btn-sm">
-                <i class="bi bi-download me-1"></i>Download Chart
-              </a>
+              <div class="rw-scenario-decision-tile">
+                <div class="rw-scenario-decision-tile__label">Primary Signal</div>
+                <div class="rw-scenario-decision-tile__value">Tail risk + positive rate</div>
+                <div class="rw-scenario-decision-tile__detail">
+                  Use downside depth and reliability together before treating the median result as “good enough”.
+                </div>
+              </div>
+
+              <div class="rw-scenario-decision-tile">
+                <div class="rw-scenario-decision-tile__label">Decision Rule</div>
+                <div class="rw-scenario-decision-tile__value">Compare, then rerun</div>
+                <div class="rw-scenario-decision-tile__detail">
+                  If differences are narrow, increase simulation depth or tighten range assumptions before committing capital.
+                </div>
+              </div>
             </div>
+          </section>
 
-            <div class="text-center">
-              <img src="data:image/png;base64,{{ scenario.chart }}"
-                   class="img-fluid rw-scenario-chart-thumb"
-                   alt="{{ scenario.label }} chart"
-                   data-bs-toggle="modal"
-                   data-bs-target="#scenarioModal{{ forloop.counter }}">
-            </div>
-
-            <div class="modal fade" id="scenarioModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content rw-modal-content">
-                  <div class="modal-header rw-modal-header">
-                    <h5 class="modal-title">
-                      <i class="bi bi-bar-chart-line me-2"></i>{{ scenario.label }} — Full Size
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <section class="mb-0">
+            <div class="row g-3">
+              {% for scenario in scenarios %}
+                {% if scenario.error %}
+                  <div class="col-md-6 col-xl-4">
+                    <div class="rw-kpi-card rw-kpi-card-warning h-100">
+                      <div class="rw-kpi-icon-wrap"><i class="bi bi-exclamation-circle"></i></div>
+                      <div class="rw-kpi-label">{{ scenario.label }}</div>
+                      <div class="rw-kpi-value" style="font-size: 1rem;">Skipped</div>
+                      <div class="rw-form-help mt-2">{{ scenario.error }}</div>
+                    </div>
                   </div>
-                  <div class="modal-body text-center">
-                    <img src="data:image/png;base64,{{ scenario.chart }}" class="img-fluid rounded" alt="{{ scenario.label }} full chart">
+                {% else %}
+                  <div class="col-md-6 col-xl-4">
+                    <div class="rw-kpi-card rw-kpi-card-primary h-100">
+                      <div class="rw-kpi-icon-wrap"><i class="bi bi-bullseye"></i></div>
+                      <div class="rw-kpi-label">{{ scenario.label }} — Median</div>
+                      <div class="rw-kpi-value">${{ scenario.median|floatformat:2 }}</div>
+                      <div class="rw-form-help mt-2">
+                        Positive: {{ scenario.prob_positive|floatformat:2 }}%
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="rw-panel-card mb-0">
+            <div class="rw-panel-card__header">
+              <h3>Scenario Results</h3>
+              <span class="rw-badge rw-badge--neutral">Comparison Surface</span>
+            </div>
+
+            <p class="rw-sim-panel-note mb-3">
+              Review each scenario side by side and identify which setup carries the most defensible downside profile.
+            </p>
+
+            <div class="row g-4">
+              {% for scenario in scenarios %}
+                <div class="col-lg-6">
+                  <div class="rw-scenario-result-card h-100">
+                    <div class="rw-scenario-card__top">
+                      <div>
+                        <h3 class="rw-scenario-title mb-2">{{ scenario.label }}</h3>
+
+                        <div class="rw-scenario-card__meta">
+                          {% if scenario.error %}
+                            <span class="rw-badge rw-badge--warning">Skipped</span>
+                          {% else %}
+                            {% if scenario.prob_positive >= 80 %}
+                              {% if scenario.min >= 0 %}
+                                <span class="rw-badge rw-badge--success">Most defensive</span>
+                              {% else %}
+                                <span class="rw-badge rw-badge--info">Balanced</span>
+                              {% endif %}
+                            {% elif scenario.prob_positive >= 60 %}
+                              <span class="rw-badge rw-badge--warning">Watchlist</span>
+                            {% else %}
+                              <span class="rw-badge rw-badge--danger">Fragile setup</span>
+                            {% endif %}
+
+                            <span class="rw-badge rw-badge--neutral">Decision review</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      {% if not scenario.error and scenario.chart %}
+                        <div class="rw-scenario-toolbar">
+                          <a
+                            download="{{ scenario.label|slugify }}_chart.png"
+                            href="data:image/png;base64,{{ scenario.chart }}"
+                            class="btn rw-btn-outline btn-sm"
+                          >
+                            <i class="bi bi-download me-1"></i>Download
+                          </a>
+
+                          <button
+                            type="button"
+                            class="btn rw-btn-outline btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#scenarioModal{{ forloop.counter }}"
+                          >
+                            <i class="bi bi-arrows-fullscreen me-1"></i>View Full
+                          </button>
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    {% if scenario.error %}
+                      <div class="alert alert-warning mb-0">{{ scenario.error }}</div>
+                    {% else %}
+
+                      {% if scenario.warning %}
+                        <div class="rw-warning-banner rw-warning-banner--informational mb-1">
+                          <i class="bi bi-exclamation-triangle-fill"></i>
+                          <div>
+                            <strong class="d-block mb-1">Scenario note</strong>
+                            <span>{{ scenario.warning }}</span>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      <div class="rw-scenario-highlight-grid">
+                        <div class="rw-detail-item">
+                          <span class="rw-meta-text d-block mb-1">Worst Outcome</span>
+                          <strong>${{ scenario.min|floatformat:2 }}</strong>
+                        </div>
+
+                        <div class="rw-detail-item">
+                          <span class="rw-meta-text d-block mb-1">Best Outcome</span>
+                          <strong>${{ scenario.max|floatformat:2 }}</strong>
+                        </div>
+
+                        <div class="rw-detail-item">
+                          <span class="rw-meta-text d-block mb-1">Median</span>
+                          <strong>${{ scenario.median|floatformat:2 }}</strong>
+                        </div>
+
+                        <div class="rw-detail-item">
+                          <span class="rw-meta-text d-block mb-1">Positive Probability</span>
+                          <strong>{{ scenario.prob_positive|floatformat:2 }}%</strong>
+                        </div>
+                      </div>
+
+                      {% if scenario.chart %}
+                        <section class="rw-scenario-chart-panel">
+                          <div class="rw-scenario-chart-panel__header">
+                            <div class="rw-scenario-chart-panel__title">Distribution View</div>
+                            <span class="rw-badge rw-badge--neutral">Paths + bands</span>
+                          </div>
+
+                          <div class="text-center rw-scenario-chart-wrap">
+                            <img
+                              src="data:image/png;base64,{{ scenario.chart }}"
+                              class="img-fluid rw-scenario-chart-thumb"
+                              alt="{{ scenario.label }} chart"
+                              data-bs-toggle="modal"
+                              data-bs-target="#scenarioModal{{ forloop.counter }}"
+                            >
+                          </div>
+
+                          <div class="rw-scenario-chart-meta">
+                            Review the path spread and downside band first. The most attractive upside path matters less than whether the lower range remains acceptable.
+                          </div>
+                        </section>
+
+                        {% if scenario.histogram_chart %}
+                          <section class="rw-scenario-chart-panel">
+                            <div class="rw-scenario-chart-panel__header">
+                              <div class="rw-scenario-chart-panel__title">Final Profit Distribution</div>
+                              <button
+                                type="button"
+                                class="btn rw-btn-outline btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#scenarioHistogramModal{{ forloop.counter }}"
+                              >
+                                <i class="bi bi-arrows-fullscreen me-1"></i>View Full
+                              </button>
+                            </div>
+
+                            <div class="text-center rw-scenario-chart-wrap">
+                              <img
+                                src="data:image/png;base64,{{ scenario.histogram_chart }}"
+                                class="img-fluid rw-scenario-chart-thumb"
+                                alt="{{ scenario.label }} histogram"
+                                data-bs-toggle="modal"
+                                data-bs-target="#scenarioHistogramModal{{ forloop.counter }}"
+                              >
+                            </div>
+
+                            <div class="rw-scenario-chart-meta">
+                              Use the histogram to see where outcomes cluster and how heavy the downside tail remains.
+                            </div>
+                          </section>
+                        {% endif %}
+
+                        <div class="modal fade" id="scenarioModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered rw-scenario-modal-dialog">
+                            <div class="modal-content rw-modal-content">
+                              <div class="modal-header rw-modal-header">
+                                <div>
+                                  <h5 class="modal-title mb-1">
+                                    <i class="bi bi-bar-chart-line me-2"></i>{{ scenario.label }} — Distribution View
+                                  </h5>
+                                  <p class="mb-0 text-secondary small">
+                                    Full-screen review of percentile paths and downside dispersion.
+                                  </p>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body rw-modal-body-chart">
+                                <div class="rw-modal-chart-wrap">
+                                  <img
+                                    src="data:image/png;base64,{{ scenario.chart }}"
+                                    class="rw-scenario-modal-image"
+                                    alt="{{ scenario.label }} full chart"
+                                  >
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {% if scenario.histogram_chart %}
+                          <div class="modal fade" id="scenarioHistogramModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered rw-scenario-modal-dialog">
+                              <div class="modal-content rw-modal-content">
+                                <div class="modal-header rw-modal-header">
+                                  <div>
+                                    <h5 class="modal-title mb-1">
+                                      <i class="bi bi-bar-chart me-2"></i>{{ scenario.label }} — Final Profit Distribution
+                                    </h5>
+                                    <p class="mb-0 text-secondary small">
+                                      Full-screen review of final outcome clustering and left-tail depth.
+                                    </p>
+                                  </div>
+                                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body rw-modal-body-chart">
+                                  <div class="rw-modal-chart-wrap">
+                                    <img
+                                      src="data:image/png;base64,{{ scenario.histogram_chart }}"
+                                      class="rw-scenario-modal-image"
+                                      alt="{{ scenario.label }} histogram full chart"
+                                    >
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
+                      {% else %}
+                        <div class="rw-empty-state rw-empty-state--compact">
+                          <div class="rw-empty-icon">
+                            <i class="bi bi-bar-chart"></i>
+                          </div>
+                          <h3 class="rw-empty-title">No chart available</h3>
+                          <p class="rw-empty-text">This scenario did not generate a chart preview.</p>
+                        </div>
+                      {% endif %}
+
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <section class="rw-panel-card h-100">
+                <div class="rw-panel-card__header">
+                  <h3>How to read the comparison</h3>
+                  <span class="rw-badge rw-badge--neutral">Interpretation</span>
+                </div>
+
+                <div class="rw-insight-list mt-3">
+                  <div class="rw-insight-item">
+                    <div class="rw-insight-dot rw-dot-danger"></div>
+                    <div><strong>Primary downside focus:</strong> treat the weakest worst-case outcome as the main fragility signal.</div>
+                  </div>
+                  <div class="rw-insight-item">
+                    <div class="rw-insight-dot rw-dot-info"></div>
+                    <div><strong>Distribution stability:</strong> if median and probability of positive outcome fall sharply under stricter settings, the plan may be too fragile.</div>
+                  </div>
+                  <div class="rw-insight-item">
+                    <div class="rw-insight-dot rw-dot-success"></div>
+                    <div><strong>Planning use:</strong> choose the scenario that remains acceptable under conservative assumptions, not the one with the best upside only.</div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="col-lg-6">
+              <section class="rw-panel-card h-100">
+                <div class="rw-panel-card__header">
+                  <h3>Next Actions</h3>
+                  <span class="rw-badge rw-badge--neutral">Workflow</span>
+                </div>
+
+                <p class="rw-sim-panel-note mt-3 mb-3">
+                  Continue the workflow after comparing scenario resilience.
+                </p>
+
+                <div class="d-grid gap-2">
+                  <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+                    <i class="bi bi-clock-history me-2"></i>Review Saved Planning Runs
+                  </a>
+                  <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+                    <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+                  </a>
+                </div>
+              </section>
+            </div>
+          </div>
+
+        {% else %}
+          <section class="rw-panel-card mb-0">
+            <div class="rw-panel-card__header">
+              <h3>Current Dataset Snapshot</h3>
+              <span class="rw-badge rw-badge--neutral">Ready State</span>
+            </div>
+
+            <p class="rw-sim-panel-note mb-3">
+              Review the active dataset context before comparing scenarios.
+            </p>
+
+            <div class="row g-3">
+              <div class="col-sm-6 col-xl-3">
+                <div class="rw-kpi-card rw-kpi-card-primary h-100">
+                  <div class="rw-kpi-label">Dataset</div>
+                  <div class="rw-kpi-value" style="font-size: 1rem; word-break: break-word;">
+                    {% if dataset_meta %}
+                      {% firstof dataset_meta.source_file dataset_meta.filename "No dataset loaded" %}
+                    {% else %}
+                      No dataset loaded
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-xl-3">
+                <div class="rw-kpi-card rw-kpi-card-info h-100">
+                  <div class="rw-kpi-label">Records</div>
+                  <div class="rw-kpi-value" style="font-size: 1rem;">
+                    {% if dataset_meta and dataset_meta.records_loaded %}
+                      {{ dataset_meta.records_loaded }}
+                    {% elif dataset_meta and dataset_meta.trade_count %}
+                      {{ dataset_meta.trade_count }}
+                    {% elif trade_count %}
+                      {{ trade_count }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-xl-3">
+                <div class="rw-kpi-card rw-kpi-card-secondary h-100">
+                  <div class="rw-kpi-label">Date Range</div>
+                  <div class="rw-kpi-value" style="font-size: 0.95rem;">
+                    {% if dataset_meta and dataset_meta.date_start and dataset_meta.date_end %}
+                      {{ dataset_meta.date_start }}<br>{{ dataset_meta.date_end }}
+                    {% elif date_start and date_end %}
+                      {{ date_start }}<br>{{ date_end }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 col-xl-3">
+                <div class="rw-kpi-card rw-kpi-card-warning h-100">
+                  <div class="rw-kpi-label">Use Case</div>
+                  <div class="rw-kpi-value" style="font-size: 1rem;">
+                    Scenario<br>Planning
                   </div>
                 </div>
               </div>
             </div>
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
+          </section>
 
-  <!-- Methodology -->
-  <section class="rw-feature-card mt-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+          <section class="rw-panel-card flex-grow-1">
+            <div class="row g-4 h-100">
+              <div class="col-lg-6">
+                <div class="h-100">
+                  <div class="rw-panel-card__header mb-3" style="padding:0; border:none;">
+                    <h3>How to use this page</h3>
+                    <span class="rw-badge rw-badge--neutral">Workflow</span>
+                  </div>
+
+                  <div class="rw-insight-list">
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-primary"></div>
+                      <div><strong>Step 1:</strong> Load a planning dataset.</div>
+                    </div>
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-info"></div>
+                      <div><strong>Step 2:</strong> Configure Scenario 1, 2, and 3 with different trade horizons, ranges, or filtered periods.</div>
+                    </div>
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-danger"></div>
+                      <div><strong>Step 3:</strong> Compare downside range and positive-outcome probability side by side.</div>
+                    </div>
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-success"></div>
+                      <div><strong>Step 4:</strong> Continue with the more defensible setup or return to the stress-test view.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="h-100">
+                  <div class="rw-panel-card__header mb-3" style="padding:0; border:none;">
+                    <h3>What this comparison tells you</h3>
+                    <span class="rw-badge rw-badge--neutral">Interpretation</span>
+                  </div>
+
+                  <div class="rw-insight-list">
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-danger"></div>
+                      <div><strong>Worst-case sensitivity:</strong> compare how much downside deepens when the scenario becomes stricter.</div>
+                    </div>
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-info"></div>
+                      <div><strong>Median resilience:</strong> if the middle outcome weakens sharply, the plan may be less stable than it appears.</div>
+                    </div>
+                    <div class="rw-insight-item">
+                      <div class="rw-insight-dot rw-dot-success"></div>
+                      <div><strong>Planning implication:</strong> the more defensible scenario is the one that still looks acceptable under conservative assumptions, not the one with the best upside alone.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        {% endif %}
+
+      </div>
     </div>
-    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+  </div>
+
+  <section class="rw-panel-card mt-4">
+    <div class="rw-panel-card__header">
+      <h3>Methodology &amp; Assumptions</h3>
+      <span class="rw-badge rw-badge--neutral">Reference Notes</span>
+    </div>
+
+    <div class="rw-methodology mt-3">
       <p>
-        <strong>What this compares:</strong> Up to three independent Monte Carlo simulations run with different parameter assumptions. Each scenario samples from the uploaded dataset and produces aggregate distribution statistics (min, max, median, probability of profit).
+        <strong>What this compares:</strong> up to three independent Monte Carlo-style scenario runs using the same active planning dataset, but with different trade counts, ranges, or filtered periods.
       </p>
       <p>
-        <strong>Assumptions:</strong> Each scenario uses the same underlying dataset but may apply different trade counts, ranges, or date filters. Outcomes are sampled independently within each scenario.
+        <strong>Assumptions:</strong> outcomes are sampled independently within each scenario. The model does not account for serial dependence, adaptive position sizing, or structural market regime shifts.
       </p>
       <p class="mb-0">
-        <strong>Use with caution if:</strong> Scenarios use very different sample sizes — comparing a 10-trade scenario with a 500-trade scenario produces uneven confidence levels. Results are planning signals, not forecasts.
+        <strong>Use with caution if:</strong> scenarios rely on very different filtered sample sizes or very short horizons. In those cases, comparison confidence is uneven and results should be treated as planning signals rather than forecasts.
       </p>
     </div>
   </section>

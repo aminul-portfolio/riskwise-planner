@@ -1,0 +1,63 @@
+<div class="rw-sidebar-section">Command Centre</div>
+
+<a href="{% url 'home' %}" class="rw-nav-link {% if current_url_name == 'home' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-grid-1x2"></i></span>
+  <span class="rw-nav-text">Risk Planning Overview</span>
+</a>
+
+<a href="{% url 'dashboard' %}" class="rw-nav-link {% if current_url_name == 'dashboard' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-shield-check"></i></span>
+  <span class="rw-nav-text">Capital Preservation</span>
+  {% if dataset_meta %}
+    <span class="rw-nav-dot rw-nav-dot--live"></span>
+  {% endif %}
+</a>
+
+<div class="rw-sidebar-section">Stress Testing</div>
+
+<a href="{% url 'simulation_run' %}" class="rw-nav-link {% if current_url_name == 'simulation_run' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-activity"></i></span>
+  <span class="rw-nav-text">Monte Carlo Simulation</span>
+</a>
+
+<a href="{% url 'simulation_scenario' %}" class="rw-nav-link {% if current_url_name == 'simulation_scenario' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-diagram-3"></i></span>
+  <span class="rw-nav-text">Scenario Comparison</span>
+</a>
+
+<a href="{% url 'simulation_history' %}" class="rw-nav-link {% if current_url_name == 'simulation_history' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-clock-history"></i></span>
+  <span class="rw-nav-text">Simulation History</span>
+  {% if saved_run_count %}
+    <span class="rw-nav-count">{{ saved_run_count }}</span>
+  {% endif %}
+</a>
+
+<div class="rw-sidebar-section">Trade Risk Controls</div>
+
+<a href="{% url 'lot_size' %}" class="rw-nav-link {% if current_url_name == 'lot_size' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-bullseye"></i></span>
+  <span class="rw-nav-text">Position Sizing</span>
+</a>
+
+<a href="{% url 'risk_per_trade' %}" class="rw-nav-link {% if current_url_name == 'risk_per_trade' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-percent"></i></span>
+  <span class="rw-nav-text">Risk Per Trade</span>
+</a>
+
+<a href="{% url 'strategy_risk' %}" class="rw-nav-link {% if current_url_name == 'strategy_risk' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-bar-chart-line"></i></span>
+  <span class="rw-nav-text">Strategy Exposure</span>
+</a>
+
+<a href="{% url 'sltp' %}" class="rw-nav-link {% if current_url_name == 'sltp' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-sliders"></i></span>
+  <span class="rw-nav-text">SL / TP Planner</span>
+</a>
+
+<div class="rw-sidebar-section">Data</div>
+
+<a href="{% url 'upload' %}" class="rw-nav-link {% if current_url_name == 'upload' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-cloud-arrow-up"></i></span>
+  <span class="rw-nav-text">Upload Dataset</span>
+</a>

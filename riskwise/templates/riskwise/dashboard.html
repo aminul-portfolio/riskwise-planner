@@ -1,29 +1,77 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Capital Preservation Dashboard{% endblock %}
+{% block title %}Capital Preservation Dashboard — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Capital Preservation Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
 <div class="rw-dashboard-page">
 
-  <!-- Page Header -->
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">CORE PLANNING SURFACE</div>
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-      <div class="flex-grow-1">
-        <h1 class="rw-page-title mb-3">Capital Preservation Dashboard</h1>
+  <section class="rw-hero-card rw-dashboard-hero rw-border-glow mb-4">
+    <div class="rw-eyebrow">DECISION SUPPORT DASHBOARD</div>
+
+    <div class="rw-dashboard-hero__row">
+      <div class="rw-dashboard-hero__content">
+        <h1 class="rw-page-title"><span class="rw-grad-text">Capital Preservation Dashboard</span></h1>
         <p class="rw-page-subtitle mb-0">
-          Review downside-aware summaries, planning metrics, and risk signals derived from the currently loaded dataset.
+          Review downside-aware planning signals from the currently loaded reference dataset,
+          assess whether the baseline is credible enough to guide new capital allocation,
+          and move into stress testing before increasing risk.
         </p>
+
+        <div class="rw-dashboard-hero__meta">
+          <span class="rw-badge rw-badge--{{ decision_state.tone|default:'neutral' }}">
+            {{ decision_state.label|default:"Inactive" }}
+          </span>
+
+          {% if trade_count %}
+            <span class="rw-badge rw-badge--neutral">
+              {{ trade_count }} records loaded
+            </span>
+          {% endif %}
+
+          {% if date_range_start and date_range_end %}
+            <span class="rw-badge rw-badge--neutral">
+              {{ date_range_start }} to {{ date_range_end }}
+            </span>
+          {% endif %}
+
+          <span class="rw-badge rw-badge--neutral">Planning Reference Only</span>
+        </div>
       </div>
 
-      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+      <div class="rw-dashboard-hero__actions">
         <a href="{% url 'upload' %}" class="btn rw-btn-primary">
           <i class="bi bi-upload me-2"></i>Upload Dataset
         </a>
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-          <i class="bi bi-play-circle me-2"></i>New Simulation
+          <i class="bi bi-play-circle me-2"></i>Run Stress Test
+        </a>
+        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
+          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
         </a>
       </div>
+    </div>
+
+    <div class="rw-decision-summary">
+      <h2>{{ decision_state.headline|default:"Planning baseline not yet loaded" }}</h2>
+      <p>
+        {{ decision_state.summary|default:"Load a reference dataset to activate downside-aware planning review." }}
+      </p>
+      <p class="rw-decision-summary__recommendation">
+        <strong>Recommended next step:</strong>
+        {{ decision_state.recommended_action|default:"Upload a valid planning dataset to begin assessment." }}
+      </p>
+      <p class="rw-decision-summary__note">
+        {{ decision_state.sample_note|default:"No observed outcome sample is available yet." }}
+      </p>
     </div>
   </section>
 
@@ -32,204 +80,173 @@
       <div class="rw-empty-icon">
         <i class="bi bi-shield-exclamation"></i>
       </div>
-      <h3 class="rw-empty-title">No risk plan loaded yet</h3>
+      <h3 class="rw-empty-title">No active planning baseline</h3>
       <p class="rw-empty-text">{{ message }}</p>
+
       <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 mt-3">
         <a href="{% url 'upload' %}" class="btn rw-btn-primary">
           <i class="bi bi-upload me-2"></i>Upload Dataset
         </a>
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-          <i class="bi bi-play-circle me-2"></i>Run First Simulation
+          <i class="bi bi-play-circle me-2"></i>Run First Stress Test
         </a>
       </div>
     </div>
   {% else %}
 
-    <!-- Dataset Provenance Banner -->
-    <section class="rw-feature-card mb-4" style="border-left: 3px solid var(--rw-primary, #3b82f6);">
+    <section class="rw-provenance mb-4">
       <div class="d-flex flex-wrap align-items-center gap-3">
         <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-database" style="color: var(--rw-primary, #3b82f6);"></i>
-          <span style="color: var(--rw-muted, #94a3b8);">Reference Dataset</span>
+          <i class="bi bi-database" style="color: var(--rw-primary);"></i>
+          <span style="color: var(--rw-muted);">Reference dataset methodology</span>
         </div>
-        <span class="rw-badge">{{ trade_count }} records loaded</span>
+
         {% if date_range_start and date_range_end %}
-          <span class="rw-badge rw-badge-secondary">{{ date_range_start }} to {{ date_range_end }}</span>
+          <span class="rw-badge rw-badge--neutral">
+            {{ date_range_start }} to {{ date_range_end }}
+          </span>
         {% endif %}
-        <span class="rw-badge rw-badge-secondary">Planning Reference Only</span>
+
+        <span class="rw-status-chip rw-status-chip--live">
+          <span class="rw-live-dot"></span> Live Session
+        </span>
       </div>
-      <p class="mb-0 mt-2" style="color: var(--rw-muted, #94a3b8); font-size: 0.85rem;">
-        These metrics are derived from observed trade outcomes and serve as calibration inputs for forward-looking risk planning — not as a post-trade performance evaluation.
+
+      <p class="rw-methodology mb-0 mt-2">
+        {{ planning_reference_notice|default:"These metrics are derived from observed trade outcomes and should be used to calibrate forward-looking risk planning, not to claim future performance certainty." }}
       </p>
     </section>
 
-    <!-- KPI Summary -->
+    <section class="rw-decision-strip mb-4">
+      {% for item in decision_strip %}
+        <article class="rw-decision-tile rw-tone-{{ item.tone|default:'neutral' }}">
+          <div class="rw-decision-tile__label">{{ item.label }}</div>
+          <div class="rw-decision-tile__value">{{ item.value }}</div>
+          <div class="rw-decision-tile__detail">{{ item.detail }}</div>
+        </article>
+      {% endfor %}
+    </section>
+
+    <div class="rw-divider">Risk Profile</div>
+
     <section class="mb-4">
-      <div class="rw-section-heading mb-3">
-        <h2 class="rw-section-title">Observed Risk Profile</h2>
-        <p class="rw-section-subtitle">
-          High-level planning indicators derived from the currently loaded reference dataset.
-        </p>
+      {% include "riskwise/includes/section_header.html" with title="Observed Risk Profile" subtitle="Executive planning metrics from the currently loaded reference dataset." %}
+      <div class="rw-kpi-grid mt-3">
+        {% for item in kpi_panels %}
+          <article class="rw-kpi-panel rw-tone-{{ item.tone|default:'neutral' }}">
+            <div class="rw-kpi-panel__label">{{ item.label }}</div>
+            <div class="rw-kpi-panel__value">{{ item.value }}</div>
+            <div class="rw-kpi-panel__subtext">{{ item.subtext }}</div>
+          </article>
+        {% endfor %}
       </div>
+    </section>
 
-      <div class="row g-4">
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-primary h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-currency-dollar"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Net Outcome</div>
-            <div class="rw-kpi-value">${{ total_profit|floatformat:2 }}</div>
+    <div class="rw-divider">Analysis</div>
+
+    <section class="rw-dashboard-analysis mb-4">
+      <div class="rw-analysis-grid">
+        <article class="rw-panel-card rw-glass">
+          <div class="rw-panel-card__header">
+            <h3>Risk Assessment</h3>
+            <span class="rw-badge rw-badge--{{ decision_state.tone|default:'neutral' }}">
+              {{ decision_state.label|default:"Inactive" }}
+            </span>
           </div>
+
+          <div class="rw-insight-list">
+            {% for item in risk_checks %}
+              <div class="rw-insight-item rw-tone-{{ item.tone|default:'neutral' }}">
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.body }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="rw-panel-card">
+          <div class="rw-panel-card__header">
+            <h3>Suggested Next Steps</h3>
+            <span class="rw-badge rw-badge--neutral">Actionable</span>
+          </div>
+
+          <ol class="rw-action-list">
+            {% for item in suggested_actions %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ol>
+
+          <div class="rw-mini-stats">
+            <div class="rw-mini-stat">
+              <span class="rw-mini-stat__label">Win Rate</span>
+              <span class="rw-mini-stat__value">
+                {{ dashboard_win_rate|default:"—" }}{% if dashboard_win_rate and dashboard_win_rate != "—" %}%{% endif %}
+              </span>
+            </div>
+            <div class="rw-mini-stat">
+              <span class="rw-mini-stat__label">Profit Factor</span>
+              <span class="rw-mini-stat__value">{{ dashboard_profit_factor|default:"—" }}</span>
+            </div>
+            <div class="rw-mini-stat">
+              <span class="rw-mini-stat__label">Observed Outcomes</span>
+              <span class="rw-mini-stat__value">{{ dashboard_sample_size|default:"0" }}</span>
+            </div>
+          </div>
+
+          <div class="rw-inline-actions mt-4">
+            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+              <i class="bi bi-play-circle me-2"></i>Run Stress Test
+            </a>
+            <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
+              <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="rw-divider">Baseline Metrics</div>
+
+    <section class="mb-4">
+      {% include "riskwise/includes/section_header.html" with title="Supporting Baseline Metrics" subtitle="Secondary planning signals for downside review and calibration." %}
+      <div class="row g-4 mt-1">
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="primary" icon="bi bi-currency-dollar" label="Observed Net Outcome" value=total_profit|floatformat:2 %}
         </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-success h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-trophy"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Win Rate</div>
-            <div class="rw-kpi-value">{{ win_rate|floatformat:2 }}%</div>
-          </div>
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="warning" icon="bi bi-exclamation-triangle" label="Observed Avg Risk" value=avg_risk|floatformat:2 %}
         </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-danger h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-graph-down"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Max Drawdown</div>
-            <div class="rw-kpi-value">${{ max_drawdown|floatformat:2 }}</div>
-          </div>
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="info" icon="bi bi-bar-chart-line" label="Observed Volatility" value=volatility|floatformat:2 %}
         </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-warning h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-exclamation-triangle"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Avg Risk (Losing Trades)</div>
-            <div class="rw-kpi-value">${{ avg_risk|floatformat:2 }}</div>
-          </div>
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="secondary" icon="bi bi-percent" label="Downside Percentile (5th)" value=downside_percentile|floatformat:2 %}
         </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-info h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-bar-chart-line"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Volatility (Std Dev)</div>
-            <div class="rw-kpi-value">${{ volatility|floatformat:2 }}</div>
-          </div>
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="success" icon="bi bi-graph-up-arrow" label="Observed Avg Win" value=avg_win|floatformat:2 %}
         </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-secondary h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-percent"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Downside Percentile (5th)</div>
-            <div class="rw-kpi-value">${{ percentile_95|floatformat:2 }}</div>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-success h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-graph-up-arrow"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Avg Win</div>
-            <div class="rw-kpi-value">${{ avg_win|floatformat:2 }}</div>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-danger h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-graph-down-arrow"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Avg Loss</div>
-            <div class="rw-kpi-value">${{ avg_loss|floatformat:2 }}</div>
-          </div>
-        </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <div class="rw-kpi-card rw-kpi-card-primary h-100">
-            <div class="rw-kpi-icon">
-              <i class="bi bi-balance-scale"></i>
-            </div>
-            <div class="rw-kpi-label">Observed Profit Factor</div>
-            <div class="rw-kpi-value">
-              {% if profit_factor %}
-                {{ profit_factor|floatformat:2 }}
-              {% else %}
-                N/A
-              {% endif %}
-            </div>
-          </div>
+        <div class="col-sm-6 col-xl-4 rw-kpi-enter">
+          {% include "riskwise/includes/metric_card.html" with variant="danger" icon="bi bi-graph-down-arrow" label="Observed Avg Loss" value=avg_loss|floatformat:2 %}
         </div>
       </div>
     </section>
 
-    <!-- Interpretation / Next Actions -->
-    <section class="mb-4">
-      <div class="row g-4">
-        <div class="col-lg-7">
-          <div class="rw-feature-card h-100">
-            <div class="rw-section-heading mb-3">
-              <h2 class="rw-section-title">What this suggests</h2>
-              <p class="rw-section-subtitle">
-                Use these observed metrics to calibrate whether the current profile is aligned with your capital preservation rules.
-              </p>
-            </div>
+    <div class="rw-divider">Interpretation</div>
 
-            <div class="rw-insight-list">
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-danger"></div>
-                <div>
-                  <strong>Drawdown context:</strong> Observed max drawdown and downside percentile indicate how much adverse movement the reference dataset has experienced — use this to set realistic downside expectations.
-                </div>
-              </div>
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-info"></div>
-                <div>
-                  <strong>Stability context:</strong> Observed volatility and average loss indicate outcome distribution unevenness — higher values suggest larger position sizing buffers may be needed.
-                </div>
-              </div>
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-success"></div>
-                <div>
-                  <strong>Efficiency context:</strong> Observed win rate, average win, and profit factor help assess whether the plan has enough edge to justify risk allocation.
-                </div>
-              </div>
-            </div>
-          </div>
+    <section class="mb-4">
+      <div class="rw-panel-card rw-glass">
+        <div class="rw-panel-card__header">
+          <h3>Interpretation Summary</h3>
+          <span class="rw-badge rw-badge--neutral">Planning Guidance</span>
         </div>
 
-        <div class="col-lg-5">
-          <div class="rw-feature-card h-100">
-            <div class="rw-section-heading mb-3">
-              <h2 class="rw-section-title">Next actions</h2>
-              <p class="rw-section-subtitle">
-                Continue the planning workflow through simulation and scenario comparison.
-              </p>
+        <div class="rw-insight-list">
+          {% for item in insight_items %}
+            <div class="rw-insight-item rw-tone-{{ item.variant|default:'neutral' }}">
+              <h4>{{ item.label }}</h4>
+              <p>{{ item.text }}</p>
             </div>
-
-            <div class="d-grid gap-2">
-              <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-                <i class="bi bi-play-circle me-2"></i>Run Simulation
-              </a>
-              <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
-                <i class="bi bi-shuffle me-2"></i>Monte Carlo Risk Simulation
-              </a>
-              <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-                <i class="bi bi-diagram-3 me-2"></i>Scenario Comparison
-              </a>
-              <a href="{% url 'upload' %}" class="btn rw-btn-outline">
-                <i class="bi bi-upload me-2"></i>Upload New Dataset
-              </a>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </section>

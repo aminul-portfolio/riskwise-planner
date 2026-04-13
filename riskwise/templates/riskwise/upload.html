@@ -4,43 +4,210 @@
 {% block content %}
 <div class="rw-tool-page">
 
+  <!-- Hero -->
   <section class="rw-hero-card mb-4">
     <div class="rw-eyebrow">PRIMARY PLANNING FLOW</div>
-    <h1 class="rw-page-title mb-3">Upload Dataset</h1>
-    <p class="rw-page-subtitle mb-0">
-      Upload a CSV or Excel dataset so RiskWise can prepare downside-aware review, simulation, and planning surfaces.
-    </p>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+      <div class="flex-grow-1">
+        <h1 class="rw-page-title mb-3">Upload Dataset</h1>
+        <p class="rw-page-subtitle mb-0">
+          Upload a CSV or Excel file to build a planning baseline for downside review, simulation, and scenario modelling.
+        </p>
+      </div>
+
+      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+        <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
+          <i class="bi bi-speedometer2 me-2"></i>Go to Planning Baseline
+        </a>
+      </div>
+    </div>
   </section>
 
-  <section class="rw-feature-card">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Load Planning Dataset</h2>
-      <p class="rw-section-subtitle">
-        Use a realistic file with outcome data so the downstream planning workflow reflects meaningful capital preservation analysis.
+  <!-- Current Dataset -->
+  {% if dataset_meta %}
+    <section class="rw-provenance mb-4">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-database" style="color: var(--rw-primary);"></i>
+          <span style="color: var(--rw-muted);">Current Dataset</span>
+        </div>
+
+        {% if dataset_meta.source_file %}
+          <span class="rw-badge">{{ dataset_meta.source_file }}</span>
+        {% endif %}
+
+        {% if dataset_meta.records_loaded %}
+          <span class="rw-badge rw-badge-secondary">{{ dataset_meta.records_loaded }} records</span>
+        {% endif %}
+
+        {% if dataset_meta.date_start and dataset_meta.date_end %}
+          <span class="rw-badge rw-badge-secondary">{{ dataset_meta.date_start }} to {{ dataset_meta.date_end }}</span>
+        {% endif %}
+
+        {% if dataset_meta.uploaded_at_display %}
+          <span class="rw-badge rw-badge-secondary">Loaded {{ dataset_meta.uploaded_at_display }}</span>
+        {% endif %}
+      </div>
+
+      <p class="rw-methodology mb-0 mt-3">
+        Uploading a new file will load a fresh planning dataset into the current workflow. Use the dashboard to review the baseline before running simulations.
       </p>
+    </section>
+  {% endif %}
+
+  <div class="row g-4">
+    <!-- Left -->
+    <div class="col-lg-7">
+      <section class="rw-feature-card h-100">
+        <div class="rw-section-heading mb-3">
+          <h2 class="rw-section-title">Load Planning Dataset</h2>
+          <p class="rw-section-subtitle">
+            Use a realistic file that includes outcome data such as profit so RiskWise can build a meaningful downside-aware planning reference.
+          </p>
+        </div>
+
+        {% if error %}
+          <div class="alert alert-danger mb-4">
+            {{ error }}
+          </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+          {% csrf_token %}
+
+          <div class="col-12">
+            <label class="form-label rw-form-label">Select File</label>
+            <input type="file" name="file" class="form-control rw-form-control" required>
+            <small class="rw-form-help">
+              Upload a CSV or Excel file. Files should include outcome data such as <strong>profit</strong> so RiskWise can prepare the planning baseline correctly.
+            </small>
+          </div>
+
+          {% if dataset_meta and dataset_meta.source_file %}
+            <div class="col-12">
+              <div class="rw-topbar-chip w-100">
+                <span class="rw-topbar-label d-block">Current File</span>
+                {{ dataset_meta.source_file }}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="col-12 d-grid gap-2 d-sm-flex">
+            <button type="submit" class="btn rw-btn-primary">
+              <i class="bi bi-cloud-arrow-up me-2"></i>Load Dataset
+            </button>
+            <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
+              <i class="bi bi-speedometer2 me-2"></i>Go to Planning Baseline
+            </a>
+          </div>
+        </form>
+
+        <div class="row g-3 mt-4">
+          <div class="col-md-6">
+            <div class="rw-feature-card rw-feature-card--soft h-100">
+              <div class="rw-section-subtitle mb-2">Current dataset status</div>
+
+              <div class="rw-detail-list">
+                <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+                  <span class="rw-meta-text">File</span>
+                  <strong>
+                    {% if dataset_meta and dataset_meta.source_file %}
+                      {{ dataset_meta.source_file }}
+                    {% else %}
+                      No dataset loaded
+                    {% endif %}
+                  </strong>
+                </div>
+
+                <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+                  <span class="rw-meta-text">Records</span>
+                  <strong>
+                    {% if dataset_meta and dataset_meta.records_loaded %}
+                      {{ dataset_meta.records_loaded }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </strong>
+                </div>
+
+                <div class="rw-detail-item d-flex justify-content-between gap-3 flex-wrap">
+                  <span class="rw-meta-text">Workflow use</span>
+                  <strong>Planning Baseline</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="rw-feature-card rw-feature-card--soft h-100">
+              <div class="rw-section-subtitle mb-2">Expected fields</div>
+
+              <div class="rw-insight-list">
+                <div class="rw-insight-item">
+                  <div class="rw-insight-dot rw-dot-primary"></div>
+                  <div><strong>Required:</strong> <code>profit</code></div>
+                </div>
+                <div class="rw-insight-item">
+                  <div class="rw-insight-dot rw-dot-info"></div>
+                  <div><strong>Helpful:</strong> date/time fields for filtering and provenance</div>
+                </div>
+                <div class="rw-insight-item">
+                  <div class="rw-insight-dot rw-dot-success"></div>
+                  <div><strong>Best practice:</strong> use realistic historical outcomes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
     </div>
 
-    {% if error %}
-    <div class="alert alert-danger mb-4">
-      {{ error }}
+    <!-- Right -->
+    <div class="col-lg-5">
+      <section class="rw-feature-card h-100">
+        <div class="rw-section-heading mb-3">
+          <h2 class="rw-section-title">What happens next</h2>
+          <p class="rw-section-subtitle">
+            Once your file is loaded, follow the product in this order.
+          </p>
+        </div>
+
+        <div class="rw-insight-list">
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-primary"></div>
+            <div>
+              <strong>1. Build planning baseline:</strong> RiskWise reads the uploaded outcome data and prepares a baseline view of downside depth, loss severity, and edge quality.
+            </div>
+          </div>
+
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-info"></div>
+            <div>
+              <strong>2. Review downside and stability signals:</strong> Open the dashboard to evaluate observed drawdown pressure, volatility, and historical efficiency before taking new risk.
+            </div>
+          </div>
+
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-success"></div>
+            <div>
+              <strong>3. Stress-test and compare:</strong> Run simulations and compare alternative planning assumptions before committing capital.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top border-secondary-subtle">
+          <div class="rw-section-subtitle mb-2">Accepted file guidance</div>
+          <ul class="mb-0 ps-3" style="color: var(--rw-muted);">
+            <li>CSV and Excel files are supported</li>
+            <li>A <strong>profit</strong> column is required for simulation workflows</li>
+            <li>Date fields improve filtering and provenance context</li>
+            <li>Use realistic historical outcomes for more meaningful planning signals</li>
+          </ul>
+        </div>
+      </section>
     </div>
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data" class="row g-3">
-      {% csrf_token %}
-      <div class="col-12">
-        <label class="form-label rw-form-label">Select File</label>
-        <input type="file" name="file" class="form-control rw-form-control" required>
-        <small class="rw-form-help">Upload CSV or Excel file. Use a file that includes outcome data such as profit.</small>
-      </div>
-
-      <div class="col-12 d-grid">
-        <button type="submit" class="btn rw-btn-primary">
-          <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
-        </button>
-      </div>
-    </form>
-  </section>
+  </div>
 
 </div>
 {% endblock %}

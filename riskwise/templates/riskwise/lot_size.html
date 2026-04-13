@@ -1,17 +1,27 @@
 {% extends 'riskwise/base.html' %}
-{% block title %}Position Sizing{% endblock %}
+
+{% block title %}Position Sizing — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Planning Baseline</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Position Sizing</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
 <div class="rw-tool-page">
 
-  <!-- Page Header -->
   <section class="rw-hero-card mb-4">
     <div class="rw-eyebrow">PLANNING TOOL</div>
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
       <div class="flex-grow-1">
         <h1 class="rw-page-title mb-3">Position Sizing</h1>
         <p class="rw-page-subtitle mb-0">
-          Estimate the monetary size of a planned position using lot size, pip distance, and contract assumptions before committing capital.
+          Estimate exposure, risk per pip, and total risk amount from your planned lot size and pip assumptions before committing capital.
         </p>
       </div>
 
@@ -20,85 +30,233 @@
           <i class="bi bi-percent me-2"></i>Trade Risk Controls
         </a>
         <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
-          <i class="bi bi-speedometer2 me-2"></i>Risk Dashboard
+          <i class="bi bi-speedometer2 me-2"></i>Planning Baseline
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Form Card -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Position Sizing Inputs</h2>
-      <p class="rw-section-subtitle">
-        Enter the core trade parameters to estimate the dollar value of the position and support pre-trade allocation decisions.
-      </p>
+  <div class="row g-4">
+    <div class="col-xl-7">
+      <section class="rw-panel-card h-100">
+        <div class="rw-panel-card__header">
+          <h3>Position Sizing Inputs</h3>
+          <span class="rw-badge rw-badge--neutral">Trade Setup</span>
+        </div>
+
+        <p class="rw-sim-panel-note mb-3">
+          Enter the core trade parameters to estimate exposure and support pre-trade allocation decisions.
+        </p>
+
+        <form method="post" class="row g-4">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="col-md-6">
+              <label class="form-label rw-form-label">{{ field.label }}</label>
+              {{ field }}
+
+              {% if field.help_text %}
+                <small class="rw-form-help">{{ field.help_text }}</small>
+              {% endif %}
+
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <div class="text-warning small mt-1">
+                    <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <div class="col-12 d-grid d-sm-flex gap-2">
+            <button type="submit" class="btn rw-btn-primary">
+              <i class="bi bi-check-circle me-2"></i>Calculate Position Size
+            </button>
+            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
+              <i class="bi bi-percent me-2"></i>Trade Risk Controls
+            </a>
+          </div>
+        </form>
+
+        <div class="mt-4 pt-3 border-top border-secondary-subtle">
+          <div class="rw-section-subtitle mb-2">How to use these inputs</div>
+          <div class="rw-insight-list">
+            <div class="rw-insight-item">
+              <div class="rw-insight-dot rw-dot-primary"></div>
+              <div><strong>Lot size:</strong> the planned position size for the trade.</div>
+            </div>
+            <div class="rw-insight-item">
+              <div class="rw-insight-dot rw-dot-info"></div>
+              <div><strong>Pip distance:</strong> the reference move used to estimate exposure size.</div>
+            </div>
+            <div class="rw-insight-item">
+              <div class="rw-insight-dot rw-dot-success"></div>
+              <div><strong>Pip value:</strong> the monetary value per pip for the chosen position setup.</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <form method="post" class="row g-4">
-      {% csrf_token %}
+    <div class="col-xl-5">
+      <div class="d-flex flex-column gap-4 h-100">
 
-      {% for field in form %}
-      <div class="col-md-6">
-        <label class="form-label rw-form-label">{{ field.label }}</label>
-        {{ field }}
+        {% if result %}
+          <section class="rw-panel-card mb-0">
+            <div class="rw-panel-card__header">
+              <h3>Position Sizing Result</h3>
+              <span class="rw-badge rw-badge--neutral">Calculated Output</span>
+            </div>
 
-        {% if field.help_text %}
-          <small class="rw-form-help">{{ field.help_text }}</small>
+            <p class="rw-sim-panel-note mb-3">
+              Use these outputs to judge whether the planned position is appropriate before checking full trade risk.
+            </p>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6 col-xl-12">
+                <div class="rw-result-card h-100">
+                  <div class="rw-result-icon text-primary">
+                    <i class="bi bi-bullseye"></i>
+                  </div>
+                  <div>
+                    <div class="rw-result-label">Lot Size</div>
+                    <div class="rw-result-value">{{ result.lot_size|floatformat:4 }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-xl-12">
+                <div class="rw-result-card h-100">
+                  <div class="rw-result-icon text-info">
+                    <i class="bi bi-arrows-expand"></i>
+                  </div>
+                  <div>
+                    <div class="rw-result-label">Pip Distance</div>
+                    <div class="rw-result-value">{{ result.pip_distance|floatformat:2 }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-xl-12">
+                <div class="rw-result-card h-100">
+                  <div class="rw-result-icon text-success">
+                    <i class="bi bi-cash-stack"></i>
+                  </div>
+                  <div>
+                    <div class="rw-result-label">Risk per Pip</div>
+                    <div class="rw-result-value">${{ result.risk_per_pip|floatformat:2 }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-xl-12">
+                <div class="rw-result-card h-100">
+                  <div class="rw-result-icon text-warning">
+                    <i class="bi bi-currency-dollar"></i>
+                  </div>
+                  <div>
+                    <div class="rw-result-label">Risk Amount</div>
+                    <div class="rw-result-value">${{ result.risk_amount|floatformat:2 }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rw-insight-list">
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-info"></div>
+                <div><strong>Interpretation:</strong> this estimate is useful for sizing and exposure review, not a full trade-risk decision by itself.</div>
+              </div>
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-warning"></div>
+                <div><strong>Primary caution:</strong> acceptable position size still depends on stop-loss distance, account size, and total downside tolerance.</div>
+              </div>
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-success"></div>
+                <div><strong>Suggested next step:</strong> validate the setup with Trade Risk Controls before committing capital.</div>
+              </div>
+            </div>
+          </section>
+        {% else %}
+          <section class="rw-panel-card mb-0">
+            <div class="rw-panel-card__header">
+              <h3>What this tool is for</h3>
+              <span class="rw-badge rw-badge--neutral">Purpose</span>
+            </div>
+
+            <p class="rw-sim-panel-note mb-3">
+              Use this page to estimate trade exposure before checking whether the trade fits your broader downside rules.
+            </p>
+
+            <div class="rw-insight-list">
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-primary"></div>
+                <div><strong>Exposure check:</strong> estimate how sensitive the planned position is to pip movement.</div>
+              </div>
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-info"></div>
+                <div><strong>Planning use:</strong> compare the result with your account size and intended stop-loss structure.</div>
+              </div>
+              <div class="rw-insight-item">
+                <div class="rw-insight-dot rw-dot-success"></div>
+                <div><strong>Workflow role:</strong> use this early in the planning process before trade-risk and SL / TP review.</div>
+              </div>
+            </div>
+          </section>
         {% endif %}
 
-        {% for error in field.errors %}
-          <div class="text-warning small mt-1">
-            <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+        <section class="rw-panel-card flex-grow-1">
+          <div class="rw-panel-card__header">
+            <h3>Related Planning Flow</h3>
+            <span class="rw-badge rw-badge--neutral">Workflow</span>
           </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
 
-      <div class="col-12 d-grid">
-        <button type="submit" class="btn rw-btn-primary">
-          <i class="bi bi-check-circle me-2"></i>Calculate Position Size
-        </button>
-      </div>
-    </form>
-  </section>
+          <p class="rw-sim-panel-note mt-3 mb-3">
+            Use this estimate as part of the broader RiskWise planning sequence.
+          </p>
 
-  <!-- Result Card -->
-  {% if result %}
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Position Sizing Result</h2>
-      <p class="rw-section-subtitle">
-        Use this output to judge whether the planned position size is appropriate for your account and capital preservation rules.
-      </p>
-    </div>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <div class="rw-topbar-chip">1. Position sizing</div>
+            <div class="rw-topbar-chip">2. Trade risk controls</div>
+            <div class="rw-topbar-chip">3. Strategy exposure review</div>
+            <div class="rw-topbar-chip">4. SL / TP planning</div>
+            <div class="rw-topbar-chip">5. Stress-test assumptions</div>
+          </div>
 
-    <div class="rw-result-card">
-      <div class="rw-result-icon">
-        <i class="bi bi-currency-dollar"></i>
-      </div>
-      <div>
-        <div class="rw-result-label">Dollar Value of Position</div>
-        <div class="rw-result-value">${{ result|floatformat:2 }}</div>
+          <div class="d-grid gap-2">
+            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
+              <i class="bi bi-percent me-2"></i>Trade Risk Controls
+            </a>
+            <a href="{% url 'sltp' %}" class="btn rw-btn-outline">
+              <i class="bi bi-sliders me-2"></i>SL / TP Planner
+            </a>
+            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+              <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+            </a>
+          </div>
+        </section>
+
       </div>
     </div>
-  </section>
-  {% endif %}
+  </div>
 
-  <!-- Methodology -->
-  <section class="rw-feature-card">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Methodology &amp; Assumptions</h2>
+  <section class="rw-panel-card mt-4">
+    <div class="rw-panel-card__header">
+      <h3>Methodology &amp; Assumptions</h3>
+      <span class="rw-badge rw-badge--neutral">Reference Notes</span>
     </div>
-    <div style="color: var(--rw-muted, #94a3b8); font-size: 0.9rem; line-height: 1.7;">
+
+    <div class="rw-methodology mt-3">
       <p>
-        <strong>What this calculates:</strong> The estimated dollar value of a planned position based on lot size, pip distance, and pip value per lot. This helps assess whether the total position exposure is appropriate before committing capital.
+        <strong>What this calculates:</strong> risk per pip and total risk amount from lot size, pip distance, and pip value inputs. :contentReference[oaicite:1]{index=1}
       </p>
       <p>
-        <strong>Formula:</strong> <code>Position Value = Pip Distance × Lot Size × Pip Value</code>
+        <strong>Formula logic:</strong> <code>Risk per Pip = Lot Size × Pip Value</code> and <code>Risk Amount = Risk per Pip × Pip Distance</code>. :contentReference[oaicite:2]{index=2}
       </p>
       <p class="mb-0">
-        <strong>Limitations:</strong> This estimate uses a fixed pip value and does not account for variable contract sizes, leverage adjustments, or currency conversion between account and instrument denomination.
+        <strong>Limitations:</strong> this estimate assumes a fixed pip value and does not account for spread, slippage, leverage changes, or currency conversion effects.
       </p>
     </div>
   </section>

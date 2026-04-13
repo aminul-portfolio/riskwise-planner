@@ -1,158 +1,288 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Simulation Detail — {{ sim.label }}{% endblock %}
+{% block title %}Simulation Run Detail — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_history' %}">Saved Runs</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Run Detail</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="rw-tool-page">
+<div class="rw-detail-page">
 
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">SIMULATION REVIEW</div>
-    <h1 class="rw-page-title mb-3">{{ sim.label }}</h1>
-    <p class="rw-page-subtitle mb-0">
-      Review saved simulation inputs, outputs, and the generated chart for follow-up analysis and comparison.
-    </p>
+  <section class="rw-hero-card rw-detail-hero mb-4">
+    <div class="rw-eyebrow">SAVED RUN REVIEW</div>
+
+    <div class="rw-detail-hero__grid">
+      <div class="rw-detail-hero__content">
+        <h1 class="rw-page-title">{% firstof detail_title run.label "Simulation Run Detail" %}</h1>
+        <p class="rw-page-subtitle mb-0">
+          Review the saved stress-test output, inspect archived assumptions, and use this run as part of a disciplined capital-allocation workflow.
+        </p>
+
+        <div class="rw-detail-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Archived Result</span>
+          <span class="rw-badge rw-badge--neutral">Planning Audit</span>
+          <span class="rw-badge rw-badge--neutral">Decision Support</span>
+
+          {% if run.created_at %}
+            <span class="rw-badge rw-badge--neutral">Saved {{ run.created_at|date:"d M Y, H:i" }}</span>
+          {% endif %}
+
+          {% if summary_items %}
+            {% for item in summary_items %}
+              {% if item.label == "Run Type" and item.value != "—" %}
+                <span class="rw-badge rw-badge--neutral">{{ item.value }}</span>
+              {% endif %}
+              {% if item.label == "Source File" and item.value != "—" %}
+                <span class="rw-badge rw-badge--neutral">{{ item.value }}</span>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="rw-detail-hero__actions">
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-primary">
+          <i class="bi bi-arrow-left me-2"></i>Back to Saved Runs
+        </a>
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+          <i class="bi bi-play-circle me-2"></i>Run New Stress Test
+        </a>
+        <a href="{% url 'simulation_download_json' run.pk %}" class="btn rw-btn-outline">
+          <i class="bi bi-filetype-json me-2"></i>Download JSON
+        </a>
+      </div>
+    </div>
   </section>
 
-  <!-- Metadata -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Simulation Metadata</h2>
-      <p class="rw-section-subtitle">
-        Basic information about when this simulation was created.
-      </p>
-    </div>
+  {% if summary_items %}
+    <section class="mb-4">
+      <div class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Executive Summary</h3>
+          <span class="rw-badge rw-badge--neutral">Top-Level Review</span>
+        </div>
 
-    <div class="row g-3">
-      <div class="col-sm-6">
-        <div class="rw-kpi-card rw-kpi-card-primary h-100">
-          <div class="rw-kpi-label">Label</div>
-          <div class="rw-kpi-value" style="font-size: 1rem;">{{ sim.label }}</div>
-        </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="rw-kpi-card rw-kpi-card-secondary h-100">
-          <div class="rw-kpi-label">Created</div>
-          <div class="rw-kpi-value" style="font-size: 1rem;">{{ sim.created_at|date:"Y-m-d H:i" }}</div>
-        </div>
-      </div>
-      {% if sim.tags %}
-      <div class="col-12">
-        <div class="d-flex flex-wrap gap-2 mt-1">
-          {% for tag in sim.tags.split %}
-            <span class="rw-badge rw-badge-secondary">{{ tag }}</span>
+        <p class="rw-sim-panel-note mt-3 mb-4">
+          Use this layer to scan the most important run outputs first before moving into chart review and lower-level audit detail.
+        </p>
+
+        <div class="rw-sim-settings-grid">
+          {% for item in summary_items %}
+            <div class="rw-mini-stat">
+              <span class="rw-mini-stat__label">{{ item.label }}</span>
+              <span class="rw-mini-stat__value">{{ item.value }}</span>
+            </div>
           {% endfor %}
         </div>
+
+        <div class="rw-insight-list mt-4">
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-warning"></div>
+            <div>
+              <strong>Review priority:</strong> focus first on weaker percentile outcomes and positive-run rate before relying on the median result.
+            </div>
+          </div>
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-info"></div>
+            <div>
+              <strong>Planning use:</strong> this archived run is most useful as a comparison baseline for future stress-test decisions.
+            </div>
+          </div>
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-success"></div>
+            <div>
+              <strong>Suggested next step:</strong> rerun the stress test with updated assumptions or compare this against a more conservative setup.
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
+  {% endif %}
+
+  <section class="rw-sim-two-col mb-4">
+    <article class="rw-panel-card">
+      <div class="rw-panel-card__header">
+        <h3>Chart Review</h3>
+        <span class="rw-badge rw-badge--neutral">Archived Visual</span>
+      </div>
+
+      <p class="rw-sim-panel-note mt-3 mb-3">
+        Use the chart to inspect how this saved run distributed outcomes across the simulated range.
+      </p>
+
+      {% if chart_base64 %}
+        <div class="rw-sim-chart-frame">
+          <img
+            src="data:image/png;base64,{{ chart_base64 }}"
+            alt="Saved simulation chart"
+            class="img-fluid rounded-4"
+          >
+        </div>
+
+        <div class="rw-inline-actions mt-4">
+          <a href="{% url 'simulation_download_chart' run.pk %}" class="btn rw-btn-outline">
+            <i class="bi bi-download me-2"></i>Download Chart
+          </a>
+          <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+            <i class="bi bi-arrow-repeat me-2"></i>Rerun Stress Test
+          </a>
+        </div>
+      {% else %}
+        <div class="rw-empty-state rw-empty-state--compact mt-3">
+          <div class="rw-empty-icon">
+            <i class="bi bi-bar-chart"></i>
+          </div>
+          <h3 class="rw-empty-title">No saved chart available</h3>
+          <p class="rw-empty-text">This archived run does not include a stored chart preview.</p>
+        </div>
       {% endif %}
-    </div>
+    </article>
+
+    <article class="rw-panel-card">
+      <div class="rw-panel-card__header">
+        <h3>Dataset Provenance</h3>
+        <span class="rw-badge rw-badge--neutral">Trust Layer</span>
+      </div>
+
+      {% if dataset_meta_items %}
+        <div class="rw-sim-settings-grid mt-3">
+          {% for item in dataset_meta_items %}
+            <div class="rw-mini-stat">
+              <span class="rw-mini-stat__label">{{ item.label }}</span>
+              <span class="rw-mini-stat__value">{{ item.value }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="rw-empty-state rw-empty-state--compact mt-3">
+          <div class="rw-empty-icon">
+            <i class="bi bi-database-check"></i>
+          </div>
+          <h3 class="rw-empty-title">No dataset provenance saved</h3>
+          <p class="rw-empty-text">This archive item does not include stored dataset metadata.</p>
+        </div>
+      {% endif %}
+    </article>
   </section>
 
-  <!-- Parameters — Structured -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Parameters</h2>
-      <p class="rw-section-subtitle">
-        The simulation inputs used for this saved run.
-      </p>
-    </div>
+  {% if params_items or results_items %}
+    <section class="mb-4">
+      <div class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Audit Breakdown</h3>
+          <span class="rw-badge rw-badge--neutral">Stored Details</span>
+        </div>
 
-    {% if params_items %}
-      <div class="row g-3">
-        {% for key, value in params_items %}
-        <div class="col-sm-6 col-lg-4">
-          <div class="rw-kpi-card rw-kpi-card-info h-100">
-            <div class="rw-kpi-label">{{ key }}</div>
-            <div class="rw-kpi-value" style="font-size: 1rem;">{{ value }}</div>
+        <p class="rw-sim-panel-note mt-3 mb-4">
+          This section preserves the archived parameter and result detail for deeper inspection without making the page feel raw by default.
+        </p>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <section class="rw-panel-card rw-panel-card--nested h-100">
+              <div class="rw-panel-card__header">
+                <h3>Parameter Breakdown</h3>
+                <span class="rw-badge rw-badge--neutral">Inputs</span>
+              </div>
+
+              {% if params_items %}
+                <div class="table-responsive mt-3">
+                  <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for key, value in params_items %}
+                        <tr>
+                          <td>{{ key }}</td>
+                          <td>{{ value|default:"—" }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <p class="rw-sim-panel-note mb-0 mt-3">No stored parameters available.</p>
+              {% endif %}
+            </section>
+          </div>
+
+          <div class="col-lg-6">
+            <section class="rw-panel-card rw-panel-card--nested h-100">
+              <div class="rw-panel-card__header">
+                <h3>Result Breakdown</h3>
+                <span class="rw-badge rw-badge--neutral">Outputs</span>
+              </div>
+
+              {% if results_items %}
+                <div class="table-responsive mt-3">
+                  <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for key, value in results_items %}
+                        <tr>
+                          <td>{{ key }}</td>
+                          <td>{{ value|default:"—" }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <p class="rw-sim-panel-note mb-0 mt-3">No stored results available.</p>
+              {% endif %}
+            </section>
           </div>
         </div>
-        {% endfor %}
       </div>
-    {% else %}
-      <div class="rw-code-block">
-        <pre class="mb-0">{{ sim.parameters }}</pre>
-      </div>
-    {% endif %}
-  </section>
+    </section>
+  {% endif %}
 
-  <!-- Results — Structured -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Results</h2>
-      <p class="rw-section-subtitle">
-        The saved summary outputs produced by the simulation.
+  <section class="mb-4">
+    <div class="rw-panel-card">
+      <div class="rw-panel-card__header">
+        <h3>Run Management</h3>
+        <span class="rw-badge rw-badge--neutral">Actions</span>
+      </div>
+
+      <p class="rw-sim-panel-note mt-3 mb-4">
+        Treat this run as part of an iterative review workflow: archive, compare, rerun, and refine assumptions before committing new capital.
       </p>
-    </div>
 
-    {% if results_items %}
-      <div class="row g-3">
-        {% for key, value in results_items %}
-        <div class="col-sm-6 col-lg-4">
-          <div class="rw-kpi-card rw-kpi-card-success h-100">
-            <div class="rw-kpi-label">{{ key }}</div>
-            <div class="rw-kpi-value" style="font-size: 1rem;">{{ value }}</div>
-          </div>
-        </div>
-        {% endfor %}
+      <div class="rw-inline-actions">
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+          <i class="bi bi-arrow-left me-2"></i>Back to Archive
+        </a>
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+          <i class="bi bi-arrow-repeat me-2"></i>Rerun Stress Test
+        </a>
+        <a href="{% url 'simulation_download_json' run.pk %}" class="btn rw-btn-outline">
+          <i class="bi bi-filetype-json me-2"></i>Export JSON
+        </a>
+        <a href="{% url 'simulation_download_chart' run.pk %}" class="btn rw-btn-outline">
+          <i class="bi bi-image me-2"></i>Export Chart
+        </a>
+        <a href="{% url 'simulation_delete' run.pk %}" class="btn rw-btn-outline">
+          <i class="bi bi-trash me-2"></i>Delete Run
+        </a>
       </div>
-    {% else %}
-      <div class="rw-code-block">
-        <pre class="mb-0">{{ sim.results }}</pre>
-      </div>
-    {% endif %}
-  </section>
-
-  <!-- Chart -->
-  <section class="rw-feature-card">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Chart</h2>
-      <p class="rw-section-subtitle">
-        Review or download the saved chart generated for this simulation.
-      </p>
-    </div>
-
-    <div class="text-center mb-3">
-      <img
-        src="data:image/png;base64,{{ sim.chart_base64 }}"
-        class="img-fluid rw-scenario-chart-thumb"
-        alt="{{ sim.label }} chart"
-        data-bs-toggle="modal"
-        data-bs-target="#chartModal"
-        style="cursor: pointer;"
-      >
-    </div>
-
-    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
-      <a
-        download="{{ sim.label|slugify }}_chart.png"
-        href="data:image/png;base64,{{ sim.chart_base64 }}"
-        class="btn rw-btn-outline"
-      >
-        <i class="bi bi-download me-2"></i>Download Chart
-      </a>
-      <a href="{% url 'simulation_download_json' sim.pk %}" class="btn rw-btn-outline">
-        <i class="bi bi-filetype-json me-2"></i>Download JSON
-      </a>
-      <a href="{% url 'simulation_history' %}" class="btn rw-btn-primary">
-        <i class="bi bi-clock-history me-2"></i>Back to History
-      </a>
     </div>
   </section>
 
-</div>
-
-<div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content rw-modal-content">
-      <div class="modal-header rw-modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-bar-chart-line me-2"></i>Full Size Chart
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="data:image/png;base64,{{ sim.chart_base64 }}" class="img-fluid rounded" alt="{{ sim.label }} full chart">
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock %}

@@ -1,40 +1,48 @@
 # RiskWise Planner — Project Status
 
-## Current Release: v1.0 (Pre-Release)
+## Current Release
+**v1.0 — In final polish**
 
-### Completed
+## Completed
 
-- [x] Phase 0 — Scope lock, positioning statement, SCOPE.md
-- [x] Phase 1 — Repo cleanup (.idea, __pycache__, db.sqlite3, media/screenshots)
-- [x] Phase 1 — .gitignore fixed (Unix line endings, media exclusion)
-- [x] Phase 1 — settings.py wired to environment variables (SECRET_KEY, DEBUG, ALLOWED_HOSTS)
-- [x] Phase 1 — Timezone set deliberately (Europe/London)
-- [x] Phase 1 — requirements.txt created with actual dependency stack
-- [x] Phase 1 — models.py cleaned (duplicate imports removed, Meta added, docstrings improved)
-- [x] Phase 2 — Dashboard reframed with "Observed" prefixes on all KPI labels
-- [x] Phase 2 — Dataset provenance banner added (record count, date range, planning-reference label)
-- [x] Phase 2 — Homepage screenshot tooling removed from public-facing flow
-- [x] Phase 2 — SCOPE.md documents portfolio separation (RiskWise vs TradeIntel)
-- [x] Phase 3 — Login page redesigned (premium dark theme, branded, no raw Bootstrap)
-- [x] Phase 3 — Topbar simplified (removed hardcoded chips, shows authenticated user)
-- [x] Phase 3 — Simulation detail page redesigned (structured KPI cards, JSON download)
-- [x] Phase 3 — Chart styling upgraded (dark matplotlib theme matching app colours)
-- [x] Phase 3 — CSS: rw-form-input styles added for auth forms
-- [x] Phase 4 — Methodology notes on Position Sizing, Trade Risk Controls, Strategy Exposure Review, SL/TP Planner
-- [x] Phase 4 — Methodology notes on Monte Carlo Risk Simulation, Scenario Comparison
-- [x] Phase 4 — Strategy Exposure Review formula explicitly labelled as heuristic
-- [x] Phase 4 — Risk warnings with threshold levels (caution / elevated / high) on Trade Risk Controls
-- [x] Phase 5 — Simulation history cards now display tags
-- [x] Phase 5 — Delete flow button styling polished
-- [x] Phase 6 — Baseline test suite: 20+ tests covering routes, auth, calculations, warnings, ownership
-- [x] Phase 7 — README fully rewritten (business-facing, evidence-based, interview story, role fit)
-- [x] Phase 7 — REVIEW_GUIDE.md created for reviewer walkthroughs
-- [x] Phase 7 — STATUS.md tracks completion state
+- [x] Product positioning locked as **pre-trade risk planning and scenario modelling**
+- [x] Core workflow exists across overview, planning surfaces, simulation, comparison, archive, and detail
+- [x] Calculator suite exists:
+  - [x] Lot Size
+  - [x] Trade Risk Controls
+  - [x] Strategy Exposure Review
+  - [x] SL / TP Planner
+- [x] Views are modularised into a `views/` package
+- [x] Shared service-layer logic exists in `services.py`
+- [x] Dark SaaS-style UI system exists
+- [x] Reviewer documentation exists:
+  - [x] `README.md`
+  - [x] `docs/REVIEW_GUIDE.md`
+  - [x] `docs/SCOPE.md`
+- [x] Screenshot pack exists in `docs/screenshots/`
+- [x] Test suite exists in `riskwise/tests.py` with **38 tests in suite**
+- [x] Sprint 1 public-release cleanup completed:
+  - [x] legacy view file removed
+  - [x] `db.sqlite3` excluded from public distribution
+  - [x] `__pycache__/` removed
+  - [x] `media/screenshots/` removed from public distribution
+  - [x] `LICENSE` added
+  - [x] README portfolio context aligned to final portfolio structure
+  - [x] MarketVista reference removed from this repo
+  - [x] README and status wording updated for trust and accuracy
 
-### Remaining for Full Public Release
+## Remaining before public release
 
-- [ ] Phase 7 — Screenshot pack (4 curated images captured from running app)
-- [ ] Phase 8 — GitHub release metadata (repo description, topics/tags)
-- [ ] Phase 8 — LinkedIn packaging (post, bullets, CV summary)
-- [ ] Optional — Plotly migration (if time allows for richer chart interactivity)
-- [ ] Optional — Scenario comparison save/export to JSON
+- [ ] Sprint 2 — Workflow clarity
+- [ ] Sprint 3 — Scenario comparison flagship upgrade
+- [ ] Sprint 4 — Archive/detail/calculator QA
+- [ ] Sprint 5 — SaaS frontend polish
+- [ ] Sprint 6 — Domain trust and methodology hardening
+- [ ] Sprint 7 — Technical hardening
+- [ ] Sprint 8 — Test credibility expansion
+- [ ] Sprint 9 — TradeIntel integration story
+- [ ] Sprint 10 — Public packaging and launch
+
+## Release notes
+
+This project is being packaged as a portfolio-grade Django fintech product focused on **pre-trade decision-support**, not as a CRUD app, generic dashboard, or trade journal.

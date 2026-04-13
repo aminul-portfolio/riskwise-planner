@@ -1,0 +1,28 @@
+<div class="rw-feature-card h-100">
+  {% if eyebrow %}
+    <div class="rw-eyebrow">{{ eyebrow }}</div>
+  {% endif %}
+
+  <div class="rw-section-heading mb-3">
+    <h3 class="rw-section-title mb-1">{{ title }}</h3>
+    {% if subtitle %}
+      <p class="rw-section-subtitle mb-0">{{ subtitle }}</p>
+    {% endif %}
+  </div>
+
+  {% if image_base64 %}
+    <div class="rw-chart-wrap">
+      <img
+        src="data:image/png;base64,{{ image_base64 }}"
+        alt="{{ title }}"
+        class="rw-chart-image"
+      >
+    </div>
+  {% else %}
+    <div class="rw-empty-state">
+      <div class="rw-empty-icon"><i class="bi bi-bar-chart"></i></div>
+      <h4 class="rw-empty-title">No chart available</h4>
+      <p class="rw-empty-text">Run a simulation or load a dataset to render this panel.</p>
+    </div>
+  {% endif %}
+</div>

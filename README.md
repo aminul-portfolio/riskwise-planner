@@ -17,7 +17,7 @@
 ![Django](https://img.shields.io/badge/Django-5.x-092E20?style=flat-square&logo=django&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-data--processing-150458?style=flat-square&logo=pandas&logoColor=white)
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-charts-11557c?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-25_passing-2ea44f?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-38_in--suite-2ea44f?style=flat-square)
 
 </div>
 
@@ -49,7 +49,7 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
 | **Simulation & analytics pipeline** | Monte Carlo simulation, equity curve generation, multi-scenario comparison |
 | **Risk-product credibility** | Methodology notes, heuristic labels, threshold-based warnings, dataset provenance |
 | **Premium UI execution** | Dark design system, KPI cards, responsive sidebar, consistent visual hierarchy |
-| **Software discipline** | 25 baseline tests, ownership isolation, clean repo hygiene, reviewer documentation |
+| **Software discipline** | 38 tests in suite, ownership isolation, reviewer documentation, public-release cleanup controls |
 
 ---
 
@@ -201,7 +201,7 @@ Upload Dataset → Capital Preservation Dashboard → Planning Tools
 | Visualisation | Matplotlib (dark theme) |
 | Auth | Django auth, login-required protection, ownership isolation |
 | Database | SQLite (local), PostgreSQL-ready |
-| Testing | Django TestCase — 25 baseline tests |
+| Testing | Django TestCase — 38 tests in suite |
 | UI | Bootstrap 5 (dark-overridden), custom CSS design system |
 
 ---
@@ -231,7 +231,7 @@ Visit `http://127.0.0.1:8000`, log in, and upload a trade dataset to begin.
 
 ```bash
 python manage.py check   # Django system check — must pass
-python manage.py test    # 25 baseline tests — must pass
+python manage.py test    # 38 tests in suite — verify locally before release
 ```
 
 ---
@@ -256,22 +256,19 @@ See [`docs/REVIEW_GUIDE.md`](docs/REVIEW_GUIDE.md) for the recommended 14-step w
 
 ## Portfolio Context
 
-RiskWise Planner is the **pre-trade planning** product in a four-project FinTech portfolio:
+RiskWise Planner is the **pre-trade decision-support** product in my FinTech project sequence:
 
-| Project | Domain |
-|---|---|
-| [DataBridge Market API](https://github.com/aminul-portfolio/databridge-market-api) | Market data ingestion, ETL, API delivery |
-| [MarketVista Dashboard](https://github.com/aminul-portfolio/marketvista-dashboard) | Market monitoring and analyst visibility |
-| **RiskWise Planner** | **Pre-trade risk planning and scenario modelling** |
-| [TradeIntel 360](https://github.com/aminul-portfolio/tradeintel-360) | Post-trade performance analytics and review |
+- [DataBridge Market API](https://github.com/aminul-portfolio/databridge-market-api) — market data ingestion, ETL, normalized storage, API delivery
+- **RiskWise Planner** — pre-trade risk planning, Monte Carlo simulation, stress-test review, scenario comparison
+- [TradeIntel 360](https://github.com/aminul-portfolio/tradeintel-360) — post-trade performance analytics, KPI reporting, and review/export workflow
 
-Together, the four projects cover the full FinTech data lifecycle — from market data ingestion through monitoring, planning, and post-trade review.
+This positions RiskWise between upstream market data delivery and post-trade analytics as the decision-support layer in the FinTech workflow.
 
 ---
 
 ## Interview Story
 
-> *"I built RiskWise to solve a gap I noticed in risk tooling — most tools are either post-trade journals or isolated calculators with no planning context. I wanted a product that connects dataset review, planning tools, and simulation into a single decision workflow. The hardest engineering challenge was keeping the Monte Carlo pipeline performant while making the outputs genuinely useful for planning — not just generating numbers, but framing them with methodology, warnings, and interpretation. In my portfolio it sits between MarketVista (market monitoring) and TradeIntel 360 (post-trade review), covering the pre-trade planning stage of the FinTech data lifecycle."*
+> *"I built RiskWise to address a gap in trading and risk tooling: many tools stop at isolated calculators or post-trade review, but very few support structured pre-trade planning. RiskWise connects observed dataset context, planning controls, Monte Carlo exploration, stress-test review, and scenario comparison into a single decision-support workflow. In my portfolio, it sits between upstream data products and post-trade analytics as the pre-trade decision-support layer."*
 
 ---
 
@@ -289,3 +286,9 @@ Data Analyst (Finance / Risk) · Analytics Engineer (FinTech) · Data Engineer �
 - LinkedIn: [aminul-islam](https://www.linkedin.com/in/aminul-islam-a71a871a2)
 
 *This repository is shared for portfolio and review purposes.*
+
+---
+
+## License
+
+Licensed under the MIT License. See [`LICENSE`](LICENSE).

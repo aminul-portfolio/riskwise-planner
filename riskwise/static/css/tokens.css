@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
+
+:root {
+  --rw-bg: #080d19;
+  --rw-bg-subtle: #0b1120;
+  --rw-panel: #0f1729;
+  --rw-panel-2: #0c1322;
+  --rw-panel-3: #131d33;
+  --rw-panel-glass: rgba(15, 23, 41, 0.72);
+
+  --rw-border: rgba(255, 255, 255, 0.06);
+  --rw-border-strong: rgba(255, 255, 255, 0.10);
+  --rw-border-accent: rgba(59, 130, 246, 0.25);
+
+  --rw-text: #c9d1d9;
+  --rw-text-strong: #f0f6fc;
+  --rw-muted: #7d8da1;
+
+  --rw-primary: #3b82f6;
+  --rw-primary-hover: #2563eb;
+  --rw-primary-glow: rgba(59, 130, 246, 0.15);
+  --rw-cyan: #22d3ee;
+  --rw-teal: #14b8a6;
+  --rw-green: #10b981;
+  --rw-amber: #f59e0b;
+  --rw-red: #ef4444;
+  --rw-purple: #a78bfa;
+
+  --rw-radius-sm: 10px;
+  --rw-radius-md: 14px;
+  --rw-radius-lg: 18px;
+  --rw-radius-xl: 24px;
+
+  --rw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30), 0 4px 12px rgba(0, 0, 0, 0.15);
+  --rw-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.20);
+  --rw-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.30), 0 16px 48px rgba(0, 0, 0, 0.25);
+  --rw-shadow-glow: 0 0 20px rgba(59, 130, 246, 0.08);
+
+  --rw-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --rw-duration: 0.2s;
+  --rw-max-width: 1200px;
+}
+
+
+/* ── PREMIUM UPGRADE TOKENS ─────────────────────────────────── */
+
+:root {
+  /* Grain & texture */
+  --rw-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+
+  /* Glass */
+  --rw-glass-bg: rgba(15, 23, 41, 0.55);
+  --rw-glass-blur: blur(20px) saturate(1.6);
+  --rw-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Motion curves */
+  --rw-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --rw-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --rw-decel: cubic-bezier(0.0, 0.0, 0.2, 1);
+
+  /* Gradient text */
+  --rw-grad-brand: linear-gradient(135deg, #60a5fa 0%, var(--rw-cyan) 50%, var(--rw-teal) 100%);
+  --rw-grad-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+
+  /* Animated border */
+  --rw-border-anim-speed: 3s;
+}
+
+@property --rw-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}

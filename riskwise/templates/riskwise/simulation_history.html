@@ -1,175 +1,289 @@
 {% extends 'riskwise/base.html' %}
-{% block title %}Simulation History{% endblock %}
+
+{% block title %}Saved Simulation Runs — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Results</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Saved Runs</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="rw-tool-page">
+<div class="rw-history-page">
 
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">SIMULATION ARCHIVE</div>
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-      <div class="flex-grow-1">
-        <h1 class="rw-page-title mb-3">Simulation History</h1>
+  <section class="rw-hero-card rw-history-hero mb-4">
+    <div class="rw-eyebrow">ARCHIVED SIMULATION REVIEW</div>
+
+    <div class="rw-history-hero__grid">
+      <div class="rw-history-hero__content">
+        <h1 class="rw-page-title">Saved Simulation Runs</h1>
         <p class="rw-page-subtitle mb-0">
-          Review saved simulation runs for follow-up analysis, comparison, and audit-style tracking.
+          Review saved stress-test runs, revisit earlier assumptions, and use the archive as a structured planning review surface.
         </p>
+
+        <div class="rw-history-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Saved Runs</span>
+          <span class="rw-badge rw-badge--neutral">Audit Trail</span>
+          <span class="rw-badge rw-badge--neutral">Planning Review</span>
+          {% if query %}
+            <span class="rw-badge rw-badge--neutral">Filtered Search</span>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
+      <div class="rw-history-hero__actions">
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-play-circle me-2"></i>Run Simulation
+          <i class="bi bi-play-circle me-2"></i>New Stress Test
         </a>
         <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-          <i class="bi bi-diagram-3 me-2"></i>Scenario Comparison
+          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
         </a>
       </div>
     </div>
   </section>
 
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Search and Filter</h2>
-      <p class="rw-section-subtitle">
-        Narrow saved results by keyword and date range before reviewing individual simulation records.
-      </p>
+  <section class="rw-panel-card mb-4">
+    <div class="rw-panel-card__header">
+      <h3>Archive Filters</h3>
+      <span class="rw-badge rw-badge--neutral">Search & Review</span>
     </div>
 
+    <p class="rw-sim-panel-note mt-3 mb-4">
+      Search by label or stored content, then narrow the archive by date to reopen specific planning runs quickly.
+    </p>
+
     <form method="get" class="row g-3">
-      <div class="col-md-4">
+      <div class="col-md-5">
         <label class="form-label rw-form-label">Search</label>
-        <input type="text" name="q" class="form-control rw-form-control" placeholder="Search saved simulations..." value="{{ query }}">
+        <input
+          type="text"
+          name="q"
+          class="form-control rw-form-control"
+          value="{{ query|default:'' }}"
+          placeholder="Label, parameters, results"
+        >
       </div>
+
       <div class="col-md-3">
-        <label class="form-label rw-form-label">Date From</label>
-        <input type="date" name="date_from" class="form-control rw-form-control" value="{{ date_from }}">
+        <label class="form-label rw-form-label">Date from</label>
+        <input
+          type="date"
+          name="date_from"
+          class="form-control rw-form-control"
+          value="{{ date_from|default:'' }}"
+        >
       </div>
+
       <div class="col-md-3">
-        <label class="form-label rw-form-label">Date To</label>
-        <input type="date" name="date_to" class="form-control rw-form-control" value="{{ date_to }}">
+        <label class="form-label rw-form-label">Date to</label>
+        <input
+          type="date"
+          name="date_to"
+          class="form-control rw-form-control"
+          value="{{ date_to|default:'' }}"
+        >
       </div>
-      <div class="col-md-2 d-grid">
-        <label class="form-label rw-form-label d-none d-md-block">&nbsp;</label>
-        <button class="btn rw-btn-primary" type="submit">
-          <i class="bi bi-search me-2"></i>Search
+
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="submit" class="btn rw-btn-primary w-100">
+          <i class="bi bi-search"></i>
         </button>
       </div>
     </form>
   </section>
 
-  {% if simulations %}
+  {% if history_items %}
     <section class="mb-4">
-      <div class="row g-4">
-        {% for sim in simulations %}
-        <div class="col-md-6 col-xl-4">
-          <div class="rw-history-card h-100">
-            <div class="mb-3">
-              <h3 class="rw-history-title">{{ sim.label }}</h3>
-              <div class="rw-meta-text">
-                <i class="bi bi-calendar me-1"></i>{{ sim.created_at|date:"Y-m-d H:i" }}
+      <div class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Archive Overview</h3>
+          <span class="rw-badge rw-badge--neutral">
+            {{ page_obj.paginator.count }} saved run{{ page_obj.paginator.count|pluralize }}
+          </span>
+        </div>
+
+        <p class="rw-sim-panel-note mt-3 mb-4">
+          Scan each card by outcome profile, setup density, and source context before opening the full run detail.
+        </p>
+
+        <div class="rw-history-list">
+          {% for item in history_items %}
+            <article class="rw-history-card">
+              <div class="rw-history-card__top">
+                <div>
+                  <h4>{{ item.label|default:"Saved Run" }}</h4>
+                  <p class="mb-2 rw-sim-panel-note">
+                    Saved {{ item.created_at|date:"d M Y, H:i" }}
+                  </p>
+
+                  <div class="d-flex flex-wrap gap-2">
+                    <span class="rw-badge rw-badge--neutral">{{ item.display_run_type }}</span>
+
+                    {% if item.display_source_file != "—" %}
+                      <span class="rw-badge rw-badge--neutral">{{ item.display_source_file }}</span>
+                    {% endif %}
+
+                    <span class="rw-badge rw-badge--neutral">{{ item.display_num_simulations }} runs</span>
+                    <span class="rw-badge rw-badge--neutral">{{ item.display_num_trades }} trades/path</span>
+                  </div>
+                </div>
+
+                <div class="rw-inline-actions">
+                  <a href="{% url 'simulation_detail' item.pk %}" class="btn rw-btn-primary">
+                    <i class="bi bi-box-arrow-up-right me-2"></i>Open Detail
+                  </a>
+                </div>
               </div>
-              {% if sim.tags %}
-                <div class="d-flex flex-wrap gap-1 mt-2">
-                  {% for tag in sim.tags.split %}
-                    <span class="rw-badge rw-badge-secondary" style="font-size: 0.75rem;">{{ tag }}</span>
-                  {% endfor %}
+
+              {% if item.results %}
+                <div class="rw-history-card__metrics">
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">Median</span>
+                    <span class="rw-mini-stat__value">{{ item.display_median }}</span>
+                  </div>
+
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">Tail Risk</span>
+                    <span class="rw-mini-stat__value">{{ item.display_tail_risk }}</span>
+                  </div>
+
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">Upper Band</span>
+                    <span class="rw-mini-stat__value">{{ item.display_upper_band }}</span>
+                  </div>
+
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">Positive %</span>
+                    <span class="rw-mini-stat__value">{{ item.display_positive_rate }}</span>
+                  </div>
+
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">P25</span>
+                    <span class="rw-mini-stat__value">{{ item.display_p25 }}</span>
+                  </div>
+
+                  <div class="rw-mini-stat">
+                    <span class="rw-mini-stat__label">P75</span>
+                    <span class="rw-mini-stat__value">{{ item.display_p75 }}</span>
+                  </div>
+                </div>
+
+                <div class="row g-4 mt-1">
+                  <div class="col-lg-7">
+                    <div class="rw-insight-list">
+                      <div class="rw-insight-item">
+                        <div class="rw-insight-dot rw-dot-warning"></div>
+                        <div>
+                          <strong>Review focus:</strong> prioritise tail outcomes and positive-run rate before relying on the median result.
+                        </div>
+                      </div>
+
+                      <div class="rw-insight-item">
+                        <div class="rw-insight-dot rw-dot-info"></div>
+                        <div>
+                          <strong>Setup context:</strong> range {{ item.display_range }}
+                          {% if item.display_date_range != "—" %}
+                            • {{ item.display_date_range }}
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="rw-insight-item">
+                        <div class="rw-insight-dot rw-dot-success"></div>
+                        <div>
+                          <strong>Next step:</strong> open the detail view to inspect chart shape, dataset provenance, and archived input assumptions.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-5">
+                    {% if item.has_chart_preview %}
+                      <div class="rw-sim-chart-frame rw-sim-chart-frame--compact">
+                        <img
+                          src="data:image/png;base64,{{ item.chart_base64 }}"
+                          alt="Saved run chart preview"
+                          class="img-fluid rounded-4"
+                        >
+                      </div>
+                    {% else %}
+                      <div class="rw-empty-state rw-empty-state--compact h-100">
+                        <div class="rw-empty-icon">
+                          <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h3 class="rw-empty-title">No preview chart</h3>
+                        <p class="rw-empty-text mb-0">This saved run does not include a chart preview.</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% else %}
+                <div class="rw-empty-state rw-empty-state--compact mt-3">
+                  <div class="rw-empty-icon">
+                    <i class="bi bi-clipboard-data"></i>
+                  </div>
+                  <h3 class="rw-empty-title">No stored metrics</h3>
+                  <p class="rw-empty-text">This archive item does not include saved summary metrics.</p>
                 </div>
               {% endif %}
-            </div>
+            </article>
+          {% endfor %}
+        </div>
 
-            <ul class="rw-history-metrics list-unstyled mb-3">
-              <li><i class="bi bi-repeat me-2"></i><strong>Simulations:</strong> {{ sim.parameters.num_simulations }}</li>
-              <li><i class="bi bi-list-ol me-2"></i><strong>Trades per Simulation:</strong> {{ sim.parameters.num_trades }}</li>
-              <li><i class="bi bi-emoji-smile me-2"></i><strong>Profit Chance:</strong> {{ sim.results.prob_positive|floatformat:2 }}%</li>
-              <li><i class="bi bi-currency-dollar me-2"></i><strong>Median:</strong> ${{ sim.results.median|floatformat:2 }}</li>
+        {% if page_obj and page_obj.has_other_pages %}
+          <nav class="mt-4" aria-label="Saved runs pagination">
+            <ul class="pagination mb-0">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.previous_page_number }}"
+                  >
+                    Previous
+                  </a>
+                </li>
+              {% endif %}
+
+              <li class="page-item active">
+                <span class="page-link">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+              </li>
+
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.next_page_number }}"
+                  >
+                    Next
+                  </a>
+                </li>
+              {% endif %}
             </ul>
-
-            <div class="text-center mb-3">
-              <img
-                src="data:image/png;base64,{{ sim.chart_base64 }}"
-                class="img-fluid rw-scenario-chart-thumb"
-                alt="{{ sim.label }} chart"
-                data-bs-toggle="modal"
-                data-bs-target="#modal{{ sim.id }}"
-              >
-            </div>
-
-            <div class="d-grid gap-2">
-              <a href="{% url 'simulation_detail' sim.pk %}" class="btn rw-btn-outline">
-                <i class="bi bi-eye me-2"></i>View Detail
-              </a>
-              <a href="{% url 'simulation_delete' sim.pk %}" class="btn btn-outline-danger">
-                <i class="bi bi-trash me-2"></i>Delete
-              </a>
-              <a download="simulation_{{ sim.id }}.png" href="data:image/png;base64,{{ sim.chart_base64 }}" class="btn rw-btn-outline">
-                <i class="bi bi-download me-2"></i>Download Chart
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal fade" id="modal{{ sim.id }}" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content rw-modal-content">
-              <div class="modal-header rw-modal-header">
-                <h5 class="modal-title">
-                  <i class="bi bi-bar-chart-line me-2"></i>{{ sim.label }} — Full Size
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body text-center">
-                <img src="data:image/png;base64,{{ sim.chart_base64 }}" class="img-fluid rounded" alt="{{ sim.label }} full chart">
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
+          </nav>
+        {% endif %}
       </div>
     </section>
-
-    {% if page_obj.has_other_pages %}
-    <nav class="mt-4">
-      <ul class="pagination justify-content-center rw-pagination">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.previous_page_number }}">
-            Previous
-          </a>
-        </li>
-        {% endif %}
-
-        <li class="page-item disabled">
-          <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        </li>
-
-        {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.next_page_number }}">
-            Next
-          </a>
-        </li>
-        {% endif %}
-      </ul>
-    </nav>
-    {% endif %}
-
   {% else %}
-    <section class="rw-empty-state">
+    <div class="rw-empty-state">
       <div class="rw-empty-icon">
         <i class="bi bi-clock-history"></i>
       </div>
-      <h2 class="rw-empty-title">No saved simulations yet</h2>
+      <h3 class="rw-empty-title">No saved simulation runs yet</h3>
       <p class="rw-empty-text">
-        Run your first simulation to start building a reusable planning history.
+        Run and save a stress test to build the archive and create a reusable planning review history.
       </p>
-      <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 mt-3">
+      <div class="rw-inline-actions mt-3">
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-play-circle me-2"></i>Run First Simulation
-        </a>
-        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
-          <i class="bi bi-shuffle me-2"></i>Monte Carlo Simulation
+          <i class="bi bi-play-circle me-2"></i>Run Stress Test
         </a>
       </div>
-    </section>
+    </div>
   {% endif %}
-
 </div>
 {% endblock %}

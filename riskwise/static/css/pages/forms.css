@@ -1,0 +1,141 @@
+.rw-upload-card,
+.rw-form-surface {
+  background: var(--rw-panel);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-lg);
+  box-shadow: var(--rw-shadow-sm);
+  padding: 1.5rem;
+}
+
+.rw-upload-card .rw-section-title,
+.rw-form-surface .rw-section-title { margin-bottom: 0.35rem; }
+
+.rw-upload-card .rw-section-subtitle,
+.rw-form-surface .rw-section-subtitle { margin-bottom: 1rem; }
+
+.rw-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.rw-calc-result { margin-top: 1.25rem; }
+.rw-form-grid,
+.rw-form-page { display: grid; gap: 1rem; }
+
+.rw-form-hero__grid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.95fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.rw-form-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.rw-form-hero__badges,
+.rw-form-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.rw-form-hero__actions .btn { flex: 1 1 210px; }
+
+.rw-form-two-col {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1rem;
+}
+
+.rw-calculator-form .form-label,
+.rw-form-label {
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  opacity: 0.78;
+}
+
+.rw-calculator-form .form-control,
+.rw-form-control {
+  min-height: 46px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--rw-text-strong);
+}
+
+.rw-calculator-form .form-control:focus,
+.rw-form-control:focus {
+  box-shadow: none;
+  border-color: rgba(88, 166, 255, 0.45);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rw-form-help {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  opacity: 0.72;
+}
+
+.rw-form-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.rw-form-result {
+  min-height: 180px;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.rw-form-meta-line {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.88;
+}
+
+.rw-form-meta-line__label {
+  opacity: 0.7;
+  margin-right: 0.4rem;
+}
+
+.rw-form-meta-line__value { word-break: break-word; }
+
+@media (min-width: 768px) {
+  .rw-form-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .rw-form-hero__grid,
+  .rw-form-two-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767px) {
+  .rw-form-stat-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ── PREMIUM: CALCULATOR INPUT FOCUS ────────────────────────── */
+.rw-calculator-form .form-control:focus {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12), 0 0 16px rgba(59,130,246,0.06) !important;
+  border-color: rgba(59,130,246,0.5) !important;
+}
+
+/* ── PREMIUM: FORM RESULT ENTRANCE ──────────────────────────── */
+.rw-form-result { animation: rw-slideUp 0.4s var(--rw-decel) both; }
+
+/* ── PREMIUM: STAT GRID STAGGER ─────────────────────────────── */
+.rw-form-stat-grid > * { animation: rw-slideUp 0.4s var(--rw-decel) both; }
+.rw-form-stat-grid > *:nth-child(1) { animation-delay: 0.06s; }
+.rw-form-stat-grid > *:nth-child(2) { animation-delay: 0.12s; }
+.rw-form-stat-grid > *:nth-child(3) { animation-delay: 0.18s; }
+.rw-form-stat-grid > *:nth-child(4) { animation-delay: 0.24s; }

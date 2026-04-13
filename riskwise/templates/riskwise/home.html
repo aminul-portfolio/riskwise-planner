@@ -1,93 +1,68 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}RiskWise Planner — Risk Planning Overview{% endblock %}
+{% block title %}RiskWise Planner — Pre-Trade Risk Planning & Scenario Analysis{% endblock %}
 
 {% block content %}
 <div class="rw-home-page">
 
-  <!-- Hero -->
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">PRIMARY PLANNING FLOW</div>
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-      <div class="flex-grow-1">
-        <h1 class="rw-page-title mb-3">Risk Planning Overview</h1>
-        <p class="rw-page-subtitle mb-4">
-          RiskWise Planner is a pre-trade risk planning and scenario modelling platform for position sizing, downside control, and simulation-backed decision support.
+  <section class="rw-hero-card rw-home-hero rw-border-glow mb-4">
+    <div class="rw-eyebrow">PRE-TRADE RISK PLANNING</div>
+
+    <div class="rw-home-hero__grid">
+      <div class="rw-home-hero__content">
+        <h1 class="rw-page-title"><span class="rw-grad-text">RiskWise Planner</span></h1>
+        <p class="rw-page-subtitle mb-0">
+          A decision-support product for reviewing observed trade outcomes, calibrating downside-aware risk assumptions,
+          stress-testing outcome distributions, and comparing scenarios before committing new capital.
         </p>
 
-        <div class="d-flex flex-wrap gap-2">
-          <span class="rw-badge">Version 1.0</span>
-          <span class="rw-badge rw-badge-secondary">Capital Preservation</span>
-          <span class="rw-badge rw-badge-secondary">Scenario Modelling</span>
+        <div class="rw-home-hero__badges">
+          <span class="rw-badge rw-badge--neutral">SaaS Decision Support</span>
+          <span class="rw-badge rw-badge--neutral">Pre-Trade Planning</span>
+          <span class="rw-badge rw-badge--neutral">Scenario Analysis</span>
         </div>
-      </div>
 
-      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
-        <a href="{% url 'upload' %}" class="btn rw-btn-primary">
-          <i class="bi bi-upload me-2"></i>Upload Dataset
-        </a>
-        <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
-          <i class="bi bi-speedometer2 me-2"></i>Open Risk Dashboard
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Primary Feature Cards -->
-  <section class="mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Core Workflow</h2>
-      <p class="rw-section-subtitle">
-        Move from dataset upload to downside-aware review, then into simulation and scenario comparison.
-      </p>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-lg-4">
-        <div class="rw-feature-card h-100">
-          <div class="rw-feature-icon text-primary">
-            <i class="bi bi-upload"></i>
-          </div>
-          <h3 class="rw-feature-title">Upload Risk Dataset</h3>
-          <p class="rw-feature-text">
-            Import CSV or Excel data to prepare position sizing, downside review, and simulation-backed planning surfaces.
-          </p>
-          <a href="{% url 'upload' %}" class="btn rw-btn-primary w-100 mt-3">
-            Upload Dataset
+        <div class="rw-home-hero__actions">
+          <a href="{% url 'upload' %}" class="btn rw-btn-primary">
+            <i class="bi bi-upload me-2"></i>Load Planning Dataset
+          </a>
+          <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
+            <i class="bi bi-speedometer2 me-2"></i>Open Dashboard
+          </a>
+          <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+            <i class="bi bi-play-circle me-2"></i>Run Stress Test
           </a>
         </div>
-      </div>
 
-      <div class="col-lg-4">
-        <div class="rw-feature-card h-100">
-          <div class="rw-feature-icon text-success">
-            <i class="bi bi-shield-check"></i>
-          </div>
-          <h3 class="rw-feature-title">Capital Preservation Dashboard</h3>
-          <p class="rw-feature-text">
-            Review downside-aware planning metrics, drawdown context, and risk signals in one place.
+        <div class="rw-home-hero__positioning">
+          <div class="rw-home-hero__positioning-label">Product positioning</div>
+          <p class="mb-0">
+            Built as a decision-support product for downside-aware capital planning.
+            It is not a trade journal and not just a calculator bundle.
           </p>
-          <a href="{% url 'dashboard' %}" class="btn rw-btn-outline w-100 mt-3">
-            Open Risk Dashboard
-          </a>
         </div>
       </div>
 
-      <div class="col-lg-4">
-        <div class="rw-feature-card h-100">
-          <div class="rw-feature-icon text-info">
-            <i class="bi bi-shuffle"></i>
+      <div class="rw-home-hero__panel">
+        <div class="rw-home-summary-card rw-glass">
+          <div class="rw-home-summary-card__header">
+            <h3>Reviewer Path</h3>
+            <span class="rw-badge rw-badge--neutral">Fast Review</span>
           </div>
-          <h3 class="rw-feature-title">Simulation &amp; Scenario Modelling</h3>
-          <p class="rw-feature-text">
-            Stress-test risk assumptions with Monte Carlo simulation and scenario comparison before committing capital.
-          </p>
-          <div class="d-grid gap-2 mt-3">
-            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-              Run Simulation
+
+          <ol class="rw-action-list">
+            <li>Load a reference dataset to activate the planning surface.</li>
+            <li>Review the Capital Preservation Dashboard for downside and edge signals.</li>
+            <li>Run stress testing to examine weaker outcome sequences.</li>
+            <li>Compare scenarios before increasing size or allocating new capital.</li>
+          </ol>
+
+          <div class="rw-inline-actions mt-4">
+            <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
+              <i class="bi bi-arrow-right-circle me-2"></i>Start Review
             </a>
-            <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
-              Monte Carlo Tool
+            <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+              <i class="bi bi-clock-history me-2"></i>View Saved Runs
             </a>
           </div>
         </div>
@@ -95,46 +70,210 @@
     </div>
   </section>
 
-  <!-- Feature Grid -->
-  <section class="mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Explore Risk Planning Tools</h2>
-      <p class="rw-section-subtitle">
-        Review the full product surface across planning tools, calculators, and simulation workflows.
-      </p>
-    </div>
-
-    <div class="row g-4">
-      {% for feature in features %}
-      <div class="col-md-6 col-xl-4">
-        <div class="rw-feature-card h-100">
-          <div class="rw-feature-icon text-{{ feature.color }}">
-            <i class="{{ feature.icon }}"></i>
-          </div>
-          <h3 class="rw-feature-title">{{ feature.title }}</h3>
-          <p class="rw-feature-text">{{ feature.description }}</p>
-          <a href="{{ feature.url }}" class="btn rw-btn-outline w-100 mt-3">
-            {{ feature.button_text }}
-          </a>
-        </div>
+  <section class="rw-home-strip mb-4">
+    <article class="rw-home-strip__item">
+      <div class="rw-home-strip__label">Primary use case</div>
+      <div class="rw-home-strip__value">Pre-trade risk planning</div>
+      <div class="rw-home-strip__detail">
+        Use observed outcomes as a calibration baseline before new allocation decisions.
       </div>
-      {% endfor %}
+    </article>
+
+    <article class="rw-home-strip__item">
+      <div class="rw-home-strip__label">Core decision task</div>
+      <div class="rw-home-strip__value">Stress-test assumptions</div>
+      <div class="rw-home-strip__detail">
+        Check how downside behaves under weaker sequences, not only under average conditions.
+      </div>
+    </article>
+
+    <article class="rw-home-strip__item">
+      <div class="rw-home-strip__label">Product framing</div>
+      <div class="rw-home-strip__value">Decision-support surface</div>
+      <div class="rw-home-strip__detail">
+        This is not a trade journal and not just a calculator collection.
+      </div>
+    </article>
+  </section>
+
+  <div class="rw-divider">Workflow</div>
+
+  <section class="mb-4">
+    {% include "riskwise/includes/section_header.html" with title="Core Workflow" subtitle="How RiskWise moves from observed outcomes to a more disciplined planning decision." %}
+    <div class="rw-home-workflow-grid mt-3">
+      <article class="rw-home-workflow-card">
+        <div class="rw-home-workflow-card__step">01</div>
+        <h3>Load Observed Outcomes</h3>
+        <p>
+          Upload a planning dataset to create a session-based reference baseline for downside and outcome review.
+        </p>
+        <a href="{% url 'upload' %}" class="rw-text-link">Go to upload <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-workflow-card">
+        <div class="rw-home-workflow-card__step">02</div>
+        <h3>Review Baseline Quality</h3>
+        <p>
+          Use the dashboard to evaluate drawdown depth, edge quality, win rate, and planning credibility.
+        </p>
+        <a href="{% url 'dashboard' %}" class="rw-text-link">Open dashboard <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-workflow-card">
+        <div class="rw-home-workflow-card__step">03</div>
+        <h3>Stress-Test the Distribution</h3>
+        <p>
+          Run simulation views to inspect how weaker outcome paths may affect capital preservation assumptions.
+        </p>
+        <a href="{% url 'simulation_run' %}" class="rw-text-link">Run stress test <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-workflow-card">
+        <div class="rw-home-workflow-card__step">04</div>
+        <h3>Compare Scenarios Before Allocation</h3>
+        <p>
+          Use scenario comparison to review alternative sizing and operating assumptions before new capital is committed.
+        </p>
+        <a href="{% url 'simulation_scenario' %}" class="rw-text-link">Compare scenarios <i class="bi bi-arrow-right-short"></i></a>
+      </article>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="rw-footer mt-4">
-    <p class="mb-1">Developed by <strong>Aminul Islam</strong></p>
-    <p class="mb-0">
-      <a href="mailto:aminulislamkhan.tech@gmail.com" class="rw-footer-link">
-        <i class="bi bi-envelope me-1"></i>aminulislamkhan.tech@gmail.com
-      </a>
-      <span class="mx-2">|</span>
-      <a href="https://www.linkedin.com/in/aminul-islam-a71a871a2" target="_blank" class="rw-footer-link">
-        <i class="bi bi-linkedin me-1"></i>LinkedIn
-      </a>
-    </p>
-  </footer>
+  <div class="rw-divider">Session &amp; Value</div>
+
+  <section class="rw-home-two-col mb-4">
+    <article class="rw-panel-card">
+      <div class="rw-panel-card__header">
+        <h3>Current Session</h3>
+        {% if dataset_meta %}
+          <span class="rw-status-chip rw-status-chip--live">
+            <span class="rw-live-dot"></span> Live
+          </span>
+        {% else %}
+          <span class="rw-badge rw-badge--neutral">Inactive</span>
+        {% endif %}
+      </div>
+
+      {% if dataset_meta %}
+        <div class="rw-home-session-grid">
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Status</span>
+            <span class="rw-mini-stat__value">Dataset Active</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Rows</span>
+            <span class="rw-mini-stat__value">{{ dataset_meta.trade_count|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Date Start</span>
+            <span class="rw-mini-stat__value">{{ dataset_meta.date_start|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Date End</span>
+            <span class="rw-mini-stat__value">{{ dataset_meta.date_end|default:"—" }}</span>
+          </div>
+        </div>
+
+        {% if dataset_meta.filename %}
+          <p class="rw-home-meta-line mt-3 mb-0">
+            <span class="rw-home-meta-line__label">Active file:</span>
+            <span class="rw-home-meta-line__value">{{ dataset_meta.filename }}</span>
+          </p>
+        {% endif %}
+
+        <p class="rw-home-note mt-3 mb-0">
+          A reference dataset is currently active in session. Continue into the dashboard or run stress testing.
+        </p>
+
+        <div class="rw-inline-actions mt-4">
+          <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
+            <i class="bi bi-speedometer2 me-2"></i>Review Dashboard
+          </a>
+          <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+            <i class="bi bi-play-circle me-2"></i>Stress Test
+          </a>
+        </div>
+      {% else %}
+        <div class="rw-empty-state rw-empty-state--compact">
+          <div class="rw-empty-icon">
+            <i class="bi bi-database-exclamation"></i>
+          </div>
+          <h3 class="rw-empty-title">No active dataset</h3>
+          <p class="rw-empty-text">
+            Load a planning dataset to activate the decision-support workflow.
+          </p>
+        </div>
+
+        <div class="rw-inline-actions mt-3">
+          <a href="{% url 'upload' %}" class="btn rw-btn-primary">
+            <i class="bi bi-upload me-2"></i>Load Dataset
+          </a>
+          <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+            <i class="bi bi-clock-history me-2"></i>Review Saved Runs
+          </a>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="rw-panel-card rw-glass">
+      <div class="rw-panel-card__header">
+        <h3>What This Project Demonstrates</h3>
+        <span class="rw-badge rw-badge--neutral">Portfolio Value</span>
+      </div>
+
+      <div class="rw-insight-list">
+        <div class="rw-insight-item rw-tone-info">
+          <h4>Decision-Support Product Thinking</h4>
+          <p>
+            Turns observed trading outcomes into a workflow for downside-aware planning, not just historical review.
+          </p>
+        </div>
+        <div class="rw-insight-item rw-tone-success">
+          <h4>Session-Based Analytics UX</h4>
+          <p>
+            Uses an active reference dataset to drive dashboard, simulation, and scenario workflows across the product surface.
+          </p>
+        </div>
+        <div class="rw-insight-item rw-tone-warning">
+          <h4>Risk & Scenario Framing</h4>
+          <p>
+            Elevates capital preservation, drawdown review, and weaker-sequence analysis as core operating decisions.
+          </p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="rw-divider">Product Surfaces</div>
+
+  <section class="mb-4">
+    {% include "riskwise/includes/section_header.html" with title="Product Surfaces" subtitle="The main pages that support the planning workflow." %}
+    <div class="rw-home-surface-grid mt-3">
+      <article class="rw-home-surface-card">
+        <h3>Upload Surface</h3>
+        <p>Loads the reference dataset that powers the active planning session.</p>
+        <a href="{% url 'upload' %}" class="rw-text-link">Open upload <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-surface-card">
+        <h3>Capital Preservation Dashboard</h3>
+        <p>Summarises risk posture, edge quality, sample depth, and planning interpretation.</p>
+        <a href="{% url 'dashboard' %}" class="rw-text-link">Open dashboard <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-surface-card">
+        <h3>Stress-Test View</h3>
+        <p>Examines scenario resilience and weaker outcome distributions through simulation.</p>
+        <a href="{% url 'simulation_run' %}" class="rw-text-link">Open stress test <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-surface-card">
+        <h3>Scenario Comparison</h3>
+        <p>Compares alternative assumptions side by side before new allocation decisions are made.</p>
+        <a href="{% url 'simulation_scenario' %}" class="rw-text-link">Open comparison <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+    </div>
+  </section>
 
 </div>
 {% endblock %}

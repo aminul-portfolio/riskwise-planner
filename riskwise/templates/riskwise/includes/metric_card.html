@@ -1,0 +1,12 @@
+<div class="rw-kpi-card rw-kpi-card-{{ variant|default:'primary' }} h-100">
+  {% if icon %}
+    <div class="rw-kpi-icon-wrap">
+      <i class="{{ icon }}"></i>
+    </div>
+  {% endif %}
+  <div class="rw-kpi-label">{{ label }}</div>
+  <div class="rw-kpi-value">{{ value }}</div>
+  {% if note %}
+    <div class="rw-form-help mt-2">{{ note }}</div>
+  {% endif %}
+</div>

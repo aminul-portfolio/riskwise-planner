@@ -1,208 +1,570 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Run Simulation{% endblock %}
+{% block title %}Stress-Test Results — RiskWise Planner{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb rw-breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Stress-Test Results</li>
+  </ol>
+</nav>
+{% endblock %}
 
 {% block content %}
 <div class="rw-simulation-page">
 
-  <!-- Page Header -->
-  <section class="rw-hero-card mb-4">
-    <div class="rw-eyebrow">SIMULATION WORKFLOW</div>
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-      <div class="flex-grow-1">
-        <h1 class="rw-page-title mb-3">Run Simulation</h1>
+  <section class="rw-hero-card rw-sim-hero mb-4">
+    <div class="rw-eyebrow">SIMULATION DECISION SUPPORT</div>
+
+    <div class="rw-sim-hero__grid">
+      <div class="rw-sim-hero__content">
+        <h1 class="rw-page-title">Stress-Test Results</h1>
         <p class="rw-page-subtitle mb-0">
-          Upload a planning dataset and run simulation-backed analysis to review possible outcome ranges, cumulative equity paths, and downside-aware decision support.
+          Review simulated downside behaviour, compare resilience signals, and decide whether the current planning
+          baseline remains strong enough under weaker outcome paths.
         </p>
+
+        <div class="rw-sim-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Monte Carlo Stress Test</span>
+          <span class="rw-badge rw-badge--neutral">Capital Preservation</span>
+          <span class="rw-badge rw-badge--neutral">Scenario Review</span>
+        </div>
       </div>
 
-      <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
-        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
-          <i class="bi bi-shuffle me-2"></i>Monte Carlo
+      <div class="rw-sim-hero__actions">
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+          <i class="bi bi-arrow-repeat me-2"></i>Run Another Test
         </a>
-        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
-          <i class="bi bi-diagram-3 me-2"></i>Scenario Comparison
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+          <i class="bi bi-clock-history me-2"></i>View Saved Runs
+        </a>
+        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
+          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
         </a>
       </div>
     </div>
-  </section>
 
-  <!-- Upload Panel -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Load Planning Dataset</h2>
-      <p class="rw-section-subtitle">
-        Upload CSV or Excel data with a <code>profit</code> column to prepare the simulation workflow.
+    <div class="rw-sim-summary mt-4">
+      <h2>{{ simulation_headline|default:"Simulation results ready for review" }}</h2>
+      <p>
+        {{ simulation_summary|default:"Use the simulated distribution to review downside resilience before increasing risk." }}
       </p>
-    </div>
-
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="row g-3 align-items-end">
-        <div class="col-lg-9">
-          <label class="form-label rw-form-label">Select Risk Dataset</label>
-          <input type="file" name="file" class="form-control rw-form-control">
-          <small class="rw-form-help">
-            Use realistic trade outcomes so the simulation reflects downside-aware planning and capital preservation review.
-          </small>
-        </div>
-        <div class="col-lg-3 d-grid">
-          <button type="submit" class="btn rw-btn-primary">
-            <i class="bi bi-cloud-arrow-up me-2"></i>Upload Dataset
-          </button>
-        </div>
-      </div>
-    </form>
-
-    {% if instruction %}
-      <div class="alert rw-alert-info mt-4 mb-0">
-        <i class="bi bi-info-circle me-2"></i>{{ instruction }}
-      </div>
-    {% endif %}
-
-    {% if trade_count %}
-      <div class="alert rw-alert-info mt-4 mb-0">
-        <i class="bi bi-database me-2"></i>
-        <strong>{{ trade_count }}</strong> records loaded
-        {% if date_start and date_end %}
-          ({{ date_start }} to {{ date_end }})
-        {% endif %}.
-      </div>
-    {% endif %}
-  </section>
-
-  {% if trade_count %}
-  <!-- Simulation Controls -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Simulation Controls</h2>
-      <p class="rw-section-subtitle">
-        Configure the number of simulations, trade count, and date/range filters before generating equity-path outcomes.
+      <p class="rw-sim-summary__recommendation">
+        <strong>Recommended next step:</strong>
+        {{ simulation_recommendation|default:"Review downside percentiles and compare scenarios before changing allocation." }}
       </p>
-    </div>
-
-    <form method="post">
-      {% csrf_token %}
-      <div class="row g-4">
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">Number of Simulations</label>
-          <input type="number" name="num_simulations" class="form-control rw-form-control"
-                 placeholder="e.g., 1000" value="{{ form_data.num_simulations }}">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">Number of Trades per Simulation</label>
-          <input type="number" name="num_trades" class="form-control rw-form-control"
-                 placeholder="e.g., 50" value="{{ form_data.num_trades }}">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">Range Start</label>
-          <input type="number" name="range_start" class="form-control rw-form-control"
-                 value="{{ form_data.range_start }}">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">Range End</label>
-          <input type="number" name="range_end" class="form-control rw-form-control"
-                 value="{{ form_data.range_end }}">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">Start Date</label>
-          <input type="date" name="start_date" class="form-control rw-form-control"
-                 value="{{ form_data.start_date }}">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label rw-form-label">End Date</label>
-          <input type="date" name="end_date" class="form-control rw-form-control"
-                 value="{{ form_data.end_date }}">
-        </div>
-
-        <div class="col-md-6 d-grid">
-          <button type="submit" class="btn rw-btn-primary">
-            <i class="bi bi-play-circle me-2"></i>Run Simulation
-          </button>
-        </div>
-
-        <div class="col-md-6 d-grid">
-          <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
-            <i class="bi bi-x-circle me-2"></i>Reset Form
-          </button>
-        </div>
-      </div>
-    </form>
-  </section>
-  {% endif %}
-
-  {% if summary %}
-  <!-- Simulation Details -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Simulation Details</h2>
-      <p class="rw-section-subtitle">
-        Current parameters and dataset filters used for the active simulation run.
-      </p>
-    </div>
-
-    <div class="rw-detail-list">
-      <div class="rw-detail-item"><strong>Range:</strong> {{ summary.range_start }} to {{ summary.range_end }}</div>
-      <div class="rw-detail-item"><strong>Trades Selected:</strong> {{ summary.trade_count }}</div>
-      {% if summary.date_start and summary.date_end %}
-        <div class="rw-detail-item"><strong>Date Range:</strong> {{ summary.date_start }} – {{ summary.date_end }}</div>
+      {% if simulation_sample_note %}
+        <p class="rw-sim-summary__note">{{ simulation_sample_note }}</p>
+      {% endif %}
+      {% if simulation_warning %}
+        <p class="rw-sim-summary__note">{{ simulation_warning }}</p>
       {% endif %}
     </div>
   </section>
-  {% endif %}
 
-  {% if result_list %}
-  <!-- Results -->
-  <section class="mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Simulation Results</h2>
-      <p class="rw-section-subtitle">
-        Review ending-balance ranges and probability signals to judge whether the current setup fits your capital preservation rules.
-      </p>
+  {% if not has_active_dataset %}
+    <div class="rw-empty-state">
+      <div class="rw-empty-icon">
+        <i class="bi bi-activity"></i>
+      </div>
+      <h3 class="rw-empty-title">No planning dataset loaded</h3>
+      <p class="rw-empty-text">{{ message|default:"Load a planning dataset first, then run a stress test." }}</p>
+
+      {% if instruction %}
+        <p class="rw-sim-panel-note mt-2">{{ instruction }}</p>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="rw-sim-setup-form mt-4">
+        {% csrf_token %}
+        <div class="mb-3 text-start">
+          <label class="form-label">Load planning dataset</label>
+          <input type="file" name="file" class="form-control" accept=".csv,.xlsx,.xls" required>
+        </div>
+        <div class="rw-inline-actions mt-3">
+          <button type="submit" class="btn rw-btn-primary">
+            <i class="bi bi-upload me-2"></i>Load Dataset
+          </button>
+          <a href="{% url 'upload' %}" class="btn rw-btn-outline">
+            <i class="bi bi-folder2-open me-2"></i>Open Upload Page
+          </a>
+        </div>
+      </form>
     </div>
 
-    <div class="row g-4">
-      {% for item in result_list %}
-      <div class="col-sm-6 col-xl-3">
-        <div class="rw-kpi-card h-100">
-          <div class="rw-kpi-icon">
-            <i class="bi {{ item.icon }}"></i>
+  {% elif not has_simulation_result %}
+
+    <section class="rw-sim-two-col mb-4">
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Simulation Setup</h3>
+          <span class="rw-badge rw-badge--neutral">Ready to Run</span>
+        </div>
+
+        {% if instruction %}
+          <p class="rw-sim-panel-note mb-3">{{ instruction }}</p>
+        {% endif %}
+
+        <form method="post" class="rw-sim-setup-form">
+          {% csrf_token %}
+
+          <div class="rw-sim-settings-grid">
+            <div>
+              <label class="form-label">Number of simulations</label>
+              <input
+                type="number"
+                name="num_simulations"
+                class="form-control"
+                min="1"
+                value="{{ form_data.num_simulations|default:'1000' }}"
+              >
+            </div>
+
+            <div>
+              <label class="form-label">Trades per run</label>
+              <input
+                type="number"
+                name="num_trades"
+                class="form-control"
+                min="1"
+                value="{{ form_data.num_trades|default:'100' }}"
+              >
+            </div>
+
+            <div>
+              <label class="form-label">Range start</label>
+              <input
+                type="number"
+                name="range_start"
+                class="form-control"
+                min="0"
+                value="{{ form_data.range_start|default:'0' }}"
+              >
+            </div>
+
+            <div>
+              <label class="form-label">Range end</label>
+              <input
+                type="number"
+                name="range_end"
+                class="form-control"
+                min="1"
+                value="{% firstof form_data.range_end trade_count '0' %}"
+              >
+            </div>
+
+            <div>
+              <label class="form-label">Start date</label>
+              <input
+                type="date"
+                name="start_date"
+                class="form-control"
+                value="{{ form_data.start_date|default:'' }}"
+              >
+            </div>
+
+            <div>
+              <label class="form-label">End date</label>
+              <input
+                type="date"
+                name="end_date"
+                class="form-control"
+                value="{{ form_data.end_date|default:'' }}"
+              >
+            </div>
           </div>
-          <div class="rw-kpi-label">{{ item.label }}</div>
-          <div class="rw-kpi-value">
-            {% if item.is_percent %}
-              {{ item.value|floatformat:2 }}%
-            {% else %}
-              ${{ item.value|floatformat:2 }}
-            {% endif %}
+
+          <div class="rw-inline-actions mt-4">
+            <button type="submit" class="btn rw-btn-primary">
+              <i class="bi bi-play-circle me-2"></i>Run Stress Test
+            </button>
+            <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
+              <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Dataset
+            </button>
+          </div>
+        </form>
+      </article>
+
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Current Simulation Context</h3>
+          <span class="rw-badge rw-badge--neutral">Live Dataset</span>
+        </div>
+
+        <div class="rw-sim-settings-grid">
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Rows</span>
+            <span class="rw-mini-stat__value">{{ trade_count|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Date Start</span>
+            <span class="rw-mini-stat__value">{{ date_start|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Date End</span>
+            <span class="rw-mini-stat__value">{{ date_end|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Sample Size</span>
+            <span class="rw-mini-stat__value">{% firstof settings_sample_size trade_count "—" %}</span>
           </div>
         </div>
+
+        {% if dataset_meta.filename %}
+          <p class="rw-sim-panel-note mt-3 mb-0">
+            Active file: <strong>{{ dataset_meta.filename }}</strong>
+          </p>
+        {% endif %}
+
+        <p class="rw-sim-panel-note mt-3 mb-0">
+          The reference dataset is loaded and ready. Configure the inputs and run the stress test to generate the simulation surface.
+        </p>
+      </article>
+    </section>
+
+  {% else %}
+
+    <section class="rw-sim-strip mb-4">
+      <article class="rw-sim-strip__item rw-tone-{{ simulation_posture_tone|default:'warning' }}">
+        <div class="rw-sim-strip__label">Simulation posture</div>
+        <div class="rw-sim-strip__value">{{ simulation_posture_label|default:"Watchlist" }}</div>
+        <div class="rw-sim-strip__detail">
+          {{ simulation_posture_detail|default:"Stress-test results suggest closer review before increasing exposure." }}
+        </div>
+      </article>
+
+      <article class="rw-sim-strip__item rw-tone-{{ percentile_tone|default:'info' }}">
+        <div class="rw-sim-strip__label">Downside percentile</div>
+        <div class="rw-sim-strip__value">{{ key_downside_value|default:"—" }}</div>
+        <div class="rw-sim-strip__detail">
+          {{ key_downside_detail|default:"Use tail outcomes to check whether the plan survives weaker conditions." }}
+        </div>
+      </article>
+
+      <article class="rw-sim-strip__item rw-tone-{{ action_gate_tone|default:'neutral' }}">
+        <div class="rw-sim-strip__label">Decision gate</div>
+        <div class="rw-sim-strip__value">{{ action_gate_label|default:"Review" }}</div>
+        <div class="rw-sim-strip__detail">
+          {{ action_gate_detail|default:"Do not rely on average outcomes alone before changing allocation." }}
+        </div>
+      </article>
+    </section>
+
+    <section class="mb-4">
+      <div class="rw-sim-kpi-grid">
+        <article class="rw-sim-kpi rw-tone-info">
+          <div class="rw-sim-kpi__label">Median Final Profit</div>
+          <div class="rw-sim-kpi__value">${{ median_final_profit|default:simulation_median_value|default:"—" }}</div>
+          <div class="rw-sim-kpi__subtext">Typical final outcome across simulated paths</div>
+        </article>
+
+        <article class="rw-sim-kpi rw-tone-warning">
+          <div class="rw-sim-kpi__label">P10 Final Profit</div>
+          <div class="rw-sim-kpi__value">${{ p10_final_profit|default:"—" }}</div>
+          <div class="rw-sim-kpi__subtext">Downside case for 1 in 10 scenarios</div>
+        </article>
+
+        <article class="rw-sim-kpi rw-tone-info">
+          <div class="rw-sim-kpi__label">P90 Final Profit</div>
+          <div class="rw-sim-kpi__value">${{ p90_final_profit|default:"—" }}</div>
+          <div class="rw-sim-kpi__subtext">Upside case for 9 in 10 scenarios</div>
+        </article>
+
+        <article class="rw-sim-kpi rw-tone-success">
+          <div class="rw-sim-kpi__label">Positive Outcomes</div>
+          <div class="rw-sim-kpi__value">{{ positive_outcomes_pct|default:"—" }}%</div>
+          <div class="rw-sim-kpi__subtext">{{ positive_outcomes_label|default:"—" }}</div>
+        </article>
+
+        <article class="rw-sim-kpi rw-tone-warning">
+          <div class="rw-sim-kpi__label">Avg. Profit per Trade</div>
+          <div class="rw-sim-kpi__value">${{ avg_profit_per_trade_display|default:"—" }}</div>
+          <div class="rw-sim-kpi__subtext">Expectancy reference from filtered sample</div>
+        </article>
       </div>
-      {% endfor %}
-    </div>
-  </section>
+    </section>
+
+    <section class="rw-sim-main-grid mb-4">
+      <article class="rw-panel-card rw-distribution-card">
+        <div class="rw-panel-card__header">
+          <h3>Cumulative Profit Paths</h3>
+          <span class="rw-badge rw-badge--neutral">Percentile Bands</span>
+        </div>
+
+        <p class="rw-sim-panel-note">
+          This view shows the central path, downside band, and upside band across the trade sequence.
+        </p>
+
+        <div class="rw-sim-chart-frame">
+          {% if band_chart_base64 %}
+            <img
+              src="data:image/png;base64,{{ band_chart_base64 }}"
+              alt="Percentile band chart"
+              class="img-fluid rounded-4"
+            >
+          {% else %}
+            <div class="rw-empty-state rw-empty-state--compact">
+              <div class="rw-empty-icon">
+                <i class="bi bi-bar-chart"></i>
+              </div>
+              <h3 class="rw-empty-title">No band chart available</h3>
+              <p class="rw-empty-text">Generate a simulation result to render the percentile-band view.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Final Profit Distribution</h3>
+          <span class="rw-badge rw-badge--neutral">Histogram</span>
+        </div>
+
+        <p class="rw-sim-panel-note">
+          This histogram shows where final outcomes cluster and how heavy the downside tail is.
+        </p>
+
+        <div class="rw-sim-chart-frame">
+          {% if histogram_chart_base64 %}
+            <img
+              src="data:image/png;base64,{{ histogram_chart_base64 }}"
+              alt="Final profit histogram"
+              class="img-fluid rounded-4"
+            >
+          {% else %}
+            <div class="rw-empty-state rw-empty-state--compact">
+              <div class="rw-empty-icon">
+                <i class="bi bi-bar-chart-steps"></i>
+              </div>
+              <h3 class="rw-empty-title">No histogram available</h3>
+              <p class="rw-empty-text">Generate a simulation result to render the final-outcome distribution.</p>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    </section>
+
+    <details class="rw-sim-rerun mb-4">
+      <summary>Advanced View: All Simulation Paths</summary>
+      <div class="rw-sim-rerun__body">
+        <div class="rw-sim-chart-frame">
+          {% if all_paths_chart_base64 %}
+            <img
+              src="data:image/png;base64,{{ all_paths_chart_base64 }}"
+              alt="All simulation paths"
+              class="img-fluid rounded-4"
+            >
+          {% elif chart_base64 %}
+            <img
+              src="data:image/png;base64,{{ chart_base64 }}"
+              alt="All simulation paths"
+              class="img-fluid rounded-4"
+            >
+          {% elif plot_image %}
+            <img
+              src="data:image/png;base64,{{ plot_image }}"
+              alt="All simulation paths"
+              class="img-fluid rounded-4"
+            >
+          {% else %}
+            <p class="mb-0">No all-path chart is currently available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </details>
+
+    <section class="rw-sim-two-col mb-4">
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Key Simulation Markers</h3>
+          <span class="rw-badge rw-badge--neutral">Distribution Review</span>
+        </div>
+
+        <div class="rw-percentile-grid">
+          <div class="rw-percentile-tile">
+            <div class="rw-percentile-label">P5</div>
+            <div class="rw-percentile-value">${{ simulation_p05_value|default:"—" }}</div>
+          </div>
+          <div class="rw-percentile-tile">
+            <div class="rw-percentile-label">Median</div>
+            <div class="rw-percentile-value">${{ simulation_median_value|default:"—" }}</div>
+          </div>
+          <div class="rw-percentile-tile">
+            <div class="rw-percentile-label">Mean</div>
+            <div class="rw-percentile-value">${{ simulation_mean_value|default:"—" }}</div>
+          </div>
+          <div class="rw-percentile-tile">
+            <div class="rw-percentile-label">P95</div>
+            <div class="rw-percentile-value">${{ simulation_p95_value|default:"—" }}</div>
+          </div>
+          <div class="rw-percentile-tile">
+            <div class="rw-percentile-label">Positive Runs</div>
+            <div class="rw-percentile-value">{{ simulation_prob_positive|default:"—" }}</div>
+          </div>
+        </div>
+
+        <p class="rw-sim-panel-note mt-3 mb-0">
+          Use these markers to review tail risk, central tendency, and path resilience before changing allocation.
+        </p>
+      </article>
+
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Risk Interpretation</h3>
+          <span class="rw-badge rw-badge--{{ simulation_posture_tone|default:'warning' }}">
+            {{ simulation_posture_label|default:"Watchlist" }}
+          </span>
+        </div>
+
+        <div class="rw-insight-list">
+          <div class="rw-insight-item rw-tone-danger">
+            <h4>Primary downside concern</h4>
+            <p>{{ simulation_downside_concern|default:"Review the left-tail behaviour of simulated outcomes before changing allocation." }}</p>
+          </div>
+          <div class="rw-insight-item rw-tone-warning">
+            <h4>Planning implication</h4>
+            <p>{{ simulation_planning_implication|default:"Stress-test output should influence sizing, not just confirm the base case." }}</p>
+          </div>
+          <div class="rw-insight-item rw-tone-neutral">
+            <h4>Operating note</h4>
+            <p>{{ simulation_operating_note|default:"Simulation informs planning discipline; it does not guarantee future path behaviour." }}</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="rw-sim-two-col mb-4">
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Simulation Settings</h3>
+          <span class="rw-badge rw-badge--neutral">Run Inputs</span>
+        </div>
+
+        <div class="rw-sim-settings-grid">
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Runs</span>
+            <span class="rw-mini-stat__value">{{ settings_runs|default:"—" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Trades / Path</span>
+            <span class="rw-mini-stat__value">{% firstof settings_trades "—" %}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Confidence Focus</span>
+            <span class="rw-mini-stat__value">{{ settings_confidence|default:"Tail Review" }}</span>
+          </div>
+          <div class="rw-mini-stat">
+            <span class="rw-mini-stat__label">Source Sample</span>
+            <span class="rw-mini-stat__value">{% firstof settings_sample_size trade_count "—" %}</span>
+          </div>
+        </div>
+
+        <details class="rw-sim-rerun mt-3">
+          <summary>Adjust and rerun simulation</summary>
+          <div class="rw-sim-rerun__body">
+            <form method="post" class="rw-sim-setup-form">
+              {% csrf_token %}
+
+              <div class="rw-sim-settings-grid">
+                <div>
+                  <label class="form-label">Number of simulations</label>
+                  <input
+                    type="number"
+                    name="num_simulations"
+                    class="form-control"
+                    min="1"
+                    value="{{ form_data.num_simulations|default:'1000' }}"
+                  >
+                </div>
+
+                <div>
+                  <label class="form-label">Trades per run</label>
+                  <input
+                    type="number"
+                    name="num_trades"
+                    class="form-control"
+                    min="1"
+                    value="{{ form_data.num_trades|default:'100' }}"
+                  >
+                </div>
+
+                <div>
+                  <label class="form-label">Range start</label>
+                  <input
+                    type="number"
+                    name="range_start"
+                    class="form-control"
+                    min="0"
+                    value="{{ form_data.range_start|default:'0' }}"
+                  >
+                </div>
+
+                <div>
+                  <label class="form-label">Range end</label>
+                  <input
+                    type="number"
+                    name="range_end"
+                    class="form-control"
+                    min="1"
+                    value="{% firstof form_data.range_end trade_count '0' %}"
+                  >
+                </div>
+
+                <div>
+                  <label class="form-label">Start date</label>
+                  <input
+                    type="date"
+                    name="start_date"
+                    class="form-control"
+                    value="{{ form_data.start_date|default:'' }}"
+                  >
+                </div>
+
+                <div>
+                  <label class="form-label">End date</label>
+                  <input
+                    type="date"
+                    name="end_date"
+                    class="form-control"
+                    value="{{ form_data.end_date|default:'' }}"
+                  >
+                </div>
+              </div>
+
+              <div class="rw-inline-actions mt-3">
+                <button type="submit" class="btn rw-btn-primary">
+                  <i class="bi bi-play-circle me-2"></i>Run Updated Simulation
+                </button>
+              </div>
+            </form>
+          </div>
+        </details>
+      </article>
+
+      <article class="rw-panel-card">
+        <div class="rw-panel-card__header">
+          <h3>Recommended Next Steps</h3>
+          <span class="rw-badge rw-badge--neutral">Actionable</span>
+        </div>
+
+        <ol class="rw-action-list">
+          <li>{% firstof next_step_1 simulation_recommendation "Review downside percentiles before increasing risk." %}</li>
+          <li>{% firstof next_step_2 "Compare this run against alternative scenarios before changing size." %}</li>
+          <li>{% firstof next_step_3 "Use the dashboard and simulation together, not in isolation." %}</li>
+        </ol>
+
+        <div class="rw-inline-actions mt-4">
+          <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
+            <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+          </a>
+          <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+            <i class="bi bi-clock-history me-2"></i>View Saved Runs
+          </a>
+        </div>
+      </article>
+    </section>
+
   {% endif %}
-
-  {% if equity_curve %}
-  <!-- Equity Curve -->
-  <section class="rw-feature-card mb-4">
-    <div class="rw-section-heading mb-3">
-      <h2 class="rw-section-title">Equity Curve Simulation</h2>
-      <p class="rw-section-subtitle">
-        Simulated cumulative equity paths across repeated random sampling of the loaded outcome distribution.
-      </p>
-    </div>
-
-    <div class="rw-chart-wrap text-center">
-      <img src="data:image/png;base64,{{ equity_curve }}" alt="Equity Curve Simulation" class="img-fluid rw-chart-image">
-    </div>
-  </section>
-  {% endif %}
-
 </div>
 {% endblock %}
