@@ -13,11 +13,13 @@
 
 <br/>
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-5.x-092E20?style=flat-square&logo=django&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-data--processing-150458?style=flat-square&logo=pandas&logoColor=white)
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-charts-11557c?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-38_in--suite-2ea44f?style=flat-square)
+[![CI](https://github.com/aminul-portfolio/riskwise-planner/actions/workflows/django-ci.yml/badge.svg)](https://github.com/aminul-portfolio/riskwise-planner/actions/workflows/django-ci.yml)
+![Tests](https://img.shields.io/badge/tests-64_passing-2ea44f?style=flat-square)
+![Coverage](https://img.shields.io/badge/coverage-71%25-2ea44f?style=flat-square)
 
 </div>
 
@@ -49,7 +51,7 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
 | **Simulation & analytics pipeline** | Monte Carlo simulation, equity curve generation, multi-scenario comparison |
 | **Risk-product credibility** | Methodology notes, heuristic labels, threshold-based warnings, dataset provenance |
 | **Premium UI execution** | Dark design system, KPI cards, responsive sidebar, consistent visual hierarchy |
-| **Software discipline** | 38 tests in suite, ownership isolation, reviewer documentation, public-release cleanup controls |
+| **Software discipline** | 64 passing tests, 71% measured coverage, ownership isolation, CI workflow, reviewer documentation |
 
 ---
 
@@ -175,7 +177,7 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
 
 ## Risk Workflow
 
-```
+```text
 Upload Dataset → Capital Preservation Dashboard → Planning Tools
                                                      ↓
                                               Position Sizing
@@ -196,13 +198,14 @@ Upload Dataset → Capital Preservation Dashboard → Planning Tools
 
 | Layer | Technology |
 |---|---|
-| Backend | Python 3, Django 5 |
+| Backend | Python 3.11, Django 5 |
 | Data processing | Pandas, NumPy |
 | Visualisation | Matplotlib (dark theme) |
 | Auth | Django auth, login-required protection, ownership isolation |
 | Database | SQLite (local), PostgreSQL-ready |
-| Testing | Django TestCase — 38 tests in suite |
+| Testing | Django TestCase — 64 passing tests, Coverage 71% |
 | UI | Bootstrap 5 (dark-overridden), custom CSS design system |
+| CI | GitHub Actions workflow on push, pull request, and manual dispatch |
 
 ---
 
@@ -230,9 +233,39 @@ Visit `http://127.0.0.1:8000`, log in, and upload a trade dataset to begin.
 ## Verification
 
 ```bash
-python manage.py check   # Django system check — must pass
-python manage.py test    # 38 tests in suite — verify locally before release
+python manage.py check
+python manage.py test
+python -m coverage run manage.py test
+python -m coverage report
+python manage.py seed_demo
 ```
+
+### Current verified state
+- 64 tests passing
+- 71% coverage
+- `seed_demo` working
+- GitHub Actions workflow included for repository CI
+
+---
+
+## Continuous Integration
+
+The repository includes a GitHub Actions workflow at:
+
+```text
+.github/workflows/django-ci.yml
+```
+
+It runs on:
+- push to `main`
+- pull requests targeting `main`
+- manual dispatch
+
+CI steps:
+- install dependencies
+- run `python manage.py check`
+- run tests under coverage
+- fail the job if coverage drops below 70%
 
 ---
 
