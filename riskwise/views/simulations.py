@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
@@ -34,6 +36,41 @@ from .shared import (
     _normalize_scenario_dataset_meta,
 )
 
+logger = logging.getLogger("riskwise")
+
+
+def _calculate_max_consecutive_losses(equity_curves):
+    if equity_curves is None:
+        return None
+
+    try:
+        curves = np.asarray(equity_curves, dtype=float)
+    except Exception:
+        return None
+
+    if curves.size == 0:
+        return None
+
+    if curves.ndim == 1:
+        curves = curves.reshape(1, -1)
+
+    if curves.shape[1] == 0:
+        return None
+
+    step_results = np.diff(curves, axis=1, prepend=0.0)
+
+    max_streak = 0
+    for path in step_results:
+        streak = 0
+        for step in path:
+            if step < 0:
+                streak += 1
+                max_streak = max(max_streak, streak)
+            else:
+                streak = 0
+
+    return int(max_streak)
+
 
 @login_required
 def monte_carlo_simulation(request):
@@ -51,6 +88,7 @@ def monte_carlo_simulation(request):
     if request.method == "POST":
         if "reset" in request.POST:
             clear_uploaded_dataset_from_session(request)
+            logger.info("monte_carlo_reset | user=%s", request.user.username)
             return render(
                 request,
                 "riskwise/monte_carlo.html",
@@ -86,6 +124,13 @@ def monte_carlo_simulation(request):
             dataset_meta = _normalize_dataset_meta(load_dataset_meta_from_session(request), df=df)
             trade_count, date_start, date_end = get_dataset_meta(df)
 
+            logger.info(
+                "monte_carlo_dataset_loaded | user=%s | filename=%s | rows=%s",
+                request.user.username,
+                uploaded_file.name,
+                trade_count,
+            )
+
             return render(
                 request,
                 "riskwise/monte_carlo.html",
@@ -105,6 +150,7 @@ def monte_carlo_simulation(request):
 
         df = load_uploaded_df_from_session(request)
         if df is None or df.empty:
+            logger.warning("monte_carlo_missing_dataset | user=%s", request.user.username)
             return render(
                 request,
                 "riskwise/monte_carlo.html",
@@ -203,6 +249,13 @@ def monte_carlo_simulation(request):
         summary["date_end"] = filtered_date_end
 
         if len(profits_filtered) == 0:
+            logger.warning(
+                "monte_carlo_no_filtered_results | user=%s | range_start=%s | range_end=%s | session=%s",
+                request.user.username,
+                start,
+                end,
+                market_session,
+            )
             instruction = "No records matched your current filters."
         else:
             simulation_warning = build_simulation_warning(len(profits_filtered), n_sim, n_trades)
@@ -214,6 +267,14 @@ def monte_carlo_simulation(request):
             )
             results["trades_used"] = profits_filtered.tolist()
             result_list = build_result_list(results)
+
+            logger.info(
+                "monte_carlo_completed | user=%s | filtered_rows=%s | num_simulations=%s | num_trades=%s",
+                request.user.username,
+                len(profits_filtered),
+                n_sim,
+                n_trades,
+            )
 
     else:
         df = load_uploaded_df_from_session(request)
@@ -263,6 +324,7 @@ def simulation_run_view(request):
     if request.method == "POST":
         if "reset" in request.POST:
             clear_uploaded_dataset_from_session(request)
+            logger.info("stress_test_reset | user=%s", request.user.username)
             return render(
                 request,
                 "riskwise/simulation_run.html",
@@ -317,6 +379,13 @@ def simulation_run_view(request):
             dataset_meta = _normalize_dataset_meta(load_dataset_meta_from_session(request), df=df)
             trade_count, date_start, date_end = get_dataset_meta(df)
 
+            logger.info(
+                "stress_test_dataset_loaded | user=%s | filename=%s | rows=%s",
+                request.user.username,
+                uploaded_file.name,
+                trade_count,
+            )
+
             return render(
                 request,
                 "riskwise/simulation_run.html",
@@ -340,6 +409,7 @@ def simulation_run_view(request):
 
         df = load_uploaded_df_from_session(request)
         if df is None or df.empty:
+            logger.warning("stress_test_missing_dataset | user=%s", request.user.username)
             return render(
                 request,
                 "riskwise/simulation_run.html",
@@ -432,6 +502,12 @@ def simulation_run_view(request):
         profits = df_range["profit"].dropna().to_numpy(dtype=float)
 
         if len(profits) == 0:
+            logger.warning(
+                "stress_test_no_filtered_results | user=%s | range_start=%s | range_end=%s",
+                request.user.username,
+                start,
+                end,
+            )
             return render(
                 request,
                 "riskwise/simulation_run.html",
@@ -481,6 +557,7 @@ def simulation_run_view(request):
         positive_count = curve_summary["positive_count"]
         path_count = curve_summary["path_count"]
         positive_rate = curve_summary["positive_rate"]
+        max_consecutive_losses = _calculate_max_consecutive_losses(simulation_data["equity_curves"])
 
         results_data = {
             "min": simulation_data["min"],
@@ -490,9 +567,20 @@ def simulation_run_view(request):
             "p05": simulation_data["p05"],
             "p95": simulation_data["p95"],
             "prob_positive": simulation_data["prob_positive"],
+            "max_consecutive_losses": max_consecutive_losses,
         }
 
-        result_list = build_result_list(results_data)
+        result_list = build_result_list(
+            {
+                "min": results_data["min"],
+                "max": results_data["max"],
+                "mean": results_data["mean"],
+                "median": results_data["median"],
+                "p05": results_data["p05"],
+                "p95": results_data["p95"],
+                "prob_positive": results_data["prob_positive"],
+            }
+        )
 
         equity_curve_base64 = build_equity_curve_chart(
             simulation_data["equity_curves"],
@@ -510,6 +598,7 @@ def simulation_run_view(request):
         summary["trade_count"] = filtered_trade_count
         summary["date_start"] = filtered_date_start
         summary["date_end"] = filtered_date_end
+        summary["source_file"] = dataset_meta.get("source_file") or dataset_meta.get("filename")
 
         avg_profit_per_trade = float(np.mean(profits)) if len(profits) > 0 else 0.0
 
@@ -521,7 +610,7 @@ def simulation_run_view(request):
 
         SimulationHistory.objects.create(
             user=request.user,
-            label="Stress-Test Plan",
+            label="Stress-Test Run",
             parameters=history_parameters,
             results={
                 **results_data,
@@ -535,6 +624,15 @@ def simulation_run_view(request):
                 "positive_rate": positive_rate,
             },
             chart_base64=band_chart_base64,
+        )
+
+        logger.info(
+            "stress_test_history_saved | user=%s | label=%s | filtered_rows=%s | simulations=%s | trades=%s",
+            request.user.username,
+            "Stress-Test Run",
+            len(profits),
+            n_sim,
+            n_trades,
         )
 
         context = {
@@ -554,34 +652,18 @@ def simulation_run_view(request):
             "dataset_meta": dataset_meta,
             "avg_profit_per_trade": avg_profit_per_trade,
             "avg_profit_per_trade_display": f"{avg_profit_per_trade:,.2f}",
-            "suggested_next_step": "Compare alternative scenarios next to see how the baseline behaves under different assumptions.",
+            "suggested_next_step": "Compare this run against alternative scenarios before increasing size.",
             "message": None,
             "has_active_dataset": True,
             "has_simulation_result": True,
-
-            # top KPI strip
             "median_final_profit": f"{p50_final:,.2f}",
             "p10_final_profit": f"{p10_final:,.2f}",
             "p90_final_profit": f"{p90_final:,.2f}",
             "positive_outcomes_pct": f"{positive_rate:.1f}",
             "positive_outcomes_label": f"{positive_count} out of {path_count} paths",
-
-            # settings / review
             "settings_runs": f"{n_sim:,}",
             "settings_trades": f"{n_trades:,}",
             "settings_sample_size": f"{len(profits):,}",
-
-            # 5 percentile tiles
-            "percentile_1_label": "P10",
-            "percentile_1_value": f"{p10_final:,.2f}",
-            "percentile_2_label": "P25",
-            "percentile_2_value": f"{p25_final:,.2f}",
-            "percentile_3_label": "Median",
-            "percentile_3_value": f"{p50_final:,.2f}",
-            "percentile_4_label": "P75",
-            "percentile_4_value": f"{p75_final:,.2f}",
-            "percentile_5_label": "P90",
-            "percentile_5_value": f"{p90_final:,.2f}",
         }
 
         context.update(
@@ -670,6 +752,7 @@ def simulation_scenario_view(request):
             "scenarios": [],
             "dataset_meta": {},
             "scenario_persistence_note": persistence_note,
+            "best_scenario": None,
         }
         base_context.update(context)
         return render(
@@ -678,9 +761,98 @@ def simulation_scenario_view(request):
             with_dataset_context(request, base_context, df=df),
         )
 
+    def build_scenario_label(
+        scenario_id: str,
+        n_trades: int,
+        start: int,
+        end: int,
+        total_count: int,
+        start_date: str,
+        end_date: str,
+    ) -> str:
+        if start_date or end_date:
+            return f"Scenario {scenario_id} — Filtered Period"
+        if start > 0 or end < total_count:
+            return f"Scenario {scenario_id} — Range Filtered"
+        if total_count and n_trades >= max(10, int(total_count * 0.60)):
+            return f"Scenario {scenario_id} — Long Horizon"
+        if total_count and n_trades <= max(5, int(total_count * 0.20)):
+            return f"Scenario {scenario_id} — Short Horizon"
+        if scenario_id == "1":
+            return "Scenario 1 — Base Case"
+        return f"Scenario {scenario_id} — Comparison Case"
+
+    def build_setup_note(
+        n_sim: int,
+        n_trades: int,
+        start: int,
+        end: int,
+        start_date: str,
+        end_date: str,
+    ) -> str:
+        parts = [f"{n_sim:,} runs", f"{n_trades} trades/path"]
+
+        if start_date or end_date:
+            if start_date and end_date:
+                parts.append(f"{start_date} to {end_date}")
+            elif start_date:
+                parts.append(f"from {start_date}")
+            else:
+                parts.append(f"until {end_date}")
+        elif start > 0 or end > 0:
+            parts.append(f"range {start} to {end}")
+
+        return " · ".join(parts)
+
+    def normalize(value: float, values: list[float]) -> float:
+        if not values:
+            return 1.0
+        low = min(values)
+        high = max(values)
+        if high == low:
+            return 1.0
+        return (value - low) / (high - low)
+
+    def build_delta_note(current: dict, best: dict) -> str:
+        if current is best:
+            return "Leads the current comparison on combined downside resilience, reliability, and median outcome."
+
+        prob_gap = current["prob_positive"] - best["prob_positive"]
+        median_gap = current["median"] - best["median"]
+        p05_gap = current["p05"] - best["p05"]
+
+        prob_text = (
+            f"{abs(prob_gap):.2f} percentage points {'lower' if prob_gap < 0 else 'higher'}"
+        )
+        median_text = (
+            f"${abs(median_gap):,.2f} {'below' if median_gap < 0 else 'above'}"
+        )
+        p05_text = (
+            f"${abs(p05_gap):,.2f} {'weaker' if p05_gap < 0 else 'stronger'}"
+        )
+
+        return (
+            f"Median is {median_text} than the leading setup, positive probability is "
+            f"{prob_text}, and 5th-percentile downside is {p05_text}."
+        )
+
+    def build_best_summary(best: dict, runner_up: dict | None) -> str:
+        if runner_up is None:
+            return "Only configured scenario in the current comparison set."
+
+        prob_gap = best["prob_positive"] - runner_up["prob_positive"]
+        p05_gap = best["p05"] - runner_up["p05"]
+        median_gap = best["median"] - runner_up["median"]
+
+        return (
+            f"Leads the next-best setup by {prob_gap:.2f} percentage points on positive probability, "
+            f"${p05_gap:,.2f} on 5th-percentile downside, and ${median_gap:,.2f} on median outcome."
+        )
+
     if request.method == "POST":
         if "reset" in request.POST:
             clear_uploaded_dataset_from_session(request)
+            logger.info("scenario_compare_reset | user=%s", request.user.username)
             return render_scenario_page(
                 {
                     "instruction": "Planning dataset reset successfully.",
@@ -716,6 +888,13 @@ def simulation_scenario_view(request):
                 date_end=date_end,
             )
 
+            logger.info(
+                "scenario_compare_dataset_loaded | user=%s | filename=%s | rows=%s",
+                request.user.username,
+                uploaded_file.name,
+                trade_count,
+            )
+
             return render_scenario_page(
                 {
                     "instruction": "Planning dataset loaded. You can now compare scenarios side by side.",
@@ -729,6 +908,7 @@ def simulation_scenario_view(request):
 
         df = load_uploaded_df_from_session(request)
         if df is None or df.empty:
+            logger.warning("scenario_compare_missing_dataset | user=%s", request.user.username)
             return render_scenario_page(
                 {
                     "instruction": "Please load a planning dataset first.",
@@ -799,6 +979,17 @@ def simulation_scenario_view(request):
                     )
                     continue
 
+                display_label = build_scenario_label(
+                    scenario_id=i,
+                    n_trades=n_trades,
+                    start=start,
+                    end=end,
+                    total_count=len(df),
+                    start_date=start_date_raw,
+                    end_date=end_date_raw,
+                )
+                form_data[i]["display_label"] = display_label
+
                 df_range = df.iloc[start:end].copy()
                 df_range = filter_df_by_date_range(
                     df_range,
@@ -811,7 +1002,7 @@ def simulation_scenario_view(request):
                 if len(profits) == 0:
                     scenarios.append(
                         {
-                            "label": label,
+                            "label": display_label,
                             "error": "No records matched filters.",
                         }
                     )
@@ -828,17 +1019,26 @@ def simulation_scenario_view(request):
 
                 band_chart = build_percentile_band_chart(
                     curve_summary,
-                    title=f"{label} Distribution View",
+                    title=f"{display_label} Distribution View",
                 )
 
                 histogram_chart = build_final_profit_histogram(
                     curve_summary,
-                    title=f"{label} Final Profit Distribution",
+                    title=f"{display_label} Final Profit Distribution",
                 )
 
                 scenarios.append(
                     {
-                        "label": label,
+                        "label": display_label,
+                        "scenario_id": i,
+                        "setup_note": build_setup_note(
+                            n_sim=n_sim,
+                            n_trades=n_trades,
+                            start=start,
+                            end=end,
+                            start_date=start_date_raw,
+                            end_date=end_date_raw,
+                        ),
                         "min": simulation_data["min"],
                         "max": simulation_data["max"],
                         "mean": simulation_data["mean"],
@@ -857,6 +1057,13 @@ def simulation_scenario_view(request):
                         "chart": band_chart,
                         "histogram_chart": histogram_chart,
                         "warning": build_simulation_warning(len(profits), n_sim, n_trades),
+                        "filtered_trade_count": len(profits),
+                        "range_start": start,
+                        "range_end": end,
+                        "start_date": start_date_raw,
+                        "end_date": end_date_raw,
+                        "num_simulations": n_sim,
+                        "num_trades": n_trades,
                     }
                 )
 
@@ -868,6 +1075,67 @@ def simulation_scenario_view(request):
                     }
                 )
 
+        successful_scenarios = [s for s in scenarios if not s.get("error")]
+
+        best_scenario = None
+        if successful_scenarios:
+            prob_values = [s["prob_positive"] for s in successful_scenarios]
+            median_values = [s["median"] for s in successful_scenarios]
+            p05_values = [s["p05"] for s in successful_scenarios]
+
+            for scenario in successful_scenarios:
+                score = (
+                    0.40 * normalize(scenario["prob_positive"], prob_values)
+                    + 0.35 * normalize(scenario["p05"], p05_values)
+                    + 0.25 * normalize(scenario["median"], median_values)
+                )
+                scenario["decision_score"] = score * 100
+
+            ranked = sorted(
+                successful_scenarios,
+                key=lambda s: (
+                    s["decision_score"],
+                    s["prob_positive"],
+                    s["p05"],
+                    s["median"],
+                ),
+                reverse=True,
+            )
+
+            best_scenario = ranked[0]
+            runner_up = ranked[1] if len(ranked) > 1 else None
+
+            for rank, scenario in enumerate(ranked, start=1):
+                scenario["rank"] = rank
+                scenario["is_best"] = rank == 1
+
+                if scenario["is_best"]:
+                    scenario["status_label"] = "Most defensible"
+                    scenario["status_tone"] = "success"
+                elif rank == 2 and scenario["decision_score"] >= 55:
+                    scenario["status_label"] = "Balanced alternative"
+                    scenario["status_tone"] = "info"
+                elif scenario["prob_positive"] >= 60:
+                    scenario["status_label"] = "Watchlist"
+                    scenario["status_tone"] = "warning"
+                else:
+                    scenario["status_label"] = "Fragile setup"
+                    scenario["status_tone"] = "danger"
+
+                scenario["delta_note"] = build_delta_note(scenario, best_scenario)
+
+            best_scenario["summary_reason"] = build_best_summary(best_scenario, runner_up)
+
+            error_scenarios = [s for s in scenarios if s.get("error")]
+            scenarios = ranked + error_scenarios
+
+            logger.info(
+                "scenario_compare_completed | user=%s | successful_scenarios=%s | best_scenario=%s",
+                request.user.username,
+                len(successful_scenarios),
+                best_scenario["label"] if best_scenario else "none",
+            )
+
         return render_scenario_page(
             {
                 "trade_count": trade_count,
@@ -876,6 +1144,7 @@ def simulation_scenario_view(request):
                 "form_data": form_data,
                 "scenarios": scenarios,
                 "dataset_meta": dataset_meta,
+                "best_scenario": best_scenario,
             },
             df=df,
         )
@@ -901,4 +1170,3 @@ def simulation_scenario_view(request):
         )
 
     return render_scenario_page({})
-

@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import logging
 import re
 from io import BytesIO
 from typing import Any
@@ -22,6 +23,8 @@ APP_LABEL = "riskwise"
 
 SESSION_DF_KEY = "riskwise_uploaded_df"
 SESSION_META_KEY = "riskwise_dataset_meta"
+
+logger = logging.getLogger("riskwise")
 
 PROFIT_ALIASES = [
     "profit",
@@ -175,6 +178,9 @@ def _ensure_session_column(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _prepare_dataframe(uploaded_file) -> pd.DataFrame:
+    filename = getattr(uploaded_file, "name", "uploaded_file")
+    logger.info("prepare_dataframe_started | filename=%s", filename)
+
     df = _read_uploaded_dataframe(uploaded_file)
 
     if df.empty:
@@ -207,6 +213,13 @@ def _prepare_dataframe(uploaded_file) -> pd.DataFrame:
         df = df.sort_values(by=date_col, kind="stable", na_position="last").reset_index(drop=True)
 
     df = _ensure_session_column(df)
+
+    logger.info(
+        "prepare_dataframe_success | filename=%s | rows=%s | columns=%s",
+        filename,
+        len(df),
+        list(df.columns),
+    )
     return df.reset_index(drop=True)
 
 
@@ -235,6 +248,7 @@ def load_uploaded_df_from_session(request) -> pd.DataFrame | None:
             df["date"] = pd.to_datetime(df["date"], errors="coerce")
         return df
     except Exception:
+        logger.exception("load_uploaded_df_from_session_failed")
         return None
 
 
@@ -242,6 +256,7 @@ def clear_uploaded_dataset_from_session(request) -> None:
     request.session.pop(SESSION_DF_KEY, None)
     request.session.pop(SESSION_META_KEY, None)
     request.session.modified = True
+    logger.info("clear_uploaded_dataset_from_session")
 
 
 def get_dataset_meta(df: pd.DataFrame) -> tuple[int, str | None, str | None]:
@@ -271,6 +286,7 @@ def build_dataset_meta(filename: str | None, df: pd.DataFrame) -> dict[str, Any]
         "columns": list(df.columns) if df is not None else [],
         "has_profit": bool(df is not None and "profit" in df.columns),
     }
+
 
 def save_dataset_meta_to_session(request, filename: str | None, df: pd.DataFrame) -> dict[str, Any]:
     meta = build_dataset_meta(filename, df)
@@ -336,12 +352,23 @@ def get_active_planning_df(request) -> tuple[pd.DataFrame | None, dict[str, Any]
         meta = load_dataset_meta_from_session(request)
         if not meta:
             meta = build_dataset_meta("Session Dataset", df)
+        logger.info(
+            "active_planning_df_from_session | user=%s | rows=%s",
+            request.user.username,
+            len(df),
+        )
         return df, meta
 
     db_df = _trade_queryset_to_dataframe(request.user)
     if db_df is not None and not db_df.empty:
+        logger.info(
+            "active_planning_df_from_database | user=%s | rows=%s",
+            request.user.username,
+            len(db_df),
+        )
         return db_df, build_dataset_meta("Database Trades", db_df)
 
+    logger.info("active_planning_df_missing | user=%s", request.user.username)
     return None, None
 
 
@@ -401,6 +428,12 @@ def _coerce_optional_datetime(value: Any):
 
 
 def replace_user_trades_from_dataframe(user, df: pd.DataFrame) -> int:
+    logger.info(
+        "replace_user_trades_started | user=%s | incoming_rows=%s",
+        getattr(user, "username", "unknown"),
+        len(df),
+    )
+
     trade_model = _get_trade_model()
     if trade_model is None:
         return len(df)
@@ -507,7 +540,6 @@ def replace_user_trades_from_dataframe(user, df: pd.DataFrame) -> int:
             if "date" in concrete_fields and "date" in row.index and pd.notna(row["date"]):
                 kwargs["date"] = _coerce_optional_datetime(row["date"])
 
-            # Fallbacks for required numeric fields
             if "volume" in concrete_fields and "volume" not in kwargs:
                 if "lot_size" in kwargs:
                     kwargs["volume"] = kwargs["lot_size"]
@@ -520,7 +552,6 @@ def replace_user_trades_from_dataframe(user, df: pd.DataFrame) -> int:
                 if "entry_price" in kwargs:
                     kwargs["entry"] = kwargs["entry_price"]
 
-            # Final safety defaults for required DB fields
             set_default_if_required(kwargs, "volume", 0.0)
             set_default_if_required(kwargs, "entry_price", 0.0)
             set_default_if_required(kwargs, "entry", 0.0)
@@ -537,6 +568,11 @@ def replace_user_trades_from_dataframe(user, df: pd.DataFrame) -> int:
         if objects:
             trade_model.objects.bulk_create(objects, batch_size=500)
 
+    logger.info(
+        "replace_user_trades_success | user=%s | created_rows=%s",
+        getattr(user, "username", "unknown"),
+        len(df),
+    )
     return len(df)
 
 
@@ -757,6 +793,14 @@ def run_simulation(
     num_simulations = max(safe_int(num_simulations, 0), 1)
     num_trades = max(safe_int(num_trades, 0), 1)
 
+    logger.info(
+        "run_simulation_started | sample_size=%s | num_simulations=%s | num_trades=%s | include_curves=%s",
+        profit_array.size,
+        num_simulations,
+        num_trades,
+        include_curves,
+    )
+
     totals = np.zeros(num_simulations)
     equity_curves: list[list[float]] = []
 
@@ -781,6 +825,13 @@ def run_simulation(
     if include_curves:
         result["equity_curves"] = equity_curves
 
+    logger.info(
+        "run_simulation_completed | min=%s | median=%s | p95=%s | prob_positive=%s",
+        result["min"],
+        result["median"],
+        result["p95"],
+        result["prob_positive"],
+    )
     return result
 
 
@@ -930,6 +981,7 @@ def slug_filename(label: str, extension: str) -> str:
     extension = extension if extension.startswith(".") else f".{extension}"
     slug = slugify(label or "riskwise-export") or "riskwise-export"
     return f"{slug}{extension}"
+
 
 def _encode_matplotlib_figure(fig) -> str:
     buffer = io.BytesIO()

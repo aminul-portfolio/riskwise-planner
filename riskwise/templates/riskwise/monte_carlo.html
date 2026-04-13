@@ -1,13 +1,13 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Monte Carlo Risk Simulation — RiskWise Planner{% endblock %}
+{% block title %}Monte Carlo Lab — RiskWise Planner{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb rw-breadcrumb mb-0">
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Planning Baseline</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Monte Carlo Risk Simulation</li>
+    <li class="breadcrumb-item active" aria-current="page">Monte Carlo Lab</li>
   </ol>
 </nav>
 {% endblock %}
@@ -16,20 +16,19 @@
 <div class="rw-simulation-page">
 
   <section class="rw-hero-card rw-sim-hero mb-4">
-    <div class="rw-eyebrow">FLAGSHIP SIMULATION SURFACE</div>
+    <div class="rw-eyebrow">EXPLORATORY SIMULATION SURFACE</div>
 
     <div class="rw-sim-hero__grid">
       <div class="rw-sim-hero__content">
-        <h1 class="rw-page-title">Monte Carlo Risk Simulation</h1>
+        <h1 class="rw-page-title">Monte Carlo Lab</h1>
         <p class="rw-page-subtitle mb-0">
-          Resample the active planning dataset to explore distribution ranges, downside pressure, and the probability
-          of positive outcomes before capital is committed.
+          Resample the active planning baseline to explore distribution ranges, downside pressure, and variation across possible trade sequences. Use this surface for exploratory analysis before moving into decision-ready stress-test review.
         </p>
 
         <div class="rw-sim-hero__badges">
+          <span class="rw-badge rw-badge--neutral">Exploratory</span>
+          <span class="rw-badge rw-badge--neutral">Distribution Analysis</span>
           <span class="rw-badge rw-badge--neutral">Monte Carlo</span>
-          <span class="rw-badge rw-badge--neutral">Planning Distribution</span>
-          <span class="rw-badge rw-badge--neutral">Decision Support</span>
         </div>
       </div>
 
@@ -37,8 +36,8 @@
         <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
           <i class="bi bi-speedometer2 me-2"></i>Planning Baseline
         </a>
-        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+          <i class="bi bi-activity me-2"></i>Continue to Stress-Test Review
         </a>
       </div>
     </div>
@@ -46,10 +45,10 @@
 
   {% if dataset_meta %}
     <section class="rw-provenance mb-4">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-database" style="color: var(--rw-primary);"></i>
-          <span style="color: var(--rw-muted);">Active Dataset</span>
+      <div class="rw-provenance__row d-flex flex-wrap align-items-center gap-3">
+        <div class="rw-provenance__meta d-flex align-items-center gap-2">
+          <i class="bi bi-database rw-provenance__icon"></i>
+          <span class="rw-provenance__label">Active Dataset</span>
         </div>
 
         {% if dataset_meta.source_file %}
@@ -100,7 +99,7 @@
           Load a planning dataset, choose the number of simulations and trade horizon, then review the resulting outcome distribution.
         </p>
 
-        <form method="post" enctype="multipart/form-data" class="row g-3">
+        <form method="post" enctype="multipart/form-data" class="row g-3 rw-submit-form">
           {% csrf_token %}
 
           <div class="col-12">
@@ -122,50 +121,22 @@
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Number of Simulations</label>
-            <input
-              type="number"
-              name="num_simulations"
-              class="form-control rw-form-control"
-              min="1"
-              value="{{ form_data.num_simulations|default:'' }}"
-              placeholder="e.g. 1000"
-            >
+            <input type="number" name="num_simulations" class="form-control rw-form-control" min="1" value="{{ form_data.num_simulations|default:'' }}" placeholder="e.g. 1000">
           </div>
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Trades per Simulation</label>
-            <input
-              type="number"
-              name="num_trades"
-              class="form-control rw-form-control"
-              min="1"
-              value="{{ form_data.num_trades|default:'' }}"
-              placeholder="e.g. 50"
-            >
+            <input type="number" name="num_trades" class="form-control rw-form-control" min="1" value="{{ form_data.num_trades|default:'' }}" placeholder="e.g. 50">
           </div>
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Range Start</label>
-            <input
-              type="number"
-              name="range_start"
-              class="form-control rw-form-control"
-              min="0"
-              value="{{ form_data.range_start|default:'' }}"
-              placeholder="0"
-            >
+            <input type="number" name="range_start" class="form-control rw-form-control" min="0" value="{{ form_data.range_start|default:'' }}" placeholder="0">
           </div>
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Range End</label>
-            <input
-              type="number"
-              name="range_end"
-              class="form-control rw-form-control"
-              min="1"
-              value="{{ form_data.range_end|default:'' }}"
-              placeholder="{% firstof trade_count 'End' %}"
-            >
+            <input type="number" name="range_end" class="form-control rw-form-control" min="1" value="{{ form_data.range_end|default:'' }}" placeholder="{% firstof trade_count 'End' %}">
           </div>
 
           <div class="col-md-6">
@@ -180,53 +151,28 @@
 
           <div class="col-md-3 uk-time-range {% if form_data.session != 'UK' %}d-none{% endif %}">
             <label class="form-label rw-form-label">UK Start Hour</label>
-            <input
-              type="number"
-              name="uk_start"
-              class="form-control rw-form-control"
-              min="0"
-              max="23"
-              value="{{ form_data.uk_start|default:'' }}"
-              placeholder="8"
-            >
+            <input type="number" name="uk_start" class="form-control rw-form-control" min="0" max="23" value="{{ form_data.uk_start|default:'' }}" placeholder="8">
           </div>
 
           <div class="col-md-3 uk-time-range {% if form_data.session != 'UK' %}d-none{% endif %}">
             <label class="form-label rw-form-label">UK End Hour</label>
-            <input
-              type="number"
-              name="uk_end"
-              class="form-control rw-form-control"
-              min="0"
-              max="23"
-              value="{{ form_data.uk_end|default:'' }}"
-              placeholder="17"
-            >
+            <input type="number" name="uk_end" class="form-control rw-form-control" min="0" max="23" value="{{ form_data.uk_end|default:'' }}" placeholder="17">
           </div>
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Filter Start Date</label>
-            <input
-              type="date"
-              name="start_date"
-              class="form-control rw-form-control"
-              value="{{ form_data.start_date|default:'' }}"
-            >
+            <input type="date" name="start_date" class="form-control rw-form-control" value="{{ form_data.start_date|default:'' }}">
           </div>
 
           <div class="col-md-6">
             <label class="form-label rw-form-label">Filter End Date</label>
-            <input
-              type="date"
-              name="end_date"
-              class="form-control rw-form-control"
-              value="{{ form_data.end_date|default:'' }}"
-            >
+            <input type="date" name="end_date" class="form-control rw-form-control" value="{{ form_data.end_date|default:'' }}">
           </div>
 
           <div class="col-12 d-grid gap-2 d-sm-flex">
-            <button type="submit" class="btn rw-btn-primary">
-              <i class="bi bi-shuffle me-2"></i>Run Monte Carlo
+            <button type="submit" class="btn rw-btn-primary rw-submit-btn">
+              <span class="rw-submit-btn__label"><i class="bi bi-shuffle me-2"></i>Run Monte Carlo</span>
+              <span class="rw-submit-btn__spinner d-none"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Running…</span>
             </button>
             <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
               <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Dataset
@@ -354,7 +300,7 @@
         {% endif %}
 
         {% if suggested_next_step %}
-          <section class="rw-panel-card">
+          <section class="rw-panel-card mb-0">
             <div class="rw-panel-card__header">
               <h3>Suggested Next Step</h3>
               <span class="rw-badge rw-badge--neutral">Actionable</span>
@@ -367,22 +313,21 @@
               </div>
             </div>
 
-            <div class="d-grid gap-2 d-sm-flex">
-              <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
-                <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+            <div class="rw-inline-actions">
+              <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
+                <i class="bi bi-activity me-2"></i>Continue to Stress-Test Review
               </a>
-              <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-                <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+              <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
+                <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
               </a>
             </div>
           </section>
         {% endif %}
 
       {% else %}
-
         <div class="row g-4">
-          <div class="col-12">
-            <section class="rw-panel-card mb-0">
+          <div class="col-lg-6">
+            <section class="rw-panel-card h-100">
               <div class="rw-panel-card__header">
                 <h3>Current Dataset Snapshot</h3>
                 <span class="rw-badge rw-badge--neutral">Ready State</span>
@@ -392,11 +337,11 @@
                 Review the active dataset context before running the simulation.
               </p>
 
-              <div class="row g-3">
-                <div class="col-sm-6 col-xl-3">
+              <div class="rw-sim-snapshot-grid">
+                <div>
                   <div class="rw-kpi-card rw-kpi-card-primary h-100">
                     <div class="rw-kpi-label">Dataset</div>
-                    <div class="rw-kpi-value" style="font-size: 1rem; word-break: break-word;">
+                    <div class="rw-kpi-value rw-kpi-value--wrap">
                       {% if dataset_meta and dataset_meta.source_file %}
                         {{ dataset_meta.source_file }}
                       {% else %}
@@ -406,10 +351,10 @@
                   </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
+                <div>
                   <div class="rw-kpi-card rw-kpi-card-info h-100">
                     <div class="rw-kpi-label">Records</div>
-                    <div class="rw-kpi-value" style="font-size: 1rem;">
+                    <div class="rw-kpi-value rw-kpi-value--sm">
                       {% if dataset_meta and dataset_meta.records_loaded %}
                         {{ dataset_meta.records_loaded }}
                       {% elif trade_count %}
@@ -421,10 +366,10 @@
                   </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
+                <div>
                   <div class="rw-kpi-card rw-kpi-card-secondary h-100">
                     <div class="rw-kpi-label">Date Range</div>
-                    <div class="rw-kpi-value" style="font-size: 0.95rem;">
+                    <div class="rw-kpi-value rw-kpi-value--sm">
                       {% if dataset_meta and dataset_meta.date_start and dataset_meta.date_end %}
                         {{ dataset_meta.date_start }}<br>{{ dataset_meta.date_end }}
                       {% elif date_start and date_end %}
@@ -436,10 +381,10 @@
                   </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
+                <div>
                   <div class="rw-kpi-card rw-kpi-card-warning h-100">
                     <div class="rw-kpi-label">Use Case</div>
-                    <div class="rw-kpi-value" style="font-size: 1rem;">
+                    <div class="rw-kpi-value rw-kpi-value--sm">
                       Planning<br>Reference
                     </div>
                   </div>
@@ -529,23 +474,37 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const sessionSelect = document.getElementById('sessionSelect');
-  const ukTimeFields = document.querySelectorAll('.uk-time-range');
+  (function () {
+    const sessionSelect = document.getElementById("sessionSelect");
+    const ukFields = document.querySelectorAll(".uk-time-range");
+    const form = document.querySelector(".rw-submit-form");
 
-  function toggleUkFields() {
-    if (!sessionSelect) return;
-    if (sessionSelect.value === 'UK') {
-      ukTimeFields.forEach(el => el.classList.remove('d-none'));
-    } else {
-      ukTimeFields.forEach(el => el.classList.add('d-none'));
+    function toggleUkFields() {
+      if (!sessionSelect || !ukFields.length) return;
+      const showUkFields = sessionSelect.value === "UK";
+      ukFields.forEach((field) => field.classList.toggle("d-none", !showUkFields));
     }
-  }
 
-  if (sessionSelect) {
-    sessionSelect.addEventListener('change', toggleUkFields);
-    toggleUkFields();
-  }
-});
+    if (sessionSelect) {
+      sessionSelect.addEventListener("change", toggleUkFields);
+      toggleUkFields();
+    }
+
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        const submitter = event.submitter;
+        if (!submitter || submitter.name === "reset") return;
+
+        const label = submitter.querySelector(".rw-submit-btn__label");
+        const spinner = submitter.querySelector(".rw-submit-btn__spinner");
+
+        if (label && spinner) {
+          label.classList.add("d-none");
+          spinner.classList.remove("d-none");
+          submitter.disabled = true;
+        }
+      });
+    }
+  })();
 </script>
 {% endblock %}

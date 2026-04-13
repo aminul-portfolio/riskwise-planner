@@ -1,12 +1,12 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Saved Simulation Runs — RiskWise Planner{% endblock %}
+{% block title %}Saved Runs — RiskWise Planner{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb rw-breadcrumb mb-0">
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Results</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Review</a></li>
     <li class="breadcrumb-item active" aria-current="page">Saved Runs</li>
   </ol>
 </nav>
@@ -20,7 +20,7 @@
 
     <div class="rw-history-hero__grid">
       <div class="rw-history-hero__content">
-        <h1 class="rw-page-title">Saved Simulation Runs</h1>
+        <h1 class="rw-page-title">Saved Runs</h1>
         <p class="rw-page-subtitle mb-0">
           Review saved stress-test runs, revisit earlier assumptions, and use the archive as a structured planning review surface.
         </p>
@@ -37,7 +37,7 @@
 
       <div class="rw-history-hero__actions">
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-play-circle me-2"></i>New Stress Test
+          <i class="bi bi-activity me-2"></i>Open Stress-Test Review
         </a>
         <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
           <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
@@ -59,39 +59,18 @@
     <form method="get" class="row g-3">
       <div class="col-md-5">
         <label class="form-label rw-form-label">Search</label>
-        <input
-          type="text"
-          name="q"
-          class="form-control rw-form-control"
-          value="{{ query|default:'' }}"
-          placeholder="Label, parameters, results"
-        >
+        <input type="text" name="q" class="form-control rw-form-control" value="{{ query|default:'' }}" placeholder="Label, parameters, results">
       </div>
-
       <div class="col-md-3">
         <label class="form-label rw-form-label">Date from</label>
-        <input
-          type="date"
-          name="date_from"
-          class="form-control rw-form-control"
-          value="{{ date_from|default:'' }}"
-        >
+        <input type="date" name="date_from" class="form-control rw-form-control" value="{{ date_from|default:'' }}">
       </div>
-
       <div class="col-md-3">
         <label class="form-label rw-form-label">Date to</label>
-        <input
-          type="date"
-          name="date_to"
-          class="form-control rw-form-control"
-          value="{{ date_to|default:'' }}"
-        >
+        <input type="date" name="date_to" class="form-control rw-form-control" value="{{ date_to|default:'' }}">
       </div>
-
       <div class="col-md-1 d-flex align-items-end">
-        <button type="submit" class="btn rw-btn-primary w-100">
-          <i class="bi bi-search"></i>
-        </button>
+        <button type="submit" class="btn rw-btn-primary w-100"><i class="bi bi-search"></i></button>
       </div>
     </form>
   </section>
@@ -101,9 +80,7 @@
       <div class="rw-panel-card">
         <div class="rw-panel-card__header">
           <h3>Archive Overview</h3>
-          <span class="rw-badge rw-badge--neutral">
-            {{ page_obj.paginator.count }} saved run{{ page_obj.paginator.count|pluralize }}
-          </span>
+          <span class="rw-badge rw-badge--neutral">{{ page_obj.paginator.count }} saved run{{ page_obj.paginator.count|pluralize }}</span>
         </div>
 
         <p class="rw-sim-panel-note mt-3 mb-4">
@@ -116,105 +93,48 @@
               <div class="rw-history-card__top">
                 <div>
                   <h4>{{ item.label|default:"Saved Run" }}</h4>
-                  <p class="mb-2 rw-sim-panel-note">
-                    Saved {{ item.created_at|date:"d M Y, H:i" }}
-                  </p>
-
+                  <p class="mb-2 rw-sim-panel-note">Saved {{ item.created_at|date:"d M Y, H:i" }}</p>
                   <div class="d-flex flex-wrap gap-2">
                     <span class="rw-badge rw-badge--neutral">{{ item.display_run_type }}</span>
-
                     {% if item.display_source_file != "—" %}
                       <span class="rw-badge rw-badge--neutral">{{ item.display_source_file }}</span>
                     {% endif %}
-
                     <span class="rw-badge rw-badge--neutral">{{ item.display_num_simulations }} runs</span>
                     <span class="rw-badge rw-badge--neutral">{{ item.display_num_trades }} trades/path</span>
                   </div>
                 </div>
-
                 <div class="rw-inline-actions">
-                  <a href="{% url 'simulation_detail' item.pk %}" class="btn rw-btn-primary">
-                    <i class="bi bi-box-arrow-up-right me-2"></i>Open Detail
-                  </a>
+                  <a href="{% url 'simulation_detail' item.pk %}" class="btn rw-btn-primary"><i class="bi bi-box-arrow-up-right me-2"></i>Open Detail</a>
                 </div>
               </div>
 
               {% if item.results %}
                 <div class="rw-history-card__metrics">
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">Median</span>
-                    <span class="rw-mini-stat__value">{{ item.display_median }}</span>
-                  </div>
-
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">Tail Risk</span>
-                    <span class="rw-mini-stat__value">{{ item.display_tail_risk }}</span>
-                  </div>
-
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">Upper Band</span>
-                    <span class="rw-mini-stat__value">{{ item.display_upper_band }}</span>
-                  </div>
-
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">Positive %</span>
-                    <span class="rw-mini-stat__value">{{ item.display_positive_rate }}</span>
-                  </div>
-
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">P25</span>
-                    <span class="rw-mini-stat__value">{{ item.display_p25 }}</span>
-                  </div>
-
-                  <div class="rw-mini-stat">
-                    <span class="rw-mini-stat__label">P75</span>
-                    <span class="rw-mini-stat__value">{{ item.display_p75 }}</span>
-                  </div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">Median</span><span class="rw-mini-stat__value">{{ item.display_median }}</span></div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">Tail Risk</span><span class="rw-mini-stat__value">{{ item.display_tail_risk }}</span></div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">Upper Band</span><span class="rw-mini-stat__value">{{ item.display_upper_band }}</span></div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">Positive %</span><span class="rw-mini-stat__value">{{ item.display_positive_rate }}</span></div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">P25</span><span class="rw-mini-stat__value">{{ item.display_p25 }}</span></div>
+                  <div class="rw-mini-stat"><span class="rw-mini-stat__label">P75</span><span class="rw-mini-stat__value">{{ item.display_p75 }}</span></div>
                 </div>
 
                 <div class="row g-4 mt-1">
                   <div class="col-lg-7">
                     <div class="rw-insight-list">
-                      <div class="rw-insight-item">
-                        <div class="rw-insight-dot rw-dot-warning"></div>
-                        <div>
-                          <strong>Review focus:</strong> prioritise tail outcomes and positive-run rate before relying on the median result.
-                        </div>
-                      </div>
-
-                      <div class="rw-insight-item">
-                        <div class="rw-insight-dot rw-dot-info"></div>
-                        <div>
-                          <strong>Setup context:</strong> range {{ item.display_range }}
-                          {% if item.display_date_range != "—" %}
-                            • {{ item.display_date_range }}
-                          {% endif %}
-                        </div>
-                      </div>
-
-                      <div class="rw-insight-item">
-                        <div class="rw-insight-dot rw-dot-success"></div>
-                        <div>
-                          <strong>Next step:</strong> open the detail view to inspect chart shape, dataset provenance, and archived input assumptions.
-                        </div>
-                      </div>
+                      <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-warning"></div><div><strong>Review focus:</strong> prioritise tail outcomes and positive-run rate before relying on the median result.</div></div>
+                      <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-info"></div><div><strong>Setup context:</strong> range {{ item.display_range }}{% if item.display_date_range != "—" %} • {{ item.display_date_range }}{% endif %}</div></div>
+                      <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-success"></div><div><strong>Next step:</strong> open the detail view to inspect chart shape, dataset provenance, and archived input assumptions.</div></div>
                     </div>
                   </div>
 
                   <div class="col-lg-5">
                     {% if item.has_chart_preview %}
                       <div class="rw-sim-chart-frame rw-sim-chart-frame--compact">
-                        <img
-                          src="data:image/png;base64,{{ item.chart_base64 }}"
-                          alt="Saved run chart preview"
-                          class="img-fluid rounded-4"
-                        >
+                        <img src="data:image/png;base64,{{ item.chart_base64 }}" alt="Saved run chart preview" class="img-fluid rounded-4">
                       </div>
                     {% else %}
                       <div class="rw-empty-state rw-empty-state--compact h-100">
-                        <div class="rw-empty-icon">
-                          <i class="bi bi-bar-chart"></i>
-                        </div>
+                        <div class="rw-empty-icon"><i class="bi bi-bar-chart"></i></div>
                         <h3 class="rw-empty-title">No preview chart</h3>
                         <p class="rw-empty-text mb-0">This saved run does not include a chart preview.</p>
                       </div>
@@ -223,9 +143,7 @@
                 </div>
               {% else %}
                 <div class="rw-empty-state rw-empty-state--compact mt-3">
-                  <div class="rw-empty-icon">
-                    <i class="bi bi-clipboard-data"></i>
-                  </div>
+                  <div class="rw-empty-icon"><i class="bi bi-clipboard-data"></i></div>
                   <h3 class="rw-empty-title">No stored metrics</h3>
                   <p class="rw-empty-text">This archive item does not include saved summary metrics.</p>
                 </div>
@@ -238,31 +156,11 @@
           <nav class="mt-4" aria-label="Saved runs pagination">
             <ul class="pagination mb-0">
               {% if page_obj.has_previous %}
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.previous_page_number }}"
-                  >
-                    Previous
-                  </a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
               {% endif %}
-
-              <li class="page-item active">
-                <span class="page-link">
-                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </span>
-              </li>
-
+              <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
               {% if page_obj.has_next %}
-                <li class="page-item">
-                  <a
-                    class="page-link"
-                    href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.next_page_number }}"
-                  >
-                    Next
-                  </a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?q={{ query }}&date_from={{ date_from }}&date_to={{ date_to }}&page={{ page_obj.next_page_number }}">Next</a></li>
               {% endif %}
             </ul>
           </nav>
@@ -271,17 +169,11 @@
     </section>
   {% else %}
     <div class="rw-empty-state">
-      <div class="rw-empty-icon">
-        <i class="bi bi-clock-history"></i>
-      </div>
-      <h3 class="rw-empty-title">No saved simulation runs yet</h3>
-      <p class="rw-empty-text">
-        Run and save a stress test to build the archive and create a reusable planning review history.
-      </p>
+      <div class="rw-empty-icon"><i class="bi bi-clock-history"></i></div>
+      <h3 class="rw-empty-title">No saved runs yet</h3>
+      <p class="rw-empty-text">Run and save a stress test to build the archive and create a reusable planning review history.</p>
       <div class="rw-inline-actions mt-3">
-        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-play-circle me-2"></i>Run Stress Test
-        </a>
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary"><i class="bi bi-activity me-2"></i>Open Stress-Test Review</a>
       </div>
     </div>
   {% endif %}

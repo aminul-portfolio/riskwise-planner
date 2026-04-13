@@ -12,6 +12,11 @@ env/
 # Django
 db.sqlite3
 media/screenshots/
+staticfiles/
+
+# Coverage
+.coverage
+htmlcov/
 
 # Environment variables
 .env

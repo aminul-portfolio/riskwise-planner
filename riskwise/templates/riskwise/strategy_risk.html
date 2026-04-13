@@ -14,7 +14,6 @@
 
 {% block content %}
 <div class="rw-tool-page">
-
   <section class="rw-hero-card mb-4">
     <div class="rw-eyebrow">PLANNING TOOL</div>
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
@@ -24,14 +23,9 @@
           Review strategy-level risk assumptions using win rate, risk-reward ratio, and volatility-aware sizing logic.
         </p>
       </div>
-
       <div class="rw-hero-actions d-flex flex-column flex-sm-row gap-2">
-        <a href="{% url 'lot_size' %}" class="btn rw-btn-outline">
-          <i class="bi bi-bullseye me-2"></i>Position Sizing
-        </a>
-        <a href="{% url 'sltp' %}" class="btn rw-btn-primary">
-          <i class="bi bi-sliders me-2"></i>SL / TP Planner
-        </a>
+        <a href="{% url 'lot_size' %}" class="btn rw-btn-outline"><i class="bi bi-bullseye me-2"></i>Position Sizing</a>
+        <a href="{% url 'sltp' %}" class="btn rw-btn-primary"><i class="bi bi-sliders me-2"></i>SL / TP Planner</a>
       </div>
     </div>
   </section>
@@ -40,7 +34,7 @@
     <div class="col-xl-7">
       <section class="rw-panel-card h-100">
         <div class="rw-panel-card__header">
-          <h3>Strategy Review Inputs</h3>
+          <h3>Strategy Exposure Inputs</h3>
           <span class="rw-badge rw-badge--neutral">Exposure Setup</span>
         </div>
 
@@ -50,49 +44,28 @@
 
         <form method="post" class="row g-4">
           {% csrf_token %}
-
           {% for field in form %}
             <div class="col-md-6">
               <label class="form-label rw-form-label">{{ field.label }}</label>
               {{ field }}
-
-              {% if field.help_text %}
-                <small class="rw-form-help">{{ field.help_text }}</small>
-              {% endif %}
-
+              {% if field.help_text %}<small class="rw-form-help">{{ field.help_text }}</small>{% endif %}
               {% for error in field.errors %}
-                <div class="text-warning small mt-1">
-                  <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
-                </div>
+                <div class="text-warning small mt-1"><i class="bi bi-exclamation-triangle me-1"></i>{{ error }}</div>
               {% endfor %}
             </div>
           {% endfor %}
-
           <div class="col-12 d-grid d-sm-flex gap-2">
-            <button type="submit" class="btn rw-btn-primary">
-              <i class="bi bi-calculator me-2"></i>Calculate Strategy Review
-            </button>
-            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
-              <i class="bi bi-percent me-2"></i>Trade Risk Controls
-            </a>
+            <button type="submit" class="btn rw-btn-primary"><i class="bi bi-calculator me-2"></i>Calculate Strategy Exposure</button>
+            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline"><i class="bi bi-percent me-2"></i>Trade Risk Controls</a>
           </div>
         </form>
 
         <div class="mt-4 pt-3 border-top border-secondary-subtle">
           <div class="rw-section-subtitle mb-2">How to use these inputs</div>
           <div class="rw-insight-list">
-            <div class="rw-insight-item">
-              <div class="rw-insight-dot rw-dot-primary"></div>
-              <div><strong>Base lot:</strong> your neutral position size before strategy adjustments.</div>
-            </div>
-            <div class="rw-insight-item">
-              <div class="rw-insight-dot rw-dot-info"></div>
-              <div><strong>Win rate and risk-reward:</strong> provide a simplified view of edge quality.</div>
-            </div>
-            <div class="rw-insight-item">
-              <div class="rw-insight-dot rw-dot-warning"></div>
-              <div><strong>Volatility:</strong> acts as a dampener when conditions are less stable.</div>
-            </div>
+            <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-primary"></div><div><strong>Base lot:</strong> your neutral position size before strategy adjustments.</div></div>
+            <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-info"></div><div><strong>Win rate and risk-reward:</strong> provide a simplified view of edge quality.</div></div>
+            <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-warning"></div><div><strong>Volatility:</strong> acts as a dampener when conditions are less stable.</div></div>
           </div>
         </div>
       </section>
@@ -100,146 +73,44 @@
 
     <div class="col-xl-5">
       <div class="d-flex flex-column gap-4 h-100">
-
         {% if result %}
           <section class="rw-panel-card mb-0">
-            <div class="rw-panel-card__header">
-              <h3>{{ result_headline|default:"Strategy Review Result" }}</h3>
-              <span class="rw-badge rw-badge--neutral">Calculated Output</span>
-            </div>
-
-            <p class="rw-sim-panel-note mb-3">
-              {{ result_summary|default:"Use the adjusted sizing output as a planning signal when reviewing exposure under different strategy assumptions." }}
-            </p>
+            <div class="rw-panel-card__header"><h3>{{ result_headline|default:"Strategy Exposure Result" }}</h3><span class="rw-badge rw-badge--neutral">Calculated Output</span></div>
+            <p class="rw-sim-panel-note mb-3">{{ result_summary|default:"Use the adjusted sizing output as a planning signal when reviewing exposure under different strategy assumptions." }}</p>
 
             <div class="row g-3 mb-4">
-              <div class="col-md-6 col-xl-12">
-                <div class="rw-result-card h-100">
-                  <div class="rw-result-icon text-primary">
-                    <i class="bi bi-bar-chart-steps"></i>
-                  </div>
-                  <div>
-                    <div class="rw-result-label">Recommended Lot</div>
-                    <div class="rw-result-value">{{ result.recommended_lot|floatformat:4 }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6 col-xl-12">
-                <div class="rw-result-card h-100">
-                  <div class="rw-result-icon text-info">
-                    <i class="bi bi-graph-up"></i>
-                  </div>
-                  <div>
-                    <div class="rw-result-label">Expectancy</div>
-                    <div class="rw-result-value">{{ result.expectancy|floatformat:4 }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6 col-xl-12">
-                <div class="rw-result-card h-100">
-                  <div class="rw-result-icon text-success">
-                    <i class="bi bi-percent"></i>
-                  </div>
-                  <div>
-                    <div class="rw-result-label">Win Rate</div>
-                    <div class="rw-result-value">{{ result.win_rate|floatformat:2 }}%</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6 col-xl-12">
-                <div class="rw-result-card h-100">
-                  <div class="rw-result-icon text-warning">
-                    <i class="bi bi-diagram-3"></i>
-                  </div>
-                  <div>
-                    <div class="rw-result-label">Risk / Reward</div>
-                    <div class="rw-result-value">{{ result.rr|floatformat:2 }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6 col-xl-12">
-                <div class="rw-result-card h-100">
-                  <div class="rw-result-icon text-secondary">
-                    <i class="bi bi-activity"></i>
-                  </div>
-                  <div>
-                    <div class="rw-result-label">Volatility Input</div>
-                    <div class="rw-result-value">{{ result.volatility|floatformat:2 }}</div>
-                  </div>
-                </div>
-              </div>
+              <div class="col-md-6 col-xl-12"><div class="rw-result-card h-100"><div class="rw-result-icon text-primary"><i class="bi bi-bar-chart-steps"></i></div><div><div class="rw-result-label">Recommended Lot</div><div class="rw-result-value">{{ result.recommended_lot|floatformat:4 }}</div></div></div></div>
+              <div class="col-md-6 col-xl-12"><div class="rw-result-card h-100"><div class="rw-result-icon text-info"><i class="bi bi-graph-up"></i></div><div><div class="rw-result-label">Expectancy</div><div class="rw-result-value">{{ result.expectancy|floatformat:4 }}</div></div></div></div>
+              <div class="col-md-6 col-xl-12"><div class="rw-result-card h-100"><div class="rw-result-icon text-success"><i class="bi bi-percent"></i></div><div><div class="rw-result-label">Win Rate</div><div class="rw-result-value">{{ result.win_rate|floatformat:2 }}%</div></div></div></div>
+              <div class="col-md-6 col-xl-12"><div class="rw-result-card h-100"><div class="rw-result-icon text-warning"><i class="bi bi-diagram-3"></i></div><div><div class="rw-result-label">Risk / Reward</div><div class="rw-result-value">{{ result.rr|floatformat:2 }}</div></div></div></div>
+              <div class="col-md-6 col-xl-12"><div class="rw-result-card h-100"><div class="rw-result-icon text-secondary"><i class="bi bi-activity"></i></div><div><div class="rw-result-label">Volatility Input</div><div class="rw-result-value">{{ result.volatility|floatformat:2 }}</div></div></div></div>
             </div>
 
             <section class="rw-panel-card rw-panel-card--nested mb-0">
-              <div class="rw-panel-card__header">
-                <h3>Decision Interpretation</h3>
-                <span class="rw-badge rw-badge--neutral">Review Note</span>
-              </div>
-
+              <div class="rw-panel-card__header"><h3>Decision Interpretation</h3><span class="rw-badge rw-badge--neutral">Review Note</span></div>
               <div class="rw-insight-list">
-                <div class="rw-insight-item">
-                  <div class="rw-insight-dot rw-dot-info"></div>
-                  <div>
-                    <strong>Interpretation:</strong> treat the recommended lot as a directional planning signal rather than a fixed execution instruction.
-                  </div>
-                </div>
-                <div class="rw-insight-item">
-                  <div class="rw-insight-dot rw-dot-warning"></div>
-                  <div>
-                    <strong>Strategy stance:</strong> {{ result.stance|default:"No interpretation available." }}
-                  </div>
-                </div>
-                <div class="rw-insight-item">
-                  <div class="rw-insight-dot rw-dot-success"></div>
-                  <div>
-                    <strong>Suggested next step:</strong> {{ suggested_next_step|default:"Validate individual setups with Trade Risk Controls and SL / TP planning." }}
-                  </div>
-                </div>
+                <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-info"></div><div><strong>Interpretation:</strong> treat the recommended lot as a directional planning signal rather than a fixed execution instruction.</div></div>
+                <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-warning"></div><div><strong>Strategy stance:</strong> {{ result.stance|default:"No interpretation available." }}</div></div>
+                <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-primary"></div><div><strong>Kelly-reference note:</strong> {{ kelly_reference_note|default:"Kelly-style sizing can be directionally informative, but this tool is intentionally more conservative and should not be treated as a Kelly allocator." }}</div></div>
+                <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-success"></div><div><strong>Suggested next step:</strong> {{ suggested_next_step|default:"Validate individual setups with Trade Risk Controls and SL / TP Planner." }}</div></div>
               </div>
             </section>
           </section>
         {% else %}
           <section class="rw-panel-card mb-0">
-            <div class="rw-panel-card__header">
-              <h3>What this tool is for</h3>
-              <span class="rw-badge rw-badge--neutral">Purpose</span>
-            </div>
-
-            <p class="rw-sim-panel-note mb-3">
-              Use this page to pressure-check whether your strategy assumptions support more conservative or more aggressive exposure planning.
-            </p>
-
+            <div class="rw-panel-card__header"><h3>What this tool is for</h3><span class="rw-badge rw-badge--neutral">Purpose</span></div>
+            <p class="rw-sim-panel-note mb-3">Use this page to pressure-check whether your strategy assumptions support more conservative or more aggressive exposure planning.</p>
             <div class="rw-insight-list">
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-primary"></div>
-                <div><strong>Edge quality:</strong> stronger win-rate and reward assumptions usually support a stronger sizing signal.</div>
-              </div>
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-info"></div>
-                <div><strong>Volatility control:</strong> rising volatility reduces the adjusted signal to reflect less stable conditions.</div>
-              </div>
-              <div class="rw-insight-item">
-                <div class="rw-insight-dot rw-dot-success"></div>
-                <div><strong>Planning use:</strong> compare the adjusted output with your neutral size before approving exposure.</div>
-              </div>
+              <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-primary"></div><div><strong>Edge quality:</strong> stronger win-rate and reward assumptions usually support a stronger sizing signal.</div></div>
+              <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-info"></div><div><strong>Volatility control:</strong> rising volatility reduces the adjusted signal to reflect less stable conditions.</div></div>
+              <div class="rw-insight-item"><div class="rw-insight-dot rw-dot-success"></div><div><strong>Planning use:</strong> compare the adjusted output with your neutral size before approving exposure.</div></div>
             </div>
           </section>
         {% endif %}
 
         <section class="rw-panel-card flex-grow-1">
-          <div class="rw-panel-card__header">
-            <h3>Related Planning Flow</h3>
-            <span class="rw-badge rw-badge--neutral">Workflow</span>
-          </div>
-
-          <p class="rw-sim-panel-note mt-3 mb-3">
-            Use this review alongside the rest of the planning workflow.
-          </p>
-
+          <div class="rw-panel-card__header"><h3>Related Planning Flow</h3><span class="rw-badge rw-badge--neutral">Workflow</span></div>
+          <p class="rw-sim-panel-note mt-3 mb-3">Use this review alongside the rest of the planning workflow.</p>
           <div class="d-flex flex-column gap-2 mb-4">
             <div class="rw-topbar-chip">1. Position sizing</div>
             <div class="rw-topbar-chip">2. Trade risk controls</div>
@@ -247,45 +118,25 @@
             <div class="rw-topbar-chip">4. SL / TP planning</div>
             <div class="rw-topbar-chip">5. Stress-test assumptions</div>
           </div>
-
           <div class="d-grid gap-2">
-            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline">
-              <i class="bi bi-percent me-2"></i>Trade Risk Controls
-            </a>
-            <a href="{% url 'sltp' %}" class="btn rw-btn-outline">
-              <i class="bi bi-sliders me-2"></i>SL / TP Planner
-            </a>
-            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-              <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
-            </a>
+            <a href="{% url 'risk_per_trade' %}" class="btn rw-btn-outline"><i class="bi bi-percent me-2"></i>Trade Risk Controls</a>
+            <a href="{% url 'sltp' %}" class="btn rw-btn-outline"><i class="bi bi-sliders me-2"></i>SL / TP Planner</a>
+            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary"><i class="bi bi-activity me-2"></i>Stress-Test Review</a>
           </div>
         </section>
-
       </div>
     </div>
   </div>
 
   <section class="rw-panel-card mt-4">
-    <div class="rw-panel-card__header">
-      <h3>Methodology &amp; Assumptions</h3>
-      <span class="rw-badge rw-badge--neutral">Reference Notes</span>
-    </div>
-
+    <div class="rw-panel-card__header"><h3>Methodology &amp; Assumptions</h3><span class="rw-badge rw-badge--neutral">Reference Notes</span></div>
     <div class="rw-methodology mt-3">
-      <p>
-        <strong>What this calculates:</strong> a recommended lot-size signal derived from base lot, win rate, risk-reward ratio, and a volatility-adjusted expectancy rule.
-      </p>
-      <p>
-        <strong>Formula logic:</strong> the service first computes expectancy from win rate and risk-reward assumptions, then applies a capped sizing multiplier and reduces the output by a volatility divisor.
-      </p>
-      <p>
-        <strong>Interpretation boundary:</strong> this is a planning heuristic intended to support pre-trade review, not a statistically validated allocation model.
-      </p>
-      <p class="mb-0">
-        <strong>Limitations:</strong> it does not account for correlation between strategy assumptions, non-normal return distributions, or market-regime shifts. Use it together with your other planning surfaces.
-      </p>
+      <p><strong>What this calculates:</strong> a recommended lot-size signal derived from base lot, win rate, risk-reward ratio, and a volatility-adjusted expectancy rule.</p>
+      <p><strong>Formula logic:</strong> the service first computes expectancy from win rate and risk-reward assumptions, then applies a capped sizing multiplier and reduces the output by a volatility divisor.</p>
+      <p><strong>Kelly-reference boundary:</strong> win rate and risk-reward are also inputs used in Kelly-style sizing logic, but this tool is intentionally more conservative and should be treated as a capped planning heuristic rather than a Kelly allocator.</p>
+      <p><strong>Interpretation boundary:</strong> this is a planning heuristic intended to support pre-trade review, not a statistically validated allocation model.</p>
+      <p class="mb-0"><strong>Limitations:</strong> it does not account for correlation between strategy assumptions, non-normal return distributions, or market-regime shifts. Use it together with your other planning surfaces.</p>
     </div>
   </section>
-
 </div>
 {% endblock %}

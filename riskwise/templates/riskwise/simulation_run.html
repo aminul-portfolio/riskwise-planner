@@ -1,13 +1,13 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Stress-Test Results — RiskWise Planner{% endblock %}
+{% block title %}Stress-Test Review — RiskWise Planner{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb rw-breadcrumb mb-0">
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Stress-Test Results</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Planning Baseline</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Stress-Test Review</li>
   </ol>
 </nav>
 {% endblock %}
@@ -16,32 +16,31 @@
 <div class="rw-simulation-page">
 
   <section class="rw-hero-card rw-sim-hero mb-4">
-    <div class="rw-eyebrow">SIMULATION DECISION SUPPORT</div>
+    <div class="rw-eyebrow">DECISION-READY REVIEW SURFACE</div>
 
     <div class="rw-sim-hero__grid">
       <div class="rw-sim-hero__content">
-        <h1 class="rw-page-title">Stress-Test Results</h1>
+        <h1 class="rw-page-title">Stress-Test Review</h1>
         <p class="rw-page-subtitle mb-0">
-          Review simulated downside behaviour, compare resilience signals, and decide whether the current planning
-          baseline remains strong enough under weaker outcome paths.
+          Review a decision-ready stress test using explicit trade-count and range assumptions drawn from the active planning baseline. Use this surface to judge whether a proposed risk plan remains defensible under tougher sequences.
         </p>
 
         <div class="rw-sim-hero__badges">
-          <span class="rw-badge rw-badge--neutral">Monte Carlo Stress Test</span>
-          <span class="rw-badge rw-badge--neutral">Capital Preservation</span>
-          <span class="rw-badge rw-badge--neutral">Scenario Review</span>
+          <span class="rw-badge rw-badge--neutral">Decision-Ready</span>
+          <span class="rw-badge rw-badge--neutral">Tail Review</span>
+          <span class="rw-badge rw-badge--neutral">Stress Test</span>
         </div>
       </div>
 
       <div class="rw-sim-hero__actions">
-        <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-arrow-repeat me-2"></i>Run Another Test
+        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
+          <i class="bi bi-play-circle me-2"></i>Monte Carlo Lab
+        </a>
+        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
+          <i class="bi bi-diagram-3 me-2"></i>Scenario Comparison
         </a>
         <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
-          <i class="bi bi-clock-history me-2"></i>View Saved Runs
-        </a>
-        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+          <i class="bi bi-clock-history me-2"></i>Open Saved Runs
         </a>
       </div>
     </div>
@@ -57,6 +56,9 @@
       </p>
       {% if simulation_sample_note %}
         <p class="rw-sim-summary__note">{{ simulation_sample_note }}</p>
+      {% endif %}
+      {% if simulation_dataset_summary_line %}
+        <p class="rw-sim-summary__note">{{ simulation_dataset_summary_line }}</p>
       {% endif %}
       {% if simulation_warning %}
         <p class="rw-sim-summary__note">{{ simulation_warning }}</p>
@@ -76,15 +78,16 @@
         <p class="rw-sim-panel-note mt-2">{{ instruction }}</p>
       {% endif %}
 
-      <form method="post" enctype="multipart/form-data" class="rw-sim-setup-form mt-4">
+      <form method="post" enctype="multipart/form-data" class="rw-sim-setup-form mt-4 rw-submit-form">
         {% csrf_token %}
         <div class="mb-3 text-start">
           <label class="form-label">Load planning dataset</label>
           <input type="file" name="file" class="form-control" accept=".csv,.xlsx,.xls" required>
         </div>
         <div class="rw-inline-actions mt-3">
-          <button type="submit" class="btn rw-btn-primary">
-            <i class="bi bi-upload me-2"></i>Load Dataset
+          <button type="submit" class="btn rw-btn-primary rw-submit-btn">
+            <span class="rw-submit-btn__label"><i class="bi bi-upload me-2"></i>Load Dataset</span>
+            <span class="rw-submit-btn__spinner d-none"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading…</span>
           </button>
           <a href="{% url 'upload' %}" class="btn rw-btn-outline">
             <i class="bi bi-folder2-open me-2"></i>Open Upload Page
@@ -106,78 +109,45 @@
           <p class="rw-sim-panel-note mb-3">{{ instruction }}</p>
         {% endif %}
 
-        <form method="post" class="rw-sim-setup-form">
+        <form method="post" class="rw-sim-setup-form rw-submit-form">
           {% csrf_token %}
 
           <div class="rw-sim-settings-grid">
             <div>
               <label class="form-label">Number of simulations</label>
-              <input
-                type="number"
-                name="num_simulations"
-                class="form-control"
-                min="1"
-                value="{{ form_data.num_simulations|default:'1000' }}"
-              >
+              <input type="number" name="num_simulations" class="form-control" min="1" value="{{ form_data.num_simulations|default:'1000' }}">
             </div>
 
             <div>
               <label class="form-label">Trades per run</label>
-              <input
-                type="number"
-                name="num_trades"
-                class="form-control"
-                min="1"
-                value="{{ form_data.num_trades|default:'100' }}"
-              >
+              <input type="number" name="num_trades" class="form-control" min="1" value="{{ form_data.num_trades|default:'100' }}">
             </div>
 
             <div>
               <label class="form-label">Range start</label>
-              <input
-                type="number"
-                name="range_start"
-                class="form-control"
-                min="0"
-                value="{{ form_data.range_start|default:'0' }}"
-              >
+              <input type="number" name="range_start" class="form-control" min="0" value="{{ form_data.range_start|default:'0' }}">
             </div>
 
             <div>
               <label class="form-label">Range end</label>
-              <input
-                type="number"
-                name="range_end"
-                class="form-control"
-                min="1"
-                value="{% firstof form_data.range_end trade_count '0' %}"
-              >
+              <input type="number" name="range_end" class="form-control" min="1" value="{% firstof form_data.range_end trade_count '0' %}">
             </div>
 
             <div>
               <label class="form-label">Start date</label>
-              <input
-                type="date"
-                name="start_date"
-                class="form-control"
-                value="{{ form_data.start_date|default:'' }}"
-              >
+              <input type="date" name="start_date" class="form-control" value="{{ form_data.start_date|default:'' }}">
             </div>
 
             <div>
               <label class="form-label">End date</label>
-              <input
-                type="date"
-                name="end_date"
-                class="form-control"
-                value="{{ form_data.end_date|default:'' }}"
-              >
+              <input type="date" name="end_date" class="form-control" value="{{ form_data.end_date|default:'' }}">
             </div>
           </div>
 
           <div class="rw-inline-actions mt-4">
-            <button type="submit" class="btn rw-btn-primary">
-              <i class="bi bi-play-circle me-2"></i>Run Stress Test
+            <button type="submit" class="btn rw-btn-primary rw-submit-btn">
+              <span class="rw-submit-btn__label"><i class="bi bi-play-circle me-2"></i>Run Stress Test</span>
+              <span class="rw-submit-btn__spinner d-none"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Running…</span>
             </button>
             <button type="submit" name="reset" value="1" class="btn rw-btn-outline">
               <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Dataset
@@ -227,27 +197,21 @@
 
     <section class="rw-sim-strip mb-4">
       <article class="rw-sim-strip__item rw-tone-{{ simulation_posture_tone|default:'warning' }}">
-        <div class="rw-sim-strip__label">Simulation posture</div>
+        <div class="rw-sim-strip__label">Simulation Posture</div>
         <div class="rw-sim-strip__value">{{ simulation_posture_label|default:"Watchlist" }}</div>
-        <div class="rw-sim-strip__detail">
-          {{ simulation_posture_detail|default:"Stress-test results suggest closer review before increasing exposure." }}
-        </div>
+        <div class="rw-sim-strip__detail">{{ simulation_posture_detail|default:"Stress-test results suggest closer review before increasing exposure." }}</div>
       </article>
 
       <article class="rw-sim-strip__item rw-tone-{{ percentile_tone|default:'info' }}">
-        <div class="rw-sim-strip__label">Downside percentile</div>
+        <div class="rw-sim-strip__label">Downside Percentile</div>
         <div class="rw-sim-strip__value">{{ key_downside_value|default:"—" }}</div>
-        <div class="rw-sim-strip__detail">
-          {{ key_downside_detail|default:"Use tail outcomes to check whether the plan survives weaker conditions." }}
-        </div>
+        <div class="rw-sim-strip__detail">{{ key_downside_detail|default:"Use tail outcomes to check whether the plan survives weaker conditions." }}</div>
       </article>
 
       <article class="rw-sim-strip__item rw-tone-{{ action_gate_tone|default:'neutral' }}">
-        <div class="rw-sim-strip__label">Decision gate</div>
+        <div class="rw-sim-strip__label">Decision Gate</div>
         <div class="rw-sim-strip__value">{{ action_gate_label|default:"Review" }}</div>
-        <div class="rw-sim-strip__detail">
-          {{ action_gate_detail|default:"Do not rely on average outcomes alone before changing allocation." }}
-        </div>
+        <div class="rw-sim-strip__detail">{{ action_gate_detail|default:"Do not rely on average outcomes alone before changing allocation." }}</div>
       </article>
     </section>
 
@@ -255,7 +219,7 @@
       <div class="rw-sim-kpi-grid">
         <article class="rw-sim-kpi rw-tone-info">
           <div class="rw-sim-kpi__label">Median Final Profit</div>
-          <div class="rw-sim-kpi__value">${{ median_final_profit|default:simulation_median_value|default:"—" }}</div>
+          <div class="rw-sim-kpi__value">${{ median_final_profit|default:"—" }}</div>
           <div class="rw-sim-kpi__subtext">Typical final outcome across simulated paths</div>
         </article>
 
@@ -298,21 +262,23 @@
 
         <div class="rw-sim-chart-frame">
           {% if band_chart_base64 %}
-            <img
-              src="data:image/png;base64,{{ band_chart_base64 }}"
-              alt="Percentile band chart"
-              class="img-fluid rounded-4"
-            >
+            <img src="data:image/png;base64,{{ band_chart_base64 }}" alt="Percentile band chart" class="img-fluid rounded-4" data-bs-toggle="modal" data-bs-target="#bandChartModal">
           {% else %}
             <div class="rw-empty-state rw-empty-state--compact">
-              <div class="rw-empty-icon">
-                <i class="bi bi-bar-chart"></i>
-              </div>
+              <div class="rw-empty-icon"><i class="bi bi-bar-chart"></i></div>
               <h3 class="rw-empty-title">No band chart available</h3>
               <p class="rw-empty-text">Generate a simulation result to render the percentile-band view.</p>
             </div>
           {% endif %}
         </div>
+
+        {% if band_chart_base64 %}
+          <div class="rw-inline-actions mt-3">
+            <button type="button" class="btn rw-btn-outline" data-bs-toggle="modal" data-bs-target="#bandChartModal">
+              <i class="bi bi-arrows-fullscreen me-2"></i>Open Chart
+            </button>
+          </div>
+        {% endif %}
       </article>
 
       <article class="rw-panel-card">
@@ -327,21 +293,23 @@
 
         <div class="rw-sim-chart-frame">
           {% if histogram_chart_base64 %}
-            <img
-              src="data:image/png;base64,{{ histogram_chart_base64 }}"
-              alt="Final profit histogram"
-              class="img-fluid rounded-4"
-            >
+            <img src="data:image/png;base64,{{ histogram_chart_base64 }}" alt="Final profit histogram" class="img-fluid rounded-4" data-bs-toggle="modal" data-bs-target="#histogramChartModal">
           {% else %}
             <div class="rw-empty-state rw-empty-state--compact">
-              <div class="rw-empty-icon">
-                <i class="bi bi-bar-chart-steps"></i>
-              </div>
+              <div class="rw-empty-icon"><i class="bi bi-bar-chart-steps"></i></div>
               <h3 class="rw-empty-title">No histogram available</h3>
               <p class="rw-empty-text">Generate a simulation result to render the final-outcome distribution.</p>
             </div>
           {% endif %}
         </div>
+
+        {% if histogram_chart_base64 %}
+          <div class="rw-inline-actions mt-3">
+            <button type="button" class="btn rw-btn-outline" data-bs-toggle="modal" data-bs-target="#histogramChartModal">
+              <i class="bi bi-arrows-fullscreen me-2"></i>Open Histogram
+            </button>
+          </div>
+        {% endif %}
       </article>
     </section>
 
@@ -350,27 +318,23 @@
       <div class="rw-sim-rerun__body">
         <div class="rw-sim-chart-frame">
           {% if all_paths_chart_base64 %}
-            <img
-              src="data:image/png;base64,{{ all_paths_chart_base64 }}"
-              alt="All simulation paths"
-              class="img-fluid rounded-4"
-            >
+            <img src="data:image/png;base64,{{ all_paths_chart_base64 }}" alt="All simulation paths" class="img-fluid rounded-4" data-bs-toggle="modal" data-bs-target="#allPathsChartModal">
           {% elif chart_base64 %}
-            <img
-              src="data:image/png;base64,{{ chart_base64 }}"
-              alt="All simulation paths"
-              class="img-fluid rounded-4"
-            >
+            <img src="data:image/png;base64,{{ chart_base64 }}" alt="All simulation paths" class="img-fluid rounded-4" data-bs-toggle="modal" data-bs-target="#allPathsChartModal">
           {% elif plot_image %}
-            <img
-              src="data:image/png;base64,{{ plot_image }}"
-              alt="All simulation paths"
-              class="img-fluid rounded-4"
-            >
+            <img src="data:image/png;base64,{{ plot_image }}" alt="All simulation paths" class="img-fluid rounded-4" data-bs-toggle="modal" data-bs-target="#allPathsChartModal">
           {% else %}
             <p class="mb-0">No all-path chart is currently available.</p>
           {% endif %}
         </div>
+
+        {% if all_paths_chart_base64 or chart_base64 or plot_image %}
+          <div class="rw-inline-actions mt-3">
+            <button type="button" class="btn rw-btn-outline" data-bs-toggle="modal" data-bs-target="#allPathsChartModal">
+              <i class="bi bi-arrows-fullscreen me-2"></i>Open All Paths Chart
+            </button>
+          </div>
+        {% endif %}
       </div>
     </details>
 
@@ -404,8 +368,19 @@
           </div>
         </div>
 
+        <div class="rw-insight-list mt-4">
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-info"></div>
+            <div><strong>90% outcome range:</strong> {{ simulation_confidence_range_90|default:"—" }}</div>
+          </div>
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-warning"></div>
+            <div><strong>Max consecutive losses:</strong> {{ simulation_max_consecutive_losses|default:"—" }}</div>
+          </div>
+        </div>
+
         <p class="rw-sim-panel-note mt-3 mb-0">
-          Use these markers to review tail risk, central tendency, and path resilience before changing allocation.
+          {{ simulation_confidence_range_note|default:"Use these markers to review tail risk, central tendency, and path resilience before changing allocation." }}
         </p>
       </article>
 
@@ -425,6 +400,10 @@
           <div class="rw-insight-item rw-tone-warning">
             <h4>Planning implication</h4>
             <p>{{ simulation_planning_implication|default:"Stress-test output should influence sizing, not just confirm the base case." }}</p>
+          </div>
+          <div class="rw-insight-item rw-tone-info">
+            <h4>Consecutive-loss check</h4>
+            <p>{{ simulation_consecutive_loss_note|default:"Review how many losing trades can cluster before relying on the median outcome." }}</p>
           </div>
           <div class="rw-insight-item rw-tone-neutral">
             <h4>Operating note</h4>
@@ -448,98 +427,34 @@
           </div>
           <div class="rw-mini-stat">
             <span class="rw-mini-stat__label">Trades / Path</span>
-            <span class="rw-mini-stat__value">{% firstof settings_trades "—" %}</span>
+            <span class="rw-mini-stat__value">{{ settings_trades|default:"—" }}</span>
           </div>
           <div class="rw-mini-stat">
             <span class="rw-mini-stat__label">Confidence Focus</span>
-            <span class="rw-mini-stat__value">{{ settings_confidence|default:"Tail Review" }}</span>
+            <span class="rw-mini-stat__value">{{ settings_confidence|default:"—" }}</span>
           </div>
           <div class="rw-mini-stat">
             <span class="rw-mini-stat__label">Source Sample</span>
-            <span class="rw-mini-stat__value">{% firstof settings_sample_size trade_count "—" %}</span>
+            <span class="rw-mini-stat__value">{{ settings_sample_size|default:"—" }}</span>
           </div>
         </div>
 
-        <details class="rw-sim-rerun mt-3">
-          <summary>Adjust and rerun simulation</summary>
-          <div class="rw-sim-rerun__body">
-            <form method="post" class="rw-sim-setup-form">
-              {% csrf_token %}
-
-              <div class="rw-sim-settings-grid">
-                <div>
-                  <label class="form-label">Number of simulations</label>
-                  <input
-                    type="number"
-                    name="num_simulations"
-                    class="form-control"
-                    min="1"
-                    value="{{ form_data.num_simulations|default:'1000' }}"
-                  >
-                </div>
-
-                <div>
-                  <label class="form-label">Trades per run</label>
-                  <input
-                    type="number"
-                    name="num_trades"
-                    class="form-control"
-                    min="1"
-                    value="{{ form_data.num_trades|default:'100' }}"
-                  >
-                </div>
-
-                <div>
-                  <label class="form-label">Range start</label>
-                  <input
-                    type="number"
-                    name="range_start"
-                    class="form-control"
-                    min="0"
-                    value="{{ form_data.range_start|default:'0' }}"
-                  >
-                </div>
-
-                <div>
-                  <label class="form-label">Range end</label>
-                  <input
-                    type="number"
-                    name="range_end"
-                    class="form-control"
-                    min="1"
-                    value="{% firstof form_data.range_end trade_count '0' %}"
-                  >
-                </div>
-
-                <div>
-                  <label class="form-label">Start date</label>
-                  <input
-                    type="date"
-                    name="start_date"
-                    class="form-control"
-                    value="{{ form_data.start_date|default:'' }}"
-                  >
-                </div>
-
-                <div>
-                  <label class="form-label">End date</label>
-                  <input
-                    type="date"
-                    name="end_date"
-                    class="form-control"
-                    value="{{ form_data.end_date|default:'' }}"
-                  >
-                </div>
-              </div>
-
-              <div class="rw-inline-actions mt-3">
-                <button type="submit" class="btn rw-btn-primary">
-                  <i class="bi bi-play-circle me-2"></i>Run Updated Simulation
-                </button>
-              </div>
-            </form>
+        <div class="rw-insight-list mt-4">
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-info"></div>
+            <div><strong>Confidence range:</strong> {{ simulation_confidence_range_90|default:"—" }}</div>
           </div>
-        </details>
+          <div class="rw-insight-item">
+            <div class="rw-insight-dot rw-dot-warning"></div>
+            <div><strong>Longest losing streak:</strong> {{ simulation_max_consecutive_losses|default:"—" }}</div>
+          </div>
+        </div>
+
+        <div class="rw-inline-actions mt-4">
+          <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+            <i class="bi bi-arrow-repeat me-2"></i>Adjust and Rerun Simulation
+          </a>
+        </div>
       </article>
 
       <article class="rw-panel-card">
@@ -549,22 +464,100 @@
         </div>
 
         <ol class="rw-action-list">
-          <li>{% firstof next_step_1 simulation_recommendation "Review downside percentiles before increasing risk." %}</li>
-          <li>{% firstof next_step_2 "Compare this run against alternative scenarios before changing size." %}</li>
-          <li>{% firstof next_step_3 "Use the dashboard and simulation together, not in isolation." %}</li>
+          <li>Proceed cautiously, then compare scenarios before increasing allocation.</li>
+          <li>Compare this run against alternative scenarios before changing size.</li>
+          <li>Use the dashboard and simulation together, not in isolation.</li>
         </ol>
 
         <div class="rw-inline-actions mt-4">
           <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-primary">
-            <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+            <i class="bi bi-diagram-3 me-2"></i>Compare This Run
           </a>
           <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
-            <i class="bi bi-clock-history me-2"></i>View Saved Runs
+            <i class="bi bi-clock-history me-2"></i>Open Saved Runs
           </a>
         </div>
       </article>
     </section>
 
+    {% if band_chart_base64 %}
+      <div class="modal fade" id="bandChartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content rw-modal-content">
+            <div class="modal-header rw-modal-header">
+              <h5 class="modal-title">Cumulative Profit Paths</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rw-modal-body-chart">
+              <img src="data:image/png;base64,{{ band_chart_base64 }}" alt="Percentile band chart" class="img-fluid rounded-4">
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if histogram_chart_base64 %}
+      <div class="modal fade" id="histogramChartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content rw-modal-content">
+            <div class="modal-header rw-modal-header">
+              <h5 class="modal-title">Final Profit Distribution</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rw-modal-body-chart">
+              <img src="data:image/png;base64,{{ histogram_chart_base64 }}" alt="Final profit histogram" class="img-fluid rounded-4">
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if all_paths_chart_base64 or chart_base64 or plot_image %}
+      <div class="modal fade" id="allPathsChartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content rw-modal-content">
+            <div class="modal-header rw-modal-header">
+              <h5 class="modal-title">All Simulation Paths</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body rw-modal-body-chart">
+              {% if all_paths_chart_base64 %}
+                <img src="data:image/png;base64,{{ all_paths_chart_base64 }}" alt="All simulation paths" class="img-fluid rounded-4">
+              {% elif chart_base64 %}
+                <img src="data:image/png;base64,{{ chart_base64 }}" alt="All simulation paths" class="img-fluid rounded-4">
+              {% elif plot_image %}
+                <img src="data:image/png;base64,{{ plot_image }}" alt="All simulation paths" class="img-fluid rounded-4">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const forms = document.querySelectorAll(".rw-submit-form");
+
+    forms.forEach((form) => {
+      form.addEventListener("submit", function (event) {
+        const submitter = event.submitter;
+        if (!submitter || submitter.name === "reset") return;
+
+        const label = submitter.querySelector(".rw-submit-btn__label");
+        const spinner = submitter.querySelector(".rw-submit-btn__spinner");
+
+        if (label && spinner) {
+          label.classList.add("d-none");
+          spinner.classList.remove("d-none");
+          submitter.disabled = true;
+        }
+      });
+    });
+  })();
+</script>
 {% endblock %}

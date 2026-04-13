@@ -4,10 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Pre-trade risk planning, Monte Carlo simulation, and scenario modelling for capital preservation.">
+  <meta name="description" content="Pre-trade risk planning, Monte Carlo exploration, stress-test review, and scenario comparison for downside-aware capital allocation.">
   <meta name="theme-color" content="#080d19">
+  <meta property="og:title" content="RiskWise Planner">
+  <meta property="og:description" content="Pre-trade risk planning, Monte Carlo exploration, stress-test review, and scenario comparison for downside-aware capital allocation.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RiskWise Planner">
   <title>{% block title %}RiskWise Planner{% endblock %}</title>
 
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -84,8 +89,8 @@
         </div>
 
         <div class="rw-topbar-right">
-          <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary btn-sm">
-            <i class="bi bi-play-circle me-1"></i>Stress-Test
+          <a href="{% url 'monte_carlo' %}" class="btn rw-btn-primary btn-sm">
+            <i class="bi bi-play-circle me-1"></i>Monte Carlo Lab
           </a>
           <a href="{% url 'upload' %}" class="btn rw-btn-outline btn-sm">
             <i class="bi bi-upload me-1"></i>Upload
@@ -129,20 +134,25 @@
     </div>
 
     {% if current_url_name == "simulation_history" or current_url_name == "simulation_detail" or current_url_name == "simulation_delete" %}
-      <div class="rw-topbar-dataset d-inline-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-        <i class="bi bi-archive" style="color: var(--rw-teal);"></i>
-        Viewing saved run
+      <div class="rw-topbar-dataset rw-mobile-dataset d-inline-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-archive"></i>
+        <span>Viewing saved run</span>
       </div>
     {% elif dataset_meta and dataset_meta.source_file %}
-      <div class="rw-topbar-dataset d-inline-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-        <i class="bi bi-database" style="color: var(--rw-teal);"></i>
-        {{ dataset_meta.source_file }}
+      <div class="rw-topbar-dataset rw-mobile-dataset d-inline-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-database"></i>
+        <span class="rw-topbar-file">{{ dataset_meta.source_file }}</span>
         {% if dataset_meta.records_loaded %}
           <span class="rw-topbar-count">{{ dataset_meta.records_loaded }}</span>
         {% endif %}
         <span class="rw-status-chip rw-status-chip--live">
           <span class="rw-live-dot"></span> Active
         </span>
+      </div>
+    {% else %}
+      <div class="rw-topbar-dataset rw-topbar-dataset--empty rw-mobile-dataset d-inline-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <span>No dataset loaded</span>
       </div>
     {% endif %}
 

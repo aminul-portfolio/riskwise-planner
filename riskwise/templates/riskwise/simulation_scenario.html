@@ -7,7 +7,8 @@
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb rw-breadcrumb mb-0">
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Results</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Planning Baseline</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'simulation_run' %}">Stress-Test Review</a></li>
     <li class="breadcrumb-item active" aria-current="page">Scenario Comparison</li>
   </ol>
 </nav>
@@ -39,7 +40,7 @@
           <i class="bi bi-speedometer2 me-2"></i>Planning Baseline
         </a>
         <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-          <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+          <i class="bi bi-activity me-2"></i>Back to Stress-Test Review
         </a>
         <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
           <i class="bi bi-clock-history me-2"></i>Saved Runs
@@ -164,7 +165,11 @@
                         aria-controls="scenarioCollapse{{ scenario_id }}"
                         style="background: transparent; color: var(--rw-text-strong); box-shadow: none;"
                       >
-                        Scenario {{ scenario_id }}
+                        {% if current_form|get:'display_label' %}
+                          {{ current_form|get:'display_label' }} Setup
+                        {% else %}
+                          Scenario {{ scenario_id }} Setup
+                        {% endif %}
                       </button>
                     </h3>
 
@@ -306,6 +311,48 @@
             </div>
           </section>
 
+          {% if best_scenario %}
+            <section class="rw-panel-card mb-0">
+              <div class="rw-panel-card__header">
+                <h3>Most Defensible Scenario</h3>
+                <span class="rw-badge rw-badge--neutral">Executive Summary</span>
+              </div>
+
+              <p class="rw-sim-panel-note mb-3">
+                Use this summary to identify which scenario remains most acceptable under downside-aware planning assumptions.
+              </p>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="rw-kpi-card rw-kpi-card-success h-100">
+                    <div class="rw-kpi-icon-wrap"><i class="bi bi-shield-check"></i></div>
+                    <div class="rw-kpi-label">Current Best Candidate</div>
+                    <div class="rw-kpi-value" style="font-size: 1.1rem;">{{ best_scenario.label }}</div>
+                    <div class="rw-form-help mt-2">{{ best_scenario.summary_reason }}</div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="rw-kpi-card rw-kpi-card-primary h-100">
+                    <div class="rw-kpi-icon-wrap"><i class="bi bi-bullseye"></i></div>
+                    <div class="rw-kpi-label">Decision Score</div>
+                    <div class="rw-kpi-value">{{ best_scenario.decision_score|floatformat:1 }}</div>
+                    <div class="rw-form-help mt-2">Composite score using downside resilience, reliability, and median outcome.</div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="rw-kpi-card rw-kpi-card-info h-100">
+                    <div class="rw-kpi-icon-wrap"><i class="bi bi-percent"></i></div>
+                    <div class="rw-kpi-label">Positive Probability</div>
+                    <div class="rw-kpi-value">{{ best_scenario.prob_positive|floatformat:2 }}%</div>
+                    <div class="rw-form-help mt-2">5th percentile: ${{ best_scenario.p05|floatformat:2 }} · Median: ${{ best_scenario.median|floatformat:2 }}</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          {% endif %}
+
           <section class="mb-0">
             <div class="row g-3">
               {% for scenario in scenarios %}
@@ -320,12 +367,12 @@
                   </div>
                 {% else %}
                   <div class="col-md-6 col-xl-4">
-                    <div class="rw-kpi-card rw-kpi-card-primary h-100">
-                      <div class="rw-kpi-icon-wrap"><i class="bi bi-bullseye"></i></div>
-                      <div class="rw-kpi-label">{{ scenario.label }} — Median</div>
+                    <div class="rw-kpi-card {% if scenario.is_best %}rw-kpi-card-success{% else %}rw-kpi-card-primary{% endif %} h-100">
+                      <div class="rw-kpi-icon-wrap"><i class="bi {% if scenario.is_best %}bi-trophy{% else %}bi-bullseye{% endif %}"></i></div>
+                      <div class="rw-kpi-label">{{ scenario.label }}</div>
                       <div class="rw-kpi-value">${{ scenario.median|floatformat:2 }}</div>
                       <div class="rw-form-help mt-2">
-                        Positive: {{ scenario.prob_positive|floatformat:2 }}%
+                        {{ scenario.status_label }} · {{ scenario.prob_positive|floatformat:2 }}% positive
                       </div>
                     </div>
                   </div>
@@ -356,19 +403,11 @@
                           {% if scenario.error %}
                             <span class="rw-badge rw-badge--warning">Skipped</span>
                           {% else %}
-                            {% if scenario.prob_positive >= 80 %}
-                              {% if scenario.min >= 0 %}
-                                <span class="rw-badge rw-badge--success">Most defensive</span>
-                              {% else %}
-                                <span class="rw-badge rw-badge--info">Balanced</span>
-                              {% endif %}
-                            {% elif scenario.prob_positive >= 60 %}
-                              <span class="rw-badge rw-badge--warning">Watchlist</span>
-                            {% else %}
-                              <span class="rw-badge rw-badge--danger">Fragile setup</span>
+                            <span class="rw-badge rw-badge--{{ scenario.status_tone }}">{{ scenario.status_label }}</span>
+                            <span class="rw-badge rw-badge--neutral">Rank {{ scenario.rank }}</span>
+                            {% if scenario.setup_note %}
+                              <span class="rw-badge rw-badge--neutral">{{ scenario.setup_note }}</span>
                             {% endif %}
-
-                            <span class="rw-badge rw-badge--neutral">Decision review</span>
                           {% endif %}
                         </div>
                       </div>
@@ -399,8 +438,18 @@
                       <div class="alert alert-warning mb-0">{{ scenario.error }}</div>
                     {% else %}
 
+                      {% if scenario.delta_note %}
+                        <div class="rw-warning-banner rw-warning-banner--informational mb-3">
+                          <i class="bi bi-arrow-left-right"></i>
+                          <div>
+                            <strong class="d-block mb-1">Scenario delta</strong>
+                            <span>{{ scenario.delta_note }}</span>
+                          </div>
+                        </div>
+                      {% endif %}
+
                       {% if scenario.warning %}
-                        <div class="rw-warning-banner rw-warning-banner--informational mb-1">
+                        <div class="rw-warning-banner rw-warning-banner--informational mb-3">
                           <i class="bi bi-exclamation-triangle-fill"></i>
                           <div>
                             <strong class="d-block mb-1">Scenario note</strong>
@@ -416,8 +465,8 @@
                         </div>
 
                         <div class="rw-detail-item">
-                          <span class="rw-meta-text d-block mb-1">Best Outcome</span>
-                          <strong>${{ scenario.max|floatformat:2 }}</strong>
+                          <span class="rw-meta-text d-block mb-1">5th Percentile</span>
+                          <strong>${{ scenario.p05|floatformat:2 }}</strong>
                         </div>
 
                         <div class="rw-detail-item">
@@ -573,6 +622,10 @@
                     <div><strong>Distribution stability:</strong> if median and probability of positive outcome fall sharply under stricter settings, the plan may be too fragile.</div>
                   </div>
                   <div class="rw-insight-item">
+                    <div class="rw-insight-dot rw-dot-warning"></div>
+                    <div><strong>Best scenario test:</strong> prefer the setup that remains acceptable when downside deepens, not the setup with the most attractive upside only.</div>
+                  </div>
+                  <div class="rw-insight-item">
                     <div class="rw-insight-dot rw-dot-success"></div>
                     <div><strong>Planning use:</strong> choose the scenario that remains acceptable under conservative assumptions, not the one with the best upside only.</div>
                   </div>
@@ -596,7 +649,7 @@
                     <i class="bi bi-clock-history me-2"></i>Review Saved Planning Runs
                   </a>
                   <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-                    <i class="bi bi-play-circle me-2"></i>Stress-Test Plan
+                    <i class="bi bi-activity me-2"></i>Back to Stress-Test Review
                   </a>
                 </div>
               </section>

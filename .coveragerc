@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = riskwise
+
+[report]
+show_missing = True
+skip_covered = True
+omit =
+    */migrations/*
+    manage.py
+    */settings.py

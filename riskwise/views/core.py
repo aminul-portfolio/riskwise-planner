@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 from django.contrib import messages
@@ -21,6 +23,8 @@ from .shared import (
     _build_empty_dashboard_context,
     _normalize_dataset_meta,
 )
+
+logger = logging.getLogger("riskwise")
 
 
 def home(request):
@@ -91,6 +95,11 @@ def home(request):
         },
     ]
 
+    logger.info(
+        "homepage_rendered | authenticated=%s",
+        request.user.is_authenticated,
+    )
+
     return render(
         request,
         "riskwise/home.html",
@@ -98,60 +107,98 @@ def home(request):
     )
 
 
-
 @login_required
 def upload_screenshot(request):
     if not request.user.is_staff:
+        logger.warning(
+            "upload_screenshot_denied | user=%s",
+            request.user.username,
+        )
         messages.error(request, "Only staff users can manage homepage screenshots.")
         return redirect("home")
 
     if request.method == "POST":
         form = ScreenshotForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            screenshot = form.save()
+            logger.info(
+                "upload_screenshot_success | user=%s | screenshot_id=%s",
+                request.user.username,
+                screenshot.pk,
+            )
             messages.success(request, "Screenshot uploaded successfully.")
         else:
+            logger.warning(
+                "upload_screenshot_failed | user=%s | errors=%s",
+                request.user.username,
+                form.errors.as_json(),
+            )
             messages.error(request, "Screenshot upload failed.")
 
     return redirect("home")
 
 
-
 @login_required
 def delete_screenshot(request, pk):
     if not request.user.is_staff:
+        logger.warning(
+            "delete_screenshot_denied | user=%s | screenshot_id=%s",
+            request.user.username,
+            pk,
+        )
         messages.error(request, "Only staff users can manage homepage screenshots.")
         return redirect("home")
 
     screenshot = get_object_or_404(Screenshot, pk=pk)
 
     if request.method == "POST":
+        screenshot_id = screenshot.pk
         screenshot.image.delete(save=False)
         screenshot.delete()
+        logger.info(
+            "delete_screenshot_success | user=%s | screenshot_id=%s",
+            request.user.username,
+            screenshot_id,
+        )
         messages.success(request, "Screenshot deleted successfully.")
 
     return redirect("home")
-
 
 
 @login_required
 def upload_file(request):
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
+        logger.info(
+            "upload_dataset_started | user=%s | filename=%s",
+            request.user.username,
+            getattr(uploaded_file, "name", "uploaded_file"),
+        )
 
         try:
             df = prepare_trade_import_dataframe(uploaded_file)
         except ValueError as exc:
+            logger.warning(
+                "upload_dataset_validation_failed | user=%s | filename=%s | error=%s",
+                request.user.username,
+                getattr(uploaded_file, "name", "uploaded_file"),
+                str(exc),
+            )
             return render(
                 request,
                 "riskwise/upload.html",
                 with_dataset_context(request, {"error": str(exc)}),
             )
-        except Exception as exc:
+        except Exception:
+            logger.exception(
+                "upload_dataset_unexpected_error | user=%s | filename=%s",
+                request.user.username,
+                getattr(uploaded_file, "name", "uploaded_file"),
+            )
             return render(
                 request,
                 "riskwise/upload.html",
-                with_dataset_context(request, {"error": f"Error reading file: {exc}"}),
+                with_dataset_context(request, {"error": "Error reading file during upload."}),
             )
 
         loaded_count = len(df)
@@ -159,15 +206,27 @@ def upload_file(request):
         if loaded_count:
             save_uploaded_df_to_session(request, df)
             save_dataset_meta_to_session(request, uploaded_file.name, df)
+            logger.info(
+                "upload_dataset_success | user=%s | filename=%s | rows=%s",
+                request.user.username,
+                uploaded_file.name,
+                loaded_count,
+            )
             messages.success(
                 request,
                 f"Planning dataset loaded. {loaded_count} records are now available for baseline review and simulation.",
             )
             return redirect("dashboard")
 
+        logger.warning(
+            "upload_dataset_zero_rows | user=%s | filename=%s",
+            request.user.username,
+            getattr(uploaded_file, "name", "uploaded_file"),
+        )
         messages.warning(request, "No planning records were loaded from the uploaded file.")
         return redirect("upload")
 
+    logger.info("upload_page_rendered | user=%s", request.user.username)
     return render(
         request,
         "riskwise/upload.html",
@@ -180,6 +239,10 @@ def dashboard(request):
     df, dataset_meta = get_active_planning_df(request)
 
     if df is None or df.empty:
+        logger.info(
+            "dashboard_no_dataset | user=%s",
+            request.user.username,
+        )
         return render(
             request,
             "riskwise/dashboard.html",
@@ -193,6 +256,11 @@ def dashboard(request):
         )
 
     if "profit" not in df.columns:
+        logger.warning(
+            "dashboard_missing_profit_column | user=%s | columns=%s",
+            request.user.username,
+            list(df.columns),
+        )
         return render(
             request,
             "riskwise/dashboard.html",
@@ -308,9 +376,17 @@ def dashboard(request):
         )
     )
 
+    logger.info(
+        "dashboard_rendered | user=%s | rows=%s | source_file=%s | profit_factor=%s | win_rate=%.2f",
+        request.user.username,
+        len(df),
+        dataset_meta.get("source_file"),
+        f"{profit_factor:.2f}" if profit_factor is not None else "N/A",
+        win_rate,
+    )
+
     return render(
         request,
         "riskwise/dashboard.html",
         with_dataset_context(request, context, df=df),
     )
-

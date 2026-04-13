@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server Error — RiskWise Planner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #08101d;
+      color: #e8eefc;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      width: min(92vw, 720px);
+      background: rgba(16, 24, 40, 0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    .eyebrow {
+      color: #39c3ff;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 42px;
+      line-height: 1.05;
+    }
+    p {
+      color: #b8c3d9;
+      line-height: 1.7;
+      margin: 0 0 16px 0;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    a {
+      text-decoration: none;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e8eefc;
+      background: rgba(255,255,255,0.03);
+    }
+    a.primary {
+      background: #4c8dff;
+      border-color: #4c8dff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="eyebrow">Error Surface</div>
+    <h1>500</h1>
+    <p>RiskWise hit an unexpected server error while rendering this page.</p>
+    <p>Try the workflow again from a stable entry point. If the issue repeats, review the server logs and recent deployment changes.</p>
+    <div class="actions">
+      <a class="primary" href="/">Go to Overview</a>
+      <a href="/login/">Go to Login</a>
+    </div>
+  </div>
+</body>
+</html>

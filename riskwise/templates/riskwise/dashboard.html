@@ -1,12 +1,12 @@
 {% extends 'riskwise/base.html' %}
 
-{% block title %}Capital Preservation Dashboard — RiskWise Planner{% endblock %}
+{% block title %}Planning Baseline — RiskWise Planner{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb rw-breadcrumb mb-0">
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Overview</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Capital Preservation Dashboard</li>
+    <li class="breadcrumb-item active" aria-current="page">Planning Baseline</li>
   </ol>
 </nav>
 {% endblock %}
@@ -15,15 +15,15 @@
 <div class="rw-dashboard-page">
 
   <section class="rw-hero-card rw-dashboard-hero rw-border-glow mb-4">
-    <div class="rw-eyebrow">DECISION SUPPORT DASHBOARD</div>
+    <div class="rw-eyebrow">PLANNING BASELINE REVIEW</div>
 
     <div class="rw-dashboard-hero__row">
       <div class="rw-dashboard-hero__content">
-        <h1 class="rw-page-title"><span class="rw-grad-text">Capital Preservation Dashboard</span></h1>
+        <h1 class="rw-page-title"><span class="rw-grad-text">Planning Baseline</span></h1>
         <p class="rw-page-subtitle mb-0">
           Review downside-aware planning signals from the currently loaded reference dataset,
-          assess whether the baseline is credible enough to guide new capital allocation,
-          and move into stress testing before increasing risk.
+          validate whether the baseline is credible enough for new allocation decisions,
+          then move into Monte Carlo exploration and decision-ready stress-test review.
         </p>
 
         <div class="rw-dashboard-hero__meta">
@@ -51,11 +51,11 @@
         <a href="{% url 'upload' %}" class="btn rw-btn-primary">
           <i class="bi bi-upload me-2"></i>Upload Dataset
         </a>
-        <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-          <i class="bi bi-play-circle me-2"></i>Run Stress Test
+        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
+          <i class="bi bi-play-circle me-2"></i>Open Monte Carlo Lab
         </a>
-        <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-          <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+        <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+          <i class="bi bi-activity me-2"></i>Open Stress-Test Review
         </a>
       </div>
     </div>
@@ -87,18 +87,21 @@
         <a href="{% url 'upload' %}" class="btn rw-btn-primary">
           <i class="bi bi-upload me-2"></i>Upload Dataset
         </a>
-        <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-          <i class="bi bi-play-circle me-2"></i>Run First Stress Test
+        <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
+          <i class="bi bi-play-circle me-2"></i>Open Monte Carlo Lab
+        </a>
+        <a href="{% url 'simulation_history' %}" class="btn rw-btn-outline">
+          <i class="bi bi-clock-history me-2"></i>Review Saved Runs
         </a>
       </div>
     </div>
   {% else %}
 
     <section class="rw-provenance mb-4">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-database" style="color: var(--rw-primary);"></i>
-          <span style="color: var(--rw-muted);">Reference dataset methodology</span>
+      <div class="rw-provenance__row d-flex flex-wrap align-items-center gap-3">
+        <div class="rw-provenance__meta d-flex align-items-center gap-2">
+          <i class="bi bi-database rw-provenance__icon"></i>
+          <span class="rw-provenance__label">Reference dataset methodology</span>
         </div>
 
         {% if date_range_start and date_range_end %}
@@ -194,11 +197,11 @@
           </div>
 
           <div class="rw-inline-actions mt-4">
-            <a href="{% url 'simulation_run' %}" class="btn rw-btn-primary">
-              <i class="bi bi-play-circle me-2"></i>Run Stress Test
+            <a href="{% url 'monte_carlo' %}" class="btn rw-btn-primary">
+              <i class="bi bi-play-circle me-2"></i>Open Monte Carlo Lab
             </a>
-            <a href="{% url 'simulation_scenario' %}" class="btn rw-btn-outline">
-              <i class="bi bi-diagram-3 me-2"></i>Compare Scenarios
+            <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
+              <i class="bi bi-activity me-2"></i>Open Stress-Test Review
             </a>
           </div>
         </article>

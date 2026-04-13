@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,6 +14,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..models import SimulationHistory
 from ..services import slug_filename, with_dataset_context
 from .shared import _format_int, _format_number, _format_percent
+
+logger = logging.getLogger("riskwise")
 
 
 def _clean_label(value, fallback="—"):
@@ -29,19 +32,10 @@ def _display_run_type(run):
 
 
 def _format_metric_value(key, value):
-    """
-    Display-safe formatting for stored result/parameter values.
-    """
     if value in (None, "", [], {}, ()):
         return "—"
 
-    percent_keys = {
-        "prob_positive",
-        "positive_rate",
-        "win_rate",
-        "risk_percent",
-    }
-
+    percent_keys = {"prob_positive", "positive_rate", "win_rate", "risk_percent"}
     integer_keys = {
         "num_simulations",
         "num_trades",
@@ -56,19 +50,14 @@ def _format_metric_value(key, value):
 
     if key in percent_keys:
         return _format_percent(value, places=2, already_scaled=True)
-
     if key in integer_keys:
         return _format_int(value)
-
     if isinstance(value, bool):
         return "Yes" if value else "No"
-
     if isinstance(value, (int, float)):
         return _format_number(value, places=2)
-
     if isinstance(value, str):
         return value
-
     return str(value)
 
 
@@ -84,10 +73,6 @@ def _preferred_result_value(results, *keys):
 
 
 def _flatten_dict_for_display(data, parent_key=""):
-    """
-    Flattens nested dicts into friendlier display rows.
-    Skips noisy raw structures like long column lists only where needed later.
-    """
     items = []
 
     if not isinstance(data, dict):
@@ -201,11 +186,19 @@ def simulation_history_view(request):
         qs = qs.filter(created_at__date__lte=date_to)
 
     qs = qs.order_by("-created_at")
-
     paginator = Paginator(qs, 6)
     page_obj = paginator.get_page(page_number)
-
     history_items = [_build_archive_card_context(item) for item in page_obj]
+
+    logger.info(
+        "history_page_rendered | user=%s | query=%s | date_from=%s | date_to=%s | page=%s | count=%s",
+        request.user.username,
+        query or "none",
+        date_from or "none",
+        date_to or "none",
+        page_obj.number,
+        len(history_items),
+    )
 
     return render(
         request,
@@ -235,6 +228,13 @@ def simulation_download_json_view(request, pk):
         "results": sim.results,
     }
 
+    logger.info(
+        "history_download_json | user=%s | simulation_id=%s | label=%s",
+        request.user.username,
+        sim.pk,
+        sim.label,
+    )
+
     response = HttpResponse(
         json.dumps(payload, indent=2),
         content_type="application/json",
@@ -248,8 +248,21 @@ def simulation_download_chart_view(request, pk):
     sim = get_object_or_404(SimulationHistory, pk=pk, user=request.user)
 
     if not sim.chart_base64:
+        logger.warning(
+            "history_download_chart_missing | user=%s | simulation_id=%s | label=%s",
+            request.user.username,
+            sim.pk,
+            sim.label,
+        )
         messages.error(request, "No saved chart is available for this planning run.")
         return redirect("simulation_detail", pk=sim.pk)
+
+    logger.info(
+        "history_download_chart | user=%s | simulation_id=%s | label=%s",
+        request.user.username,
+        sim.pk,
+        sim.label,
+    )
 
     image_data = base64.b64decode(sim.chart_base64)
     response = HttpResponse(image_data, content_type="image/png")
@@ -260,8 +273,14 @@ def simulation_download_chart_view(request, pk):
 @login_required
 def simulation_detail_view(request, pk):
     sim = get_object_or_404(SimulationHistory, pk=pk, user=request.user)
-
     detail_context = _build_detail_context(sim)
+
+    logger.info(
+        "history_detail_rendered | user=%s | simulation_id=%s | label=%s",
+        request.user.username,
+        sim.pk,
+        sim.label,
+    )
 
     return render(
         request,
@@ -284,9 +303,25 @@ def simulation_delete_view(request, pk):
     sim = get_object_or_404(SimulationHistory, pk=pk, user=request.user)
 
     if request.method == "POST":
+        deleted_label = sim.label
+        deleted_id = sim.pk
         sim.delete()
+
+        logger.info(
+            "history_delete_success | user=%s | simulation_id=%s | label=%s",
+            request.user.username,
+            deleted_id,
+            deleted_label,
+        )
         messages.success(request, "Saved planning run deleted successfully.")
         return redirect("simulation_history")
+
+    logger.info(
+        "history_delete_confirm_rendered | user=%s | simulation_id=%s | label=%s",
+        request.user.username,
+        sim.pk,
+        sim.label,
+    )
 
     return render(
         request,

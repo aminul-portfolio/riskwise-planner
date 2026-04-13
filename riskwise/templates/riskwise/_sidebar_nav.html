@@ -7,17 +7,22 @@
 
 <a href="{% url 'dashboard' %}" class="rw-nav-link {% if current_url_name == 'dashboard' %}active{% endif %}">
   <span class="rw-nav-icon"><i class="bi bi-shield-check"></i></span>
-  <span class="rw-nav-text">Capital Preservation</span>
+  <span class="rw-nav-text">Planning Baseline</span>
   {% if dataset_meta %}
     <span class="rw-nav-dot rw-nav-dot--live"></span>
   {% endif %}
 </a>
 
-<div class="rw-sidebar-section">Stress Testing</div>
+<div class="rw-sidebar-section">Simulation Workflow</div>
+
+<a href="{% url 'monte_carlo' %}" class="rw-nav-link {% if current_url_name == 'monte_carlo' %}active{% endif %}">
+  <span class="rw-nav-icon"><i class="bi bi-bezier2"></i></span>
+  <span class="rw-nav-text">Monte Carlo Lab</span>
+</a>
 
 <a href="{% url 'simulation_run' %}" class="rw-nav-link {% if current_url_name == 'simulation_run' %}active{% endif %}">
   <span class="rw-nav-icon"><i class="bi bi-activity"></i></span>
-  <span class="rw-nav-text">Monte Carlo Simulation</span>
+  <span class="rw-nav-text">Stress-Test Review</span>
 </a>
 
 <a href="{% url 'simulation_scenario' %}" class="rw-nav-link {% if current_url_name == 'simulation_scenario' %}active{% endif %}">
@@ -25,9 +30,9 @@
   <span class="rw-nav-text">Scenario Comparison</span>
 </a>
 
-<a href="{% url 'simulation_history' %}" class="rw-nav-link {% if current_url_name == 'simulation_history' %}active{% endif %}">
+<a href="{% url 'simulation_history' %}" class="rw-nav-link {% if current_url_name == 'simulation_history' or current_url_name == 'simulation_detail' or current_url_name == 'simulation_delete' or current_url_name == 'simulation_download_json' or current_url_name == 'simulation_download_chart' %}active{% endif %}">
   <span class="rw-nav-icon"><i class="bi bi-clock-history"></i></span>
-  <span class="rw-nav-text">Simulation History</span>
+  <span class="rw-nav-text">Saved Runs</span>
   {% if saved_run_count %}
     <span class="rw-nav-count">{{ saved_run_count }}</span>
   {% endif %}

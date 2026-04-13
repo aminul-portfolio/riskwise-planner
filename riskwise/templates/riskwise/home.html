@@ -13,7 +13,7 @@
         <h1 class="rw-page-title"><span class="rw-grad-text">RiskWise Planner</span></h1>
         <p class="rw-page-subtitle mb-0">
           A decision-support product for reviewing observed trade outcomes, calibrating downside-aware risk assumptions,
-          stress-testing outcome distributions, and comparing scenarios before committing new capital.
+          exploring Monte Carlo behaviour, stress-testing outcome distributions, and comparing scenarios before committing new capital.
         </p>
 
         <div class="rw-home-hero__badges">
@@ -27,10 +27,10 @@
             <i class="bi bi-upload me-2"></i>Load Planning Dataset
           </a>
           <a href="{% url 'dashboard' %}" class="btn rw-btn-outline">
-            <i class="bi bi-speedometer2 me-2"></i>Open Dashboard
+            <i class="bi bi-speedometer2 me-2"></i>Open Planning Baseline
           </a>
-          <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-            <i class="bi bi-play-circle me-2"></i>Run Stress Test
+          <a href="{% url 'monte_carlo' %}" class="btn rw-btn-outline">
+            <i class="bi bi-play-circle me-2"></i>Open Monte Carlo Lab
           </a>
         </div>
 
@@ -52,8 +52,8 @@
 
           <ol class="rw-action-list">
             <li>Load a reference dataset to activate the planning surface.</li>
-            <li>Review the Capital Preservation Dashboard for downside and edge signals.</li>
-            <li>Run stress testing to examine weaker outcome sequences.</li>
+            <li>Review the Planning Baseline for downside, edge, and sample-quality signals.</li>
+            <li>Explore Monte Carlo Lab, then move into Stress-Test Review for decision-ready downside checks.</li>
             <li>Compare scenarios before increasing size or allocating new capital.</li>
           </ol>
 
@@ -103,7 +103,7 @@
     <div class="rw-home-workflow-grid mt-3">
       <article class="rw-home-workflow-card">
         <div class="rw-home-workflow-card__step">01</div>
-        <h3>Load Observed Outcomes</h3>
+        <h3>Load Planning Dataset</h3>
         <p>
           Upload a planning dataset to create a session-based reference baseline for downside and outcome review.
         </p>
@@ -112,24 +112,33 @@
 
       <article class="rw-home-workflow-card">
         <div class="rw-home-workflow-card__step">02</div>
-        <h3>Review Baseline Quality</h3>
+        <h3>Review Planning Baseline</h3>
         <p>
-          Use the dashboard to evaluate drawdown depth, edge quality, win rate, and planning credibility.
+          Use the baseline surface to evaluate drawdown depth, edge quality, win rate, and planning credibility.
         </p>
-        <a href="{% url 'dashboard' %}" class="rw-text-link">Open dashboard <i class="bi bi-arrow-right-short"></i></a>
+        <a href="{% url 'dashboard' %}" class="rw-text-link">Open planning baseline <i class="bi bi-arrow-right-short"></i></a>
       </article>
 
       <article class="rw-home-workflow-card">
         <div class="rw-home-workflow-card__step">03</div>
-        <h3>Stress-Test the Distribution</h3>
+        <h3>Explore Monte Carlo Lab</h3>
         <p>
-          Run simulation views to inspect how weaker outcome paths may affect capital preservation assumptions.
+          Resample the active baseline to inspect distribution spread, downside pressure, and path variability before review.
         </p>
-        <a href="{% url 'simulation_run' %}" class="rw-text-link">Run stress test <i class="bi bi-arrow-right-short"></i></a>
+        <a href="{% url 'monte_carlo' %}" class="rw-text-link">Open Monte Carlo Lab <i class="bi bi-arrow-right-short"></i></a>
       </article>
 
       <article class="rw-home-workflow-card">
         <div class="rw-home-workflow-card__step">04</div>
+        <h3>Review Stress-Test Output</h3>
+        <p>
+          Move into decision-ready stress-test review to judge whether the current plan remains acceptable under tougher sequences.
+        </p>
+        <a href="{% url 'simulation_run' %}" class="rw-text-link">Open Stress-Test Review <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-workflow-card">
+        <div class="rw-home-workflow-card__step">05</div>
         <h3>Compare Scenarios Before Allocation</h3>
         <p>
           Use scenario comparison to review alternative sizing and operating assumptions before new capital is committed.
@@ -182,15 +191,15 @@
         {% endif %}
 
         <p class="rw-home-note mt-3 mb-0">
-          A reference dataset is currently active in session. Continue into the dashboard or run stress testing.
+          A reference dataset is currently active in session. Continue into the Planning Baseline, Monte Carlo Lab, or Stress-Test Review.
         </p>
 
         <div class="rw-inline-actions mt-4">
           <a href="{% url 'dashboard' %}" class="btn rw-btn-primary">
-            <i class="bi bi-speedometer2 me-2"></i>Review Dashboard
+            <i class="bi bi-speedometer2 me-2"></i>Review Planning Baseline
           </a>
           <a href="{% url 'simulation_run' %}" class="btn rw-btn-outline">
-            <i class="bi bi-play-circle me-2"></i>Stress Test
+            <i class="bi bi-activity me-2"></i>Open Stress-Test Review
           </a>
         </div>
       {% else %}
@@ -231,7 +240,7 @@
         <div class="rw-insight-item rw-tone-success">
           <h4>Session-Based Analytics UX</h4>
           <p>
-            Uses an active reference dataset to drive dashboard, simulation, and scenario workflows across the product surface.
+            Uses an active reference dataset to drive baseline, simulation, and scenario workflows across the product surface.
           </p>
         </div>
         <div class="rw-insight-item rw-tone-warning">
@@ -256,15 +265,21 @@
       </article>
 
       <article class="rw-home-surface-card">
-        <h3>Capital Preservation Dashboard</h3>
+        <h3>Planning Baseline</h3>
         <p>Summarises risk posture, edge quality, sample depth, and planning interpretation.</p>
-        <a href="{% url 'dashboard' %}" class="rw-text-link">Open dashboard <i class="bi bi-arrow-right-short"></i></a>
+        <a href="{% url 'dashboard' %}" class="rw-text-link">Open Planning Baseline <i class="bi bi-arrow-right-short"></i></a>
       </article>
 
       <article class="rw-home-surface-card">
-        <h3>Stress-Test View</h3>
-        <p>Examines scenario resilience and weaker outcome distributions through simulation.</p>
-        <a href="{% url 'simulation_run' %}" class="rw-text-link">Open stress test <i class="bi bi-arrow-right-short"></i></a>
+        <h3>Monte Carlo Lab</h3>
+        <p>Explores distribution spread, downside pressure, and path variability before decision-ready review.</p>
+        <a href="{% url 'monte_carlo' %}" class="rw-text-link">Open Monte Carlo Lab <i class="bi bi-arrow-right-short"></i></a>
+      </article>
+
+      <article class="rw-home-surface-card">
+        <h3>Stress-Test Review</h3>
+        <p>Examines whether the current plan remains defensible under tougher sequences and downside conditions.</p>
+        <a href="{% url 'simulation_run' %}" class="rw-text-link">Open Stress-Test Review <i class="bi bi-arrow-right-short"></i></a>
       </article>
 
       <article class="rw-home-surface-card">

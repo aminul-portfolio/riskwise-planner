@@ -14,13 +14,11 @@ def _safe_decimal(value):
         return None
 
 
-
 def _format_number(value, places=2, default="—"):
     number = _safe_decimal(value)
     if number is None:
         return default
     return f"{number:,.{places}f}"
-
 
 
 def _format_percent(value, places=2, already_scaled=False, default="—"):
@@ -32,7 +30,6 @@ def _format_percent(value, places=2, already_scaled=False, default="—"):
     return f"{number:,.{places}f}%"
 
 
-
 def _format_int(value, default="—"):
     number = _safe_decimal(value)
     if number is None:
@@ -40,14 +37,7 @@ def _format_int(value, default="—"):
     return f"{int(number):,}"
 
 
-
 def _clean_meta_dict(raw_dict, allowed_keys=None, label_map=None):
-    """
-    Converts raw metadata into a display-safe dictionary.
-    - removes blank values
-    - removes nested raw blobs
-    - applies optional label mapping
-    """
     if not isinstance(raw_dict, dict):
         return {}
 
@@ -87,13 +77,11 @@ def _normalize_dataset_meta(dataset_meta, df=None):
     return meta
 
 
-
 def _safe_float(value, default=0.0):
     try:
         return float(value)
     except (TypeError, ValueError):
         return default
-
 
 
 def _safe_int(value, default=0):
@@ -103,13 +91,11 @@ def _safe_int(value, default=0):
         return default
 
 
-
 def _format_metric_number(value, decimals=2):
     try:
         return f"{float(value):,.{decimals}f}"
     except (TypeError, ValueError):
         return "0.00"
-
 
 
 def _build_empty_dashboard_context(message, dataset_meta=None):
@@ -219,7 +205,6 @@ def _build_empty_dashboard_context(message, dataset_meta=None):
         "dashboard_profit_factor": "—",
         "dashboard_win_rate": "—",
     }
-
 
 
 def _build_dashboard_decision_context(
@@ -432,7 +417,6 @@ def _build_dashboard_decision_context(
     }
 
 
-
 def _trade_risk_tone(risk_percent):
     if risk_percent is None:
         return "neutral"
@@ -441,7 +425,6 @@ def _trade_risk_tone(risk_percent):
     if risk_percent >= 2:
         return "warning"
     return "success"
-
 
 
 def _build_lot_size_context(form, result):
@@ -487,7 +470,6 @@ def _build_lot_size_context(form, result):
     return context
 
 
-
 def _build_trade_risk_context(form, result, risk_warning):
     context = {
         "form": form,
@@ -505,12 +487,11 @@ def _build_trade_risk_context(form, result, risk_warning):
                     "Use the account-risk percentage to judge whether the planned trade fits your capital-preservation rules."
                 ),
                 "risk_tone": _trade_risk_tone(risk_percent),
-                "suggested_next_step": "Cross-check this setup with SL / TP planning or Strategy Review before entry.",
+                "suggested_next_step": "Cross-check this setup with SL / TP planning or Strategy Exposure Review before entry.",
             }
         )
 
     return context
-
 
 
 def _build_strategy_risk_context(form, result):
@@ -523,16 +504,19 @@ def _build_strategy_risk_context(form, result):
     if result:
         context.update(
             {
-                "result_headline": "Strategy review ready",
+                "result_headline": "Strategy exposure review ready",
                 "result_summary": (
                     "Use this output to pressure-check whether the strategy profile still supports disciplined capital allocation."
                 ),
-                "suggested_next_step": "Validate individual setups with Trade Risk Controls and SL / TP planning.",
+                "kelly_reference_note": (
+                    "Win rate and risk-reward are also inputs used in Kelly-style sizing logic, "
+                    "but this tool is intentionally more conservative and should be treated as a capped planning heuristic, not a Kelly allocator."
+                ),
+                "suggested_next_step": "Validate individual setups with Trade Risk Controls and SL / TP Planner.",
             }
         )
 
     return context
-
 
 
 def _build_sltp_context(form, result):
@@ -548,6 +532,9 @@ def _build_sltp_context(form, result):
                 "result_headline": "SL / TP plan ready",
                 "result_summary": (
                     "Review downside, reward, and the risk-reward ratio together before approving the setup."
+                ),
+                "tradeoff_note": (
+                    "A strong risk-reward ratio does not validate the setup on its own if the absolute risk is still too large for the account or the execution assumptions are weak."
                 ),
                 "result_items": [
                     {
@@ -566,12 +553,11 @@ def _build_sltp_context(form, result):
                         "format": "number",
                     },
                 ],
-                "suggested_next_step": "Validate the same setup in Trade Risk Controls before entry.",
+                "suggested_next_step": "Validate the same setup in Trade Risk Controls before entry, then stress-test the broader plan if the trade still looks acceptable.",
             }
         )
 
     return context
-
 
 
 def _format_sim_metric(value, decimals=2, suffix=""):
@@ -579,7 +565,6 @@ def _format_sim_metric(value, decimals=2, suffix=""):
         return f"{float(value):,.{decimals}f}{suffix}"
     except (TypeError, ValueError):
         return "—"
-
 
 
 def _build_simulation_presentation_context(
@@ -605,6 +590,32 @@ def _build_simulation_presentation_context(
     num_trades = int(num_trades or 0)
     sample_size = int(sample_size or 0)
     avg_profit_per_trade = float(avg_profit_per_trade or 0)
+
+    max_consecutive_losses = results_data.get("max_consecutive_losses")
+    max_consecutive_losses_display = (
+        _format_int(max_consecutive_losses) if max_consecutive_losses not in (None, "") else "—"
+    )
+
+    confidence_range_90 = f"{_format_sim_metric(p05_value)} to {_format_sim_metric(p95_value)}"
+
+    summary_metadata_line = None
+    if isinstance(summary, dict):
+        range_start = summary.get("range_start")
+        range_end = summary.get("range_end")
+        session_name = summary.get("session")
+        start_date = summary.get("date_start")
+        end_date = summary.get("date_end")
+
+        parts = []
+        if range_start is not None and range_end is not None:
+            parts.append(f"range {range_start} to {range_end}")
+        if session_name and session_name != "All":
+            parts.append(f"session {session_name}")
+        if start_date or end_date:
+            parts.append(f"dates {start_date or '—'} to {end_date or '—'}")
+
+        if parts:
+            summary_metadata_line = "Built with " + ", ".join(parts) + "."
 
     if p05_value >= 0 and prob_positive >= 60 and median_value > 0:
         simulation_posture_label = "Controlled"
@@ -641,6 +652,7 @@ def _build_simulation_presentation_context(
     simulation_summary = (
         f"Median simulated outcome is {_format_sim_metric(median_value)}, "
         f"5th percentile outcome is {_format_sim_metric(p05_value)}, "
+        f"90% outcome range is {confidence_range_90}, "
         f"and {prob_positive:.1f}% of runs finish positive."
     )
 
@@ -663,6 +675,12 @@ def _build_simulation_presentation_context(
 
     simulation_operating_note = (
         "This simulation is a planning aid for downside-aware decision-making, not a guarantee of future path behaviour."
+    )
+
+    consecutive_loss_note = (
+        "Max consecutive loss is not yet available from the current simulation service."
+        if max_consecutive_losses_display == "—"
+        else f"Longest consecutive losing sequence observed across simulated paths: {max_consecutive_losses_display}."
     )
 
     return {
@@ -698,6 +716,11 @@ def _build_simulation_presentation_context(
         "simulation_downside_concern": simulation_downside_concern,
         "simulation_planning_implication": simulation_planning_implication,
         "simulation_operating_note": simulation_operating_note,
+        "simulation_confidence_range_90": confidence_range_90,
+        "simulation_confidence_range_note": "The 90% outcome range uses the 5th to 95th percentile final outcomes, not the full min-to-max spread.",
+        "simulation_max_consecutive_losses": max_consecutive_losses_display,
+        "simulation_consecutive_loss_note": consecutive_loss_note,
+        "simulation_dataset_summary_line": summary_metadata_line,
         "percentile_1_label": "P5",
         "percentile_1_value": _format_sim_metric(p05_value),
         "percentile_2_label": "Median",
@@ -708,7 +731,7 @@ def _build_simulation_presentation_context(
         "percentile_4_value": _format_sim_metric(p95_value),
         "settings_runs": f"{num_simulations:,}" if num_simulations else "—",
         "settings_trades": f"{num_trades:,}" if num_trades else "—",
-        "settings_confidence": "Tail Review",
+        "settings_confidence": "90% Range Review",
         "settings_sample_size": f"{sample_size:,}" if sample_size else "—",
         "next_step_1": simulation_recommendation,
         "next_step_2": "Compare this run against alternative scenarios before changing size.",
@@ -738,7 +761,6 @@ def _default_simulation_form_data(trade_count=0):
     }
 
 
-
 def _normalize_scenario_dataset_meta(dataset_meta, trade_count=None, date_start=None, date_end=None):
     dataset_meta = dict(dataset_meta or {})
     dataset_meta["source_file"] = dataset_meta.get("source_file") or dataset_meta.get("filename")
@@ -751,5 +773,3 @@ def _normalize_scenario_dataset_meta(dataset_meta, trade_count=None, date_start=
     dataset_meta["date_start"] = dataset_meta.get("date_start") or date_start
     dataset_meta["date_end"] = dataset_meta.get("date_end") or date_end
     return dataset_meta
-
-
