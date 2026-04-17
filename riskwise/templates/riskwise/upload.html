@@ -12,6 +12,7 @@
         <h1 class="rw-page-title mb-3">Upload Dataset</h1>
         <p class="rw-page-subtitle mb-0">
           Upload a CSV or Excel file to build a planning baseline for downside review, simulation, and scenario modelling.
+          This is the current flat-file handoff path for TradeIntel 360-style outcome exports.
         </p>
       </div>
 
@@ -77,9 +78,10 @@
 
           <div class="col-12">
             <label class="form-label rw-form-label">Select File</label>
-            <input type="file" name="file" class="form-control rw-form-control" required>
+            <input type="file" name="file" class="form-control rw-form-control" accept=".csv,.xlsx,.xls" required>
             <small class="rw-form-help">
-              Upload a CSV or Excel file. Files should include outcome data such as <strong>profit</strong> so RiskWise can prepare the planning baseline correctly.
+              Upload a CSV or Excel file. This also supports the current manual handoff path for TradeIntel 360-style exports.
+              Files should include outcome data such as <strong>profit</strong> so RiskWise can prepare the planning baseline correctly.
             </small>
           </div>
 
@@ -199,10 +201,20 @@
         <div class="mt-4 pt-3 border-top border-secondary-subtle">
           <div class="rw-section-subtitle mb-2">Accepted file guidance</div>
           <ul class="mb-0 ps-3" style="color: var(--rw-muted);">
-            <li>CSV and Excel files are supported</li>
+            <li>CSV and Excel (.xlsx/.xls) files are supported</li>
             <li>A <strong>profit</strong> column is required for simulation workflows</li>
             <li>Date fields improve filtering and provenance context</li>
             <li>Use realistic historical outcomes for more meaningful planning signals</li>
+          </ul>
+        </div>
+
+        <div class="mt-4 pt-3 border-top border-secondary-subtle">
+          <div class="rw-section-subtitle mb-2">Import from TradeIntel 360</div>
+          <ul class="mb-0 ps-3" style="color: var(--rw-muted);">
+            <li>Current path: manual CSV/XLSX/XLS upload</li>
+            <li>Required outcome field: <strong>profit</strong> or equivalent P&amp;L naming</li>
+            <li>Helpful context: date/time, session, symbol, side, and status fields</li>
+            <li>No live sync or direct API pull in the current public release</li>
           </ul>
         </div>
       </section>

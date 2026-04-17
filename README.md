@@ -299,6 +299,38 @@ This positions RiskWise between upstream market data delivery and post-trade ana
 
 ---
 
+## TradeIntel 360 Compatibility
+
+RiskWise and TradeIntel 360 cover different stages of the same finance workflow.
+
+The **primary portfolio sequence** remains:
+
+```text
+DataBridge Market API → RiskWise Planner → TradeIntel 360
+```
+
+RiskWise is the pre-trade planning layer in that sequence.
+
+A **secondary feedback loop** is also supported on the RiskWise side through a flat-file handoff:
+
+```text
+TradeIntel-style outcome export → manual CSV/XLSX upload into RiskWise → next planning-cycle calibration
+```
+
+### Supported now
+- manual CSV/XLSX/XLS upload into RiskWise
+- RiskWise-side support for recognised P&L field aliases
+- optional date/time and session context for filtering and provenance
+
+### Not yet supported
+- direct API sync between TradeIntel 360 and RiskWise
+- one-click backend import from TradeIntel 360
+- automatic cross-product synchronisation
+
+See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) for the exact compatibility boundary.
+
+---
+
 ## Interview Story
 
 > *"I built RiskWise to address a gap in trading and risk tooling: many tools stop at isolated calculators or post-trade review, but very few support structured pre-trade planning. RiskWise connects observed dataset context, planning controls, Monte Carlo exploration, stress-test review, and scenario comparison into a single decision-support workflow. In my portfolio, it sits between upstream data products and post-trade analytics as the pre-trade decision-support layer."*
