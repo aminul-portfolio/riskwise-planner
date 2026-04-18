@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/01.1_dashboard_capital_preservation.png" alt="RiskWise Planner — Capital Preservation Dashboard" width="80%" style="border-radius:12px;"/>
+<img src="docs/screenshots/02.1_planning_baseline.png" alt="RiskWise Planner — Planning Baseline" width="80%" style="border-radius:12px;"/>
 
 <br/>
 <br/>
@@ -59,21 +59,21 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
 
 <br>
 
-<!-- Row 1: Homepage + Dashboard -->
+<!-- Row 1: Homepage hero + workflow -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
   <tr>
     <td width="50%" valign="top"
         style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
-      <img src="docs/screenshots/00.1_home_risk_planning_overview.png"
-           alt="Risk Planning Overview"
+      <img src="docs/screenshots/00.1_homepage_hero.png"
+           alt="Homepage hero"
            width="100%"
            style="border-radius:6px;border:1px solid #1e2d45;display:block">
     </td>
     <td width="50%" valign="top"
         style="padding:20px 20px 20px 12px">
-      <img src="docs/screenshots/01.1_dashboard_capital_preservation.png"
-           alt="Capital Preservation Dashboard"
+      <img src="docs/screenshots/00.2_homepage_workflow.png"
+           alt="Homepage workflow and product value"
            width="100%"
            style="border-radius:6px;border:1px solid #1e2d45;display:block">
     </td>
@@ -81,34 +81,34 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
   <tr>
     <td valign="top"
         style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
-      <sub><strong>Risk Planning Overview</strong><br>
-      Product homepage with core workflow cards and full planning tool surface</sub>
+      <sub><strong>Homepage hero</strong><br>
+      Product framing, reviewer path, positioning, and primary calls to action</sub>
     </td>
     <td valign="top"
         style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
-      <sub><strong>Capital Preservation Dashboard</strong><br>
-      Observed risk metrics with dataset provenance, interpretation context, and next actions</sub>
+      <sub><strong>Workflow and product value</strong><br>
+      Core workflow, active session context, and what the project demonstrates</sub>
     </td>
   </tr>
 </table>
 
 <br>
 
-<!-- Row 2: Monte Carlo + Scenario Comparison -->
+<!-- Row 2: Upload + Planning Baseline -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0"
        style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
   <tr>
     <td width="50%" valign="top"
         style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
-      <img src="docs/screenshots/02.1_monte_carlo_risk_simulation.png"
-           alt="Monte Carlo Risk Simulation"
+      <img src="docs/screenshots/01.1_upload_surface.png"
+           alt="Upload dataset surface"
            width="100%"
            style="border-radius:6px;border:1px solid #1e2d45;display:block">
     </td>
     <td width="50%" valign="top"
         style="padding:20px 20px 20px 12px">
-      <img src="docs/screenshots/03.1_scenario_comparison_results.png"
-           alt="Scenario Comparison"
+      <img src="docs/screenshots/02.1_planning_baseline.png"
+           alt="Planning Baseline"
            width="100%"
            style="border-radius:6px;border:1px solid #1e2d45;display:block">
     </td>
@@ -116,244 +116,176 @@ Most risk-related portfolio projects stop at isolated calculators or post-trade 
   <tr>
     <td valign="top"
         style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
-      <sub><strong>Monte Carlo Risk Simulation</strong><br>
-      Randomised outcome distributions with session filters, date ranges, and dark-themed equity curves</sub>
+      <sub><strong>Upload surface</strong><br>
+      Manual CSV/XLSX intake, dataset expectations, and documented TradeIntel-style flat-file handoff</sub>
     </td>
     <td valign="top"
         style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
-      <sub><strong>Scenario Comparison</strong><br>
-      Side-by-side comparison of up to three planning assumptions with independent statistics</sub>
+      <sub><strong>Planning Baseline</strong><br>
+      Downside posture, sample quality, observed risk profile, and decision-ready next steps</sub>
     </td>
   </tr>
 </table>
 
 <br>
 
----
-
-## Core Features
-
-<details>
-<summary><b>Capital Preservation Dashboard</b></summary>
-
-- Observed risk metrics: net outcome, win rate, max drawdown, volatility, profit factor
-- Dataset provenance banner showing record count, date range, and planning-reference label
-- Interpretation context explaining drawdown, stability, and efficiency signals
-- Guided next-action flow into simulation and scenario workflows
-
-</details>
-
-<details>
-<summary><b>Planning Tools</b></summary>
-
-- **Position Sizing** — estimate position dollar value with methodology notes
-- **Trade Risk Controls** — risk per trade with threshold-based warnings (caution / elevated / high risk)
-- **Strategy Exposure Review** — heuristic sizing signal, explicitly labelled as a planning heuristic
-- **SL / TP Planner** — risk, reward, and R:R ratio with limitation notes
-
-</details>
-
-<details>
-<summary><b>Simulation & Scenario Modelling</b></summary>
-
-- Monte Carlo simulation with configurable trade counts, date filters, and session filtering
-- Dark-themed equity curve chart generation
-- Scenario comparison with up to three independent parameter sets
-- Saved simulation history with search, date filtering, tags, and pagination
-
-</details>
-
-<details>
-<summary><b>Risk-Product Credibility</b></summary>
-
-- Methodology & Assumptions sections on every calculator and simulation page
-- Heuristic formulas clearly labelled with scaling-factor explanations
-- Threshold-based risk warnings that adapt to the calculated exposure level
-- Dataset provenance visible across all planning surfaces
-
-</details>
-
----
-
-## Risk Workflow
-
-```text
-Upload Dataset → Capital Preservation Dashboard → Planning Tools
-                                                     ↓
-                                              Position Sizing
-                                              Trade Risk Controls
-                                              Strategy Exposure Review
-                                              SL / TP Planner
-                                                     ↓
-                                              Run Simulation → Monte Carlo
-                                                     ↓
-                                              Scenario Comparison
-                                                     ↓
-                                              Simulation History → Detail / Export
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend | Python 3.11, Django 5 |
-| Data processing | Pandas, NumPy |
-| Visualisation | Matplotlib (dark theme) |
-| Auth | Django auth, login-required protection, ownership isolation |
-| Database | SQLite (local), PostgreSQL-ready |
-| Testing | Django TestCase — 64 passing tests, Coverage 71% |
-| UI | Bootstrap 5 (dark-overridden), custom CSS design system |
-| CI | GitHub Actions workflow on push, pull request, and manual dispatch |
-
----
-
-## Local Setup
-
-```bash
-git clone https://github.com/aminul-portfolio/riskwise-planner.git
-cd riskwise-planner
-
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
-
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-Visit `http://127.0.0.1:8000`, log in, and upload a trade dataset to begin.
-
-**Expected input:** CSV or XLSX with a `profit` column and common trade fields (date, symbol, volume, entry_price, exit_price, account_type).
-
----
-
-## Verification
-
-```bash
-python manage.py check
-python manage.py test
-python -m coverage run manage.py test
-python -m coverage report
-python manage.py seed_demo
-```
-
-### Current verified state
-- 64 tests passing
-- 71% coverage
-- `seed_demo` working
-- GitHub Actions workflow included for repository CI
-
----
-
-## Continuous Integration
-
-The repository includes a GitHub Actions workflow at:
-
-```text
-.github/workflows/django-ci.yml
-```
-
-It runs on:
-- push to `main`
-- pull requests targeting `main`
-- manual dispatch
-
-CI steps:
-- install dependencies
-- run `python manage.py check`
-- run tests under coverage
-- fail the job if coverage drops below 70%
-
----
-
-## How to Review This Project
-
-See [`docs/REVIEW_GUIDE.md`](docs/REVIEW_GUIDE.md) for the recommended 14-step walkthrough.
-
-**Quick review path:**
-
-| # | Surface | What to notice |
-|---|---|---|
-| 1 | **Homepage** | Pre-trade positioning, core workflow cards, product language |
-| 2 | **Upload → Dashboard** | Observed metrics, provenance banner, interpretation context |
-| 3 | **Trade Risk Controls** | Threshold warnings (caution / elevated / high) |
-| 4 | **Strategy Exposure Review** | Heuristic formula clearly labelled |
-| 5 | **Monte Carlo Simulation** | Distribution analysis with dark-themed charts |
-| 6 | **Scenario Comparison** | Side-by-side planning assumptions |
-| 7 | **Simulation History → Detail** | Structured KPI cards, JSON/chart download |
-
----
-
-## Portfolio Context
-
-RiskWise Planner is the **pre-trade decision-support** product in my FinTech project sequence:
-
-- [DataBridge Market API](https://github.com/aminul-portfolio/databridge-market-api) — market data ingestion, ETL, normalized storage, API delivery
-- **RiskWise Planner** — pre-trade risk planning, Monte Carlo simulation, stress-test review, scenario comparison
-- [TradeIntel 360](https://github.com/aminul-portfolio/tradeintel-360) — post-trade performance analytics, KPI reporting, and review/export workflow
-
-This positions RiskWise between upstream market data delivery and post-trade analytics as the decision-support layer in the FinTech workflow.
-
----
-
-## TradeIntel 360 Compatibility
-
-RiskWise and TradeIntel 360 cover different stages of the same finance workflow.
-
-The **primary portfolio sequence** remains:
-
-```text
-DataBridge Market API → RiskWise Planner → TradeIntel 360
-```
-
-RiskWise is the pre-trade planning layer in that sequence.
-
-A **secondary feedback loop** is also supported on the RiskWise side through a flat-file handoff:
-
-```text
-TradeIntel-style outcome export → manual CSV/XLSX upload into RiskWise → next planning-cycle calibration
-```
-
-### Supported now
-- manual CSV/XLSX/XLS upload into RiskWise
-- RiskWise-side support for recognised P&L field aliases
-- optional date/time and session context for filtering and provenance
-
-### Not yet supported
-- direct API sync between TradeIntel 360 and RiskWise
-- one-click backend import from TradeIntel 360
-- automatic cross-product synchronisation
-
-See [`docs/INTEGRATION.md`](docs/INTEGRATION.md) for the exact compatibility boundary.
-
----
-
-## Interview Story
-
-> *"I built RiskWise to address a gap in trading and risk tooling: many tools stop at isolated calculators or post-trade review, but very few support structured pre-trade planning. RiskWise connects observed dataset context, planning controls, Monte Carlo exploration, stress-test review, and scenario comparison into a single decision-support workflow. In my portfolio, it sits between upstream data products and post-trade analytics as the pre-trade decision-support layer."*
-
----
-
-## Target Roles
-
-Data Analyst (Finance / Risk) · Analytics Engineer (FinTech) · Data Engineer — Risk / Capital Markets · Python/Django data-product roles · Quantitative planning and simulation workflows in finance environments
-
----
-
-## Author
-
-**Aminul Islam**
-
-- GitHub: [aminul-portfolio](https://github.com/aminul-portfolio)
-- LinkedIn: [aminul-islam](https://www.linkedin.com/in/aminul-islam-a71a871a2)
-
-*This repository is shared for portfolio and review purposes.*
-
----
-
-## License
-
-Licensed under the MIT License. See [`LICENSE`](LICENSE).
+<!-- Row 3: Monte Carlo + Stress-Test -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
+  <tr>
+    <td width="50%" valign="top"
+        style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
+      <img src="docs/screenshots/04.1_monte_carlo_results.png"
+           alt="Monte Carlo results"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+    <td width="50%" valign="top"
+        style="padding:20px 20px 20px 12px">
+      <img src="docs/screenshots/05.1_stress_test_summary.png"
+           alt="Stress-Test Review"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"
+        style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
+      <sub><strong>Monte Carlo Lab</strong><br>
+      Filtered-sample run context, simulation result cards, and sampled-record review</sub>
+    </td>
+    <td valign="top"
+        style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
+      <sub><strong>Stress-Test Review</strong><br>
+      Decision-ready downside summary with tail-risk framing and simulation KPIs</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<!-- Row 4: Scenario comparison top + results -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
+  <tr>
+    <td width="50%" valign="top"
+        style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
+      <img src="docs/screenshots/06.1_scenario_comparison_top.png"
+           alt="Scenario Comparison top section"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+    <td width="50%" valign="top"
+        style="padding:20px 20px 20px 12px">
+      <img src="docs/screenshots/06.2_scenario_results.png"
+           alt="Scenario comparison results"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"
+        style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
+      <sub><strong>Scenario comparison setup</strong><br>
+      Dataset context, scenario configuration, and comparison framing before results are generated</sub>
+    </td>
+    <td valign="top"
+        style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
+      <sub><strong>Scenario comparison results</strong><br>
+      Side-by-side downside, percentile, and distribution evidence across competing planning setups</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<!-- Row 5: Modal review surfaces -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
+  <tr>
+    <td width="50%" valign="top"
+        style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
+      <img src="docs/screenshots/07.1_scenario_modal_distribution.png"
+           alt="Scenario modal distribution review"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+    <td width="50%" valign="top"
+        style="padding:20px 20px 20px 12px">
+      <img src="docs/screenshots/07.2_scenario_modal_histogram.png"
+           alt="Scenario modal histogram review"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"
+        style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
+      <sub><strong>Distribution view modal</strong><br>
+      Percentile-path review with downside dispersion, best/worst paths, and quick decision stats</sub>
+    </td>
+    <td valign="top"
+        style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
+      <sub><strong>Final profit distribution modal</strong><br>
+      Histogram review showing clustering, left-tail depth, and conservative planning context</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<!-- Row 6: Archive + detail -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
+  <tr>
+    <td width="50%" valign="top"
+        style="padding:20px 12px 20px 20px;border-right:1px solid #1e2d45">
+      <img src="docs/screenshots/08.1_saved_runs.png"
+           alt="Saved Runs archive"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+    <td width="50%" valign="top"
+        style="padding:20px 20px 20px 12px">
+      <img src="docs/screenshots/09.1_run_detail_view.png"
+           alt="Run detail view"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"
+        style="padding:10px 12px 16px 20px;border-right:1px solid #1e2d45;border-top:1px solid #1e2d45">
+      <sub><strong>Saved Runs</strong><br>
+      Archive filters, run summaries, and chart previews for structured review and retrieval</sub>
+    </td>
+    <td valign="top"
+        style="padding:10px 20px 16px 12px;border-top:1px solid #1e2d45">
+      <sub><strong>Run detail view</strong><br>
+      Archived run summary, chart review, provenance, and reviewer-facing run controls</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<!-- Row 7: Audit breakdown -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="border:1px solid #1e2d45;border-radius:10px;overflow:hidden;background:#0e1420">
+  <tr>
+    <td valign="top" style="padding:20px">
+      <img src="docs/screenshots/09.2_run_detail_audit_breakdown.png"
+           alt="Run detail audit breakdown"
+           width="100%"
+           style="border-radius:6px;border:1px solid #1e2d45;display:block">
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" style="padding:10px 20px 16px 20px;border-top:1px solid #1e2d45">
+      <sub><strong>Audit breakdown</strong><br>
+      Stored parameter and result detail for deeper technical inspection without making the primary run view feel too raw</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
