@@ -942,15 +942,191 @@ input[type="file"].rw-form-control::file-selector-button {
 .rw-toast--error   .rw-toast__icon { color: var(--rw-red); }
 .rw-toast--info    .rw-toast__icon { color: var(--rw-cyan); }
 
-/* ── PREMIUM: REDUCED MOTION ────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* ── SCENARIO REVIEW MODAL UPGRADE ─────────────────────────── */
+.rw-scenario-modal-dialog {
+  max-width: min(1380px, 96vw);
+  margin: 1rem auto;
+}
+
+.rw-scenario-review-modal {
+  overflow: hidden;
+  max-height: calc(100vh - 2rem);
+}
+
+.rw-scenario-review-modal .modal-content {
+  max-height: calc(100vh - 2rem);
+}
+
+.rw-modal-header {
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--rw-border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent), var(--rw-panel);
+  align-items: flex-start;
+}
+
+.rw-modal-header .modal-title {
+  color: var(--rw-text-strong);
+  font-weight: 700;
+  font-size: 1.18rem;
+  letter-spacing: -0.015em;
+}
+
+.rw-modal-header .btn-close {
+  opacity: 0.92;
+  padding: 0.7rem;
+  border-radius: 12px;
+  background-color: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform var(--rw-duration) var(--rw-ease), background var(--rw-duration) var(--rw-ease);
+}
+
+.rw-modal-header .btn-close:hover {
+  transform: scale(1.04);
+  background-color: rgba(255,255,255,0.06);
+}
+
+.rw-modal-body-chart {
+  padding: 1.25rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 210px);
+}
+
+.rw-scenario-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.rw-scenario-modal-stat {
+  background: var(--rw-panel-2);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-md);
+  padding: 0.95rem 1rem;
+  min-height: 100%;
+  box-shadow: var(--rw-shadow-sm);
+}
+
+.rw-scenario-modal-stat__label {
+  color: var(--rw-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.35rem;
+}
+
+.rw-scenario-modal-stat__value {
+  color: var(--rw-text-strong);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.rw-scenario-modal-note {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: rgba(59,130,246,0.05);
+  border: 1px solid rgba(59,130,246,0.12);
+  border-left: 3px solid var(--rw-primary);
+  border-radius: var(--rw-radius-md);
+  color: var(--rw-text);
+  line-height: 1.6;
+}
+
+.rw-modal-chart-wrap--xl {
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent), var(--rw-panel-2);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.rw-scenario-modal-image {
+  width: 100%;
+  max-width: 1120px;
+  max-height: 62vh;
+  margin: 0 auto;
+  display: block;
+  border-radius: var(--rw-radius-md);
+  border: 1px solid var(--rw-border);
+  background: var(--rw-panel);
+  object-fit: contain;
+}
+
+.rw-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--rw-border);
+  background: rgba(255,255,255,0.015);
+}
+
+.rw-modal-footer .rw-meta-text {
+  max-width: 720px;
+}
+
+@media (max-width: 991.98px) {
+  .rw-scenario-modal-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rw-modal-body-chart {
+    padding: 1rem;
+    max-height: calc(100vh - 190px);
+  }
+
+  .rw-modal-chart-wrap--xl {
+    padding: 0.75rem;
+  }
+
+  .rw-scenario-modal-image {
+    max-height: 54vh;
   }
 }
 
 @media (max-width: 575.98px) {
-  .rw-toast { left: 1rem; right: 1rem; bottom: 1rem; min-width: 0; }
+  .rw-scenario-modal-dialog {
+    max-width: calc(100vw - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .rw-scenario-review-modal,
+  .rw-scenario-review-modal .modal-content {
+    max-height: calc(100vh - 1rem);
+  }
+
+  .rw-scenario-modal-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .rw-modal-body-chart {
+    max-height: calc(100vh - 170px);
+  }
+
+  .rw-scenario-modal-image {
+    max-height: 46vh;
+  }
+
+  .rw-modal-header,
+  .rw-modal-body-chart,
+  .rw-modal-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .rw-modal-footer .d-flex {
+    width: 100%;
+  }
+
+  .rw-modal-footer .btn {
+    flex: 1 1 100%;
+  }
 }

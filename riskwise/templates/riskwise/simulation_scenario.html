@@ -533,8 +533,8 @@
                         {% endif %}
 
                         <div class="modal fade" id="scenarioModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                          <div class="modal-dialog modal-dialog-centered rw-scenario-modal-dialog">
-                            <div class="modal-content rw-modal-content">
+                          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl rw-scenario-modal-dialog">
+                            <div class="modal-content rw-modal-content rw-scenario-review-modal">
                               <div class="modal-header rw-modal-header">
                                 <div>
                                   <h5 class="modal-title mb-1">
@@ -546,13 +546,60 @@
                                 </div>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
+
                               <div class="modal-body rw-modal-body-chart">
-                                <div class="rw-modal-chart-wrap">
+                                <div class="rw-scenario-modal-stats">
+                                  <div class="rw-scenario-modal-stat">
+                                    <div class="rw-scenario-modal-stat__label">Worst Outcome</div>
+                                    <div class="rw-scenario-modal-stat__value">${{ scenario.min|floatformat:2 }}</div>
+                                  </div>
+
+                                  <div class="rw-scenario-modal-stat">
+                                    <div class="rw-scenario-modal-stat__label">5th Percentile</div>
+                                    <div class="rw-scenario-modal-stat__value">${{ scenario.p05|floatformat:2 }}</div>
+                                  </div>
+
+                                  <div class="rw-scenario-modal-stat">
+                                    <div class="rw-scenario-modal-stat__label">Median</div>
+                                    <div class="rw-scenario-modal-stat__value">${{ scenario.median|floatformat:2 }}</div>
+                                  </div>
+
+                                  <div class="rw-scenario-modal-stat">
+                                    <div class="rw-scenario-modal-stat__label">Positive Probability</div>
+                                    <div class="rw-scenario-modal-stat__value">{{ scenario.prob_positive|floatformat:2 }}%</div>
+                                  </div>
+                                </div>
+
+                                <div class="rw-scenario-modal-note">
+                                  Focus first on the lower range and 5th-percentile downside. Treat upside only as secondary if the weak tail is no longer acceptable under stricter assumptions.
+                                </div>
+
+                                <div class="rw-modal-chart-wrap rw-modal-chart-wrap--xl">
                                   <img
                                     src="data:image/png;base64,{{ scenario.chart }}"
                                     class="rw-scenario-modal-image"
                                     alt="{{ scenario.label }} full chart"
                                   >
+                                </div>
+                              </div>
+
+                              <div class="modal-footer rw-modal-footer">
+                                <div class="rw-meta-text">
+                                  Use this review to judge downside dispersion before treating the strongest path as decision-ready.
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                  <a
+                                    download="{{ scenario.label|slugify }}_distribution_view.png"
+                                    href="data:image/png;base64,{{ scenario.chart }}"
+                                    class="btn rw-btn-outline btn-sm"
+                                  >
+                                    <i class="bi bi-download me-1"></i>Download PNG
+                                  </a>
+
+                                  <button type="button" class="btn rw-btn-primary btn-sm" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-lg me-1"></i>Close Review
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -561,8 +608,8 @@
 
                         {% if scenario.histogram_chart %}
                           <div class="modal fade" id="scenarioHistogramModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered rw-scenario-modal-dialog">
-                              <div class="modal-content rw-modal-content">
+                            <div class="modal-dialog modal-dialog-centered modal-xl rw-scenario-modal-dialog">
+                              <div class="modal-content rw-modal-content rw-scenario-review-modal">
                                 <div class="modal-header rw-modal-header">
                                   <div>
                                     <h5 class="modal-title mb-1">
@@ -574,13 +621,60 @@
                                   </div>
                                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
+
                                 <div class="modal-body rw-modal-body-chart">
-                                  <div class="rw-modal-chart-wrap">
+                                  <div class="rw-scenario-modal-stats">
+                                    <div class="rw-scenario-modal-stat">
+                                      <div class="rw-scenario-modal-stat__label">Worst Outcome</div>
+                                      <div class="rw-scenario-modal-stat__value">${{ scenario.min|floatformat:2 }}</div>
+                                    </div>
+
+                                    <div class="rw-scenario-modal-stat">
+                                      <div class="rw-scenario-modal-stat__label">5th Percentile</div>
+                                      <div class="rw-scenario-modal-stat__value">${{ scenario.p05|floatformat:2 }}</div>
+                                    </div>
+
+                                    <div class="rw-scenario-modal-stat">
+                                      <div class="rw-scenario-modal-stat__label">Median</div>
+                                      <div class="rw-scenario-modal-stat__value">${{ scenario.median|floatformat:2 }}</div>
+                                    </div>
+
+                                    <div class="rw-scenario-modal-stat">
+                                      <div class="rw-scenario-modal-stat__label">Positive Probability</div>
+                                      <div class="rw-scenario-modal-stat__value">{{ scenario.prob_positive|floatformat:2 }}%</div>
+                                    </div>
+                                  </div>
+
+                                  <div class="rw-scenario-modal-note">
+                                    Use clustering and left-tail depth together. A tight distribution is only useful if downside remains acceptable under conservative planning assumptions.
+                                  </div>
+
+                                  <div class="rw-modal-chart-wrap rw-modal-chart-wrap--xl">
                                     <img
                                       src="data:image/png;base64,{{ scenario.histogram_chart }}"
                                       class="rw-scenario-modal-image"
                                       alt="{{ scenario.label }} histogram full chart"
                                     >
+                                  </div>
+                                </div>
+
+                                <div class="modal-footer rw-modal-footer">
+                                  <div class="rw-meta-text">
+                                    Use this view to judge where outcomes cluster and whether the lower tail still stays within your planning tolerance.
+                                  </div>
+
+                                  <div class="d-flex flex-wrap gap-2">
+                                    <a
+                                      download="{{ scenario.label|slugify }}_final_profit_distribution.png"
+                                      href="data:image/png;base64,{{ scenario.histogram_chart }}"
+                                      class="btn rw-btn-outline btn-sm"
+                                    >
+                                      <i class="bi bi-download me-1"></i>Download PNG
+                                    </a>
+
+                                    <button type="button" class="btn rw-btn-primary btn-sm" data-bs-dismiss="modal">
+                                      <i class="bi bi-x-lg me-1"></i>Close Review
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -805,4 +899,27 @@
   </section>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const scenarioModals = document.querySelectorAll(
+    '[id^="scenarioModal"], [id^="scenarioHistogramModal"]'
+  );
+
+  scenarioModals.forEach(function (modalEl) {
+    if (modalEl.parentElement !== document.body) {
+      document.body.appendChild(modalEl);
+    }
+
+    modalEl.addEventListener('hidden.bs.modal', function () {
+      document.body.classList.remove('modal-open');
+      document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+        backdrop.remove();
+      });
+    });
+  });
+});
+</script>
 {% endblock %}

@@ -279,22 +279,51 @@
             </p>
 
             <div class="rw-table-wrap">
-              <table class="table rw-dark-table align-middle mb-0">
+              <table class="table rw-dark-table align-middle mb-0" id="rwTradesUsedTable">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th style="width: 90px;">#</th>
                     <th>Profit</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for profit in results.trades_used %}
-                    <tr>
+                    <tr class="rw-trades-row">
                       <td>{{ forloop.counter }}</td>
                       <td>${{ profit|floatformat:2 }}</td>
                     </tr>
                   {% endfor %}
                 </tbody>
               </table>
+            </div>
+
+            <div
+              id="rwTradesPagination"
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mt-3"
+            >
+              <div class="rw-meta-text">
+                <span id="rwTradesPaginationSummary">Showing 1–25</span>
+              </div>
+
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <label for="rwTradesPageSize" class="rw-meta-text mb-0">Rows</label>
+                <select id="rwTradesPageSize" class="form-select rw-form-control" style="width: 88px; min-width: 88px;">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+
+                <button type="button" class="btn rw-btn-outline btn-sm" id="rwTradesPrev">
+                  <i class="bi bi-chevron-left me-1"></i>Prev
+                </button>
+
+                <span class="rw-badge rw-badge--neutral" id="rwTradesPageInfo">Page 1 of 1</span>
+
+                <button type="button" class="btn rw-btn-outline btn-sm" id="rwTradesNext">
+                  Next<i class="bi bi-chevron-right ms-1"></i>
+                </button>
+              </div>
             </div>
           </section>
         {% endif %}
@@ -505,6 +534,78 @@
         }
       });
     }
+
+    const table = document.getElementById("rwTradesUsedTable");
+    if (!table) return;
+
+    const rows = Array.from(table.querySelectorAll("tbody tr.rw-trades-row"));
+    const prevBtn = document.getElementById("rwTradesPrev");
+    const nextBtn = document.getElementById("rwTradesNext");
+    const pageInfo = document.getElementById("rwTradesPageInfo");
+    const summary = document.getElementById("rwTradesPaginationSummary");
+    const pageSizeSelect = document.getElementById("rwTradesPageSize");
+    const paginationWrap = document.getElementById("rwTradesPagination");
+
+    if (!rows.length) {
+      if (paginationWrap) paginationWrap.style.display = "none";
+      return;
+    }
+
+    let currentPage = 1;
+    let pageSize = parseInt(pageSizeSelect.value, 10) || 25;
+
+    function renderPage() {
+      const totalRows = rows.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+
+      rows.forEach((row, index) => {
+        row.style.display = (index >= startIndex && index < endIndex) ? "" : "none";
+      });
+
+      const visibleStart = totalRows === 0 ? 0 : startIndex + 1;
+      const visibleEnd = Math.min(endIndex, totalRows);
+
+      summary.textContent = `Showing ${visibleStart}–${visibleEnd} of ${totalRows}`;
+      pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+
+      if (totalRows <= pageSize) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+      }
+    }
+
+    prevBtn.addEventListener("click", function () {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        renderPage();
+      }
+    });
+
+    nextBtn.addEventListener("click", function () {
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      if (currentPage < totalPages) {
+        currentPage += 1;
+        renderPage();
+      }
+    });
+
+    pageSizeSelect.addEventListener("change", function () {
+      pageSize = parseInt(this.value, 10) || 25;
+      currentPage = 1;
+      renderPage();
+    });
+
+    renderPage();
   })();
 </script>
 {% endblock %}
